@@ -1,6 +1,6 @@
 # Project Proposal
 
-## Title: 
+## Title
 movie with me
 community movie
 drive in movie
@@ -9,7 +9,7 @@ FilmFinder
 * MovieMatcher
 We see movies
 
-## Members:
+## Members
 
 * John Starich - js68634
 * Jeremy Castillo - jcc4428
