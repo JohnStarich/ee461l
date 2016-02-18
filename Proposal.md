@@ -1,13 +1,4 @@
-# Project Proposal
-
-## Title
-movie with me
-community movie
-drive in movie
-Cinemon Cinema-N
-FilmFinder
-* MovieMatcher
-We see movies
+# Movie Matcher Project Proposal
 
 ## Members
 
