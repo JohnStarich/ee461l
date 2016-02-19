@@ -27,4 +27,6 @@ We see this project becoming a large social hub for people to find and watch mov
 ## User Stories
 
 1. Users can register and enter their movie preferences and watched movies.
-
+2. Users can link up with their friends and generate a "Top 5" list of movies that they will most likely enjoy together. 
+3. Users can subscribe for weekly updates on new upcoming movie releases.
+4. Users will receive notifications based on new movies coming out and what their friends are up to.
