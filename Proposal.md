@@ -46,28 +46,28 @@ We see this project becoming a large social hub for people to find and watch mov
 ## Design
 
 ### Mock-ups
-![Register Page](screenshots/movies_register.jpeg.png)
+![Register Page](screenshots/movie_register.jpeg.png)
 This mockup shows where users will be required to register before proceeding to the site.
 
-![Login Page](screenshots/movies_login.jpeg.png)
+![Login Page](screenshots/movie_login.jpeg.png)
 This mockup shows where users will be required to login before proceeding to the site.
 
-![Home Page](screenshots/movies_home.jpeg.png)
+![Home Page](screenshots/movie_home.jpeg.png)
 This mockup shows the home page of the site where users can view and rate upcoming, popular and "for you" (movies our site has indentified as possible choices for that user) movies.
 
-![Groups Page](screenshots/movies_groups.jpeg.png)
+![Groups Page](screenshots/movie_groups.jpeg.png)
 This mockup shows the groups page of the site where users can view, edit, delete and find a movie for the their created groups.
 
-![Movies Page](screenshots/movies_movies.jpeg.png)
+![Movies Page](screenshots/movie_movies.jpeg.png)
 This mockup shows the movies page of the site where a user can search through the movies database to rate and find movies they may be interested in.
 
-![Friends(1) Page](screenshots/movies_friends1.jpeg.png)
+![Friends(1) Page](screenshots/movie_friends1.jpeg.png)
 This mockup shows the friends page of the site where users can search through their friends and find other users they have not been connected with yet. Also the option to edit their groups is provided.
 
-![Friends(2) Page](screenshots/movies_friends2.jpeg.png)
+![Friends(2) Page](screenshots/movie_friends2.jpeg.png)
 This mockup shows the friends page of the site where a user has clicked on a group to edit and now the user can add and remove friends from the selected group.
 
-![Settings Page](screenshots/movies_settings.jpeg.png)
+![Settings Page](screenshots/movie_settings.jpeg.png)
 This mockup shows the settings page of the site where a user can edit settings like their password, group and email notifications, and deleting their account (under an advanced setting).
 
 ### Class Diagrams
