@@ -86,7 +86,11 @@ This mockup shows the settings page of the site where a user can edit settings l
 ### Testing plan
 
 ## Feasibility
-The successful completion of this project depends on two main factors: familiarizing ourselves with the libraries we plan to use, and balancing the load of the project by working together. First, the group has indentified libraries that will benefit the project. The group will form the necessary understanding for efficient use by familiarizing ourselves with those libraries early in the development process. The selected libraries are all widely used in industry, which allows to group to focus less on the reliability of the services and more on working with the technology. Finally, the group will balance the load of the project through the use of standard development process techniques. These techniques include weekly SCRUM meetings, constant team communication through Slack, and source code management with GitHub. 
+The successful completion of this project depends on two main factors: familiarizing ourselves with the libraries we plan to use, and balancing the load of the project by working together. 
+
+First, the group has indentified libraries that will benefit the project. The group will form the necessary understanding for efficient use by familiarizing ourselves with those libraries early in the development process. The selected libraries are all widely used in industry, which allows to group to focus less on the reliability of the services and more on working with the technology. 
+
+Finally, the group will balance the load of the project through the use of standard development process techniques. These techniques include weekly SCRUM meetings, constant team communication through Slack, and source code management with GitHub. 
 
 ### Group Member Contribution
 
