@@ -35,11 +35,11 @@ We see this project becoming a large social hub for people to find and watch mov
 
 ### Functional Requirements
 
-![UML use-case diagram]()
+![UML use-case diagram](screenshots/usecase.png)
 
 ### Behavioral Requirements
 
-![UML state chart diagram]()
+![UML state chart diagram](screenshots/statechart.png)
 
 ### Non-functional Requirements
 
