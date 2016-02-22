@@ -1,47 +1,45 @@
 # Movie Matcher Project Proposal
 
-## Members
-
+### Members
 * John Starich - js68634
 * Jeremy Castillo - jcc4428
 * Cesar Gonzalez - cg34887
 * Josue Alfaro - jja2244
 
-## Repo URL
+### Repo URL
 <https://github.com/johnstarich/ee461l>
 
-## Motivation
+### Motivation
 
-### Problem
+#### Problem
 There's no easy way to find movies groups of people want to watch. Our audience doesn't have a good way to choose movies they'd like to see, especially not with groups with various preferences.
 
-### Target Audience
+#### Target Audience
 We're aiming for an audience of 18-25 year olds. Generally speaking, anyone interested in seeing movies with others.
 
-### Demand
+#### Demand
 Users want to see movies they're interested in with other people. This website would enable them to reach out to their friends with our service and organize a trip to the movies. Based on the users' preferences, the site would provide a list of optimal choices for movies that a group of friends could watch together.
 
-### Vision
+#### Vision
 We see this project becoming a large social hub for people to find and watch movies they want to see. Later we may decide to add user ratings and trend data for user movie preferences.
 
-## Features and Requirements
+### Features and Requirements
 
-### User Stories
-
+#### User Stories
 1. Users can register and enter their movie preferences and watched movies.
 2. Users can link up with their friends and generate a "Top 5" list of movies that they will most likely enjoy together. 
 3. Users can subscribe for weekly updates on new upcoming movie releases.
 4. Users will receive notifications based on new movies coming out and what their friends are up to.
 
-### Functional Requirements
+#### Functional Requirements
 
 ![UML use-case diagram](screenshots/usecase.png)
 
-### Behavioral Requirements
+#### Behavioral Requirements
 
 ![UML state chart diagram](screenshots/statechart.png)
 
-### Non-functional Requirements
+#### Non-functional Requirements
 * Page load time must be under 5 seconds, ideally under ¼ second
 * Must be scalable for future growth
 * Code should follow basic style guidelines
@@ -50,9 +48,9 @@ We see this project becoming a large social hub for people to find and watch mov
 * Search results should be relevant to queries
 * Passwords should be encrypted, and run login over SSL
 
-## Design
+### Design
 
-### Mock-ups
+#### Mock-ups
 
 ![Register Page](screenshots/movie_register.jpeg.png)
 
@@ -86,9 +84,9 @@ This mockup shows the friends page of the site where a user has clicked on a gro
 
 This mockup shows the settings page of the site where a user can edit settings like their password, group and email notifications, and deleting their account (under an advanced setting).
 
-### Class Diagrams
+#### Class Diagrams
 
-### Libraries and Languages
+#### Libraries and Languages
 * Java - API language
 * Spark - RESTful framework for web apps
 * jQuery - JavaScript library for DOM manipulation and API calls
@@ -102,7 +100,7 @@ This mockup shows the settings page of the site where a user can edit settings l
 * Log4J - logs control and management
 * Jetty - Servlet backbone and runner
 
-### Testing Plan
+#### Testing Plan
 We will test for key functionalities such as:  
 * User registration, login, and logout 
 * Searching, selecting, and rating movies 
@@ -115,14 +113,14 @@ We will test for key functionalities such as:
 
 To do so, we will create and simulate different users interacting with the web application. We will have test suites for our modules to test before and after any modifications are made. Our testing will require having movie data for users to browse, search, select and rate. 
 
-### Tentative Timeline
+#### Tentative Timeline
 * March 6th - Basic UI functioning and movie data stored in MongoDB.
 * March 20th - Search for movies and friends. Select and rate movies. Add/delete friends.
 * April 3rd - Create and manage groups. Generate "Top 5" list of movies for group.
 * April 17th - User preferences and notifications for subscribing and unsubscribing.
 * May 1st - Final touches. Clean up.
 
-## Feasibility
+### Feasibility
 The successful completion of this project depends on two main factors: familiarizing ourselves with the libraries we plan to use, and balancing the load of the project by working together. 
 
 First, the group has indentified libraries that will benefit the project. The group will form the necessary understanding for efficient use by familiarizing ourselves with those libraries early in the development process. The selected libraries are all widely used in industry, which allows to group to focus less on the reliability of the services and more on working with the technology. 
@@ -132,7 +130,6 @@ Finally, the group will balance the load of the project through the use of stand
 ### Group Member Contribution
 
 The team worked together to design each of the diagrams included in this proposal, but the drawn out diagrams were completed as follows: 
-
 John - compilation of powerpoint, project architecture
 Josue - use case diagram, libraries description
 Cesar - state chart diagram, 
