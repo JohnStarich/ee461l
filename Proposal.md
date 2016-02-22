@@ -135,7 +135,7 @@ Finally, the group will balance the load of the project through the use of stand
 
 The team worked together to design each of the diagrams included in this proposal, but the drawn out diagrams were completed as follows: 
 
-John - compilation of powerpoint, project architecture
-Josue - use case diagram, libraries description
-Cesar - state chart diagram, 
-Jeremy - mock ups, feasibility
+* John - compilation of powerpoint, project architecture
+* Josue - use case diagram, libraries description
+* Cesar - state chart diagram, 
+* Jeremy - mock ups, feasibility
