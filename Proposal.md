@@ -42,6 +42,13 @@ We see this project becoming a large social hub for people to find and watch mov
 ![UML state chart diagram](screenshots/statechart.png)
 
 ### Non-functional Requirements
+* Page load time must be under 5 seconds, ideally under ¼ second
+* Must be scalable for future growth
+* Code should follow basic style guidelines
+* Use GitHub branching model
+* Navigation should be intuitive and simple
+* Search results should be relevant to queries
+* Passwords should be encrypted, and run login over SSL
 
 ## Design
 
@@ -82,8 +89,38 @@ This mockup shows the settings page of the site where a user can edit settings l
 ### Class Diagrams
 
 ### Libraries and Languages
+* Java - API language
+* Spark - RESTful framework for web apps
+* jQuery - JavaScript library for DOM manipulation and API calls
+* Sass - CSS compiler language for more advanced CSS
+* GSON - JSON parsing in Java
+* MongoDB - Database backend for web app
+* Bootstrap - pre-built UI framework for designing websites quickly
+* Tomcat - web app deployment to personal server
+* JUnit - unit testing library for Java
+* Git - version control management software
+* Log4J - logs control and management
+* Jetty - Servlet backbone and runner
 
-### Testing plan
+### Testing Plan
+We will test for key functionalities such as:  
+* User registration, login, and logout 
+* Searching, selecting, and rating movies 
+* Searching, adding, and deleting friends
+* Creating, editing, and managing groups
+* Editing preferences and notifications
+* Generating the "Top 5" list of movies for a given group 
+* Users subscribing and unsubscribing
+* Users receiving weekly updates 
+
+To do so, we will create and simulate different users interacting with the web application. We will have test suites for our modules to test before and after any modifications are made. Our testing will require having movie data for users to browse, search, select and rate. 
+
+### Tentative Timeline
+* March 6th - Basic UI functioning and movie data stored in MongoDB.
+* March 20th - Search for movies and friends. Select and rate movies. Add/delete friends.
+* April 3rd - Create and manage groups. Generate "Top 5" list of movies for group.
+* April 17th - User preferences and notifications for subscribing and unsubscribing.
+* May 1st - Final touches. Clean up.
 
 ## Feasibility
 The successful completion of this project depends on two main factors: familiarizing ourselves with the libraries we plan to use, and balancing the load of the project by working together. 
