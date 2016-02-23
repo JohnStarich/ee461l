@@ -15,5 +15,6 @@ public class RootServlet extends HttpServlet {
 		response.setContentType("text/html; charset=utf-8");
 		response.setStatus(HttpServletResponse.SC_OK);
 		response.getWriter().println("<h1>Hey there!</h1><h2>This is our EE461L design project</h2> <p>This is the request path we received: " + request.getPathInfo() + "</p>");
+		System.out.println("Request was = GET " + request.getPathInfo());
 	}
 }
