@@ -86,7 +86,9 @@ This mockup shows the friends page of the site where a user has clicked on a gro
 
 This mockup shows the settings page of the site where a user can edit settings like their password, group and email notifications, and deleting their account (under an advanced setting).
 
-### Class Diagrams
+### Class Diagram
+
+![Class Diagram](screenshots/classdiagram.png)
 
 ### Libraries and Languages
 * Java - API language
@@ -131,9 +133,10 @@ Finally, the group will balance the load of the project through the use of stand
 
 ### Group Member Contribution
 
-The team worked together to design each of the diagrams included in this proposal, but the drawn out diagrams were completed as follows: 
+The team worked together to design each of the diagrams included in this proposal, but the drawn out diagrams and written sections were completed as follows: 
 
-John - compilation of powerpoint, project architecture
-Josue - use case diagram, libraries description
-Cesar - state chart diagram, 
-Jeremy - mock ups, feasibility
+* Team - class diagram, motivation, user stories
+* John - compilation of powerpoint, project architecture
+* Josue - use case diagram, libraries description
+* Cesar - state chart diagram, tentative timeline, testing plan
+* Jeremy - mock ups, feasibility
