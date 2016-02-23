@@ -1,4 +1,4 @@
-package com.johnstarich.ee461l;
+package com.johnstarich.moviematcher;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
