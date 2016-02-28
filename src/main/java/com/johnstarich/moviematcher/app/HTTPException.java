@@ -1,6 +1,7 @@
 package com.johnstarich.moviematcher.app;
 
 /**
+ * An exception with an HTTP status code to help produce good error messages on HTTP responses.
  * Created by johnstarich on 2/25/16.
  */
 public class HTTPException extends Exception {
@@ -61,6 +62,11 @@ public class HTTPException extends Exception {
 			return getErrorMessageForCode(statusCode);
 	}
 
+	/**
+	 * Tries to figure out what kind of response occurred based on the status code and returns the appropriate message.
+	 * @param statusCode the code to retrieve a message for
+	 * @return the message
+	 */
 	public static String getErrorMessageForCode(int statusCode) {
 		switch (statusCode) {
 			case 200: return "OK";

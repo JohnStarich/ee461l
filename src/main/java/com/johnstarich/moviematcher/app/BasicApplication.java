@@ -9,7 +9,15 @@ import static spark.Spark.*;
  * Created by johnstarich on 2/25/16.
  */
 public abstract class BasicApplication implements SparkApplication {
+	/**
+	 * The route prefix for all routes defined in this application.
+	 * This prefix should not change between calls.
+	 * (Not automatically prepended to Spark routes)
+	 * @return the route prefix
+	 */
 	public abstract String prefix();
+
+	/** An immutable copy of the prefix. */
 	public final String PREFIX = prefix();
 
 	/** Initialize any routes for your JSON app here. */

@@ -11,9 +11,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 /**
+ * Movie Matcher API is defined here. These routes make up the Movie Matcher services.
  * Created by johnstarich on 2/25/16.
  */
 public class MovieMatcherApplication extends JsonApplication {
+	/** Home page HTML to be rendered for any page without a route specified. */
 	private final String indexHtml = renderHTML("index.html");
 
 	@Override
@@ -33,6 +35,10 @@ public class MovieMatcherApplication extends JsonApplication {
 		Spark.get("/*", (request, response) -> indexHtml);
 	}
 
+	/**
+	 * Register login services, like registration and user login API,
+	 * as well as authentication services.
+	 */
 	public void loginService() {
 		jpost("/login", (request, response) -> {
 			throw new HTTPException(501);
@@ -52,6 +58,9 @@ public class MovieMatcherApplication extends JsonApplication {
 		});
 	}
 
+	/**
+	 * Register movie services, like movie search and movie ID lookup
+	 */
 	public void moviesService() {
 		jget("/movies/search/:search_query", (request, response) -> {
 			String searchQuery = request.params("search_query").replaceAll("\\+", " ");
@@ -68,6 +77,9 @@ public class MovieMatcherApplication extends JsonApplication {
 		jget("/movies/:id/*", movieRoute);
 	}
 
+	/**
+	 * Register friend services, like friend search and friend ID lookup
+	 */
 	public void friendsService() {
 		jget("/friends/search/:search_query", (request, response) -> {
 			String searchQuery = request.params("search_query").replaceAll("\\+", " ");
@@ -84,6 +96,9 @@ public class MovieMatcherApplication extends JsonApplication {
 		jget("/friends/:id/*", friendRoute);
 	}
 
+	/**
+	 * Register group services, like group search and group ID lookup
+	 */
 	public void groupsService() {
 		jget("/groups/search/:search_query", (request, response) -> {
 			String searchQuery = request.params("search_query").replaceAll("\\+", " ");
@@ -100,6 +115,11 @@ public class MovieMatcherApplication extends JsonApplication {
 		jget("/groups/:id/*", groupsRoute);
 	}
 
+	/**
+	 * Render an HTML file as a String we can send in a response body.
+	 * @param htmlFile the file location (relative to WEB-INF folder)
+	 * @return the content of that file
+	 */
 	public String renderHTML(String htmlFile) {
 		try {
 			URL url = MovieMatcherApplication.class.getClassLoader().getResource("WEB-INF/"+htmlFile);
