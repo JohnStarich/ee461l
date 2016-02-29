@@ -6,12 +6,25 @@
 		metadata-complete="false"
 		version="3.1">
 	<display-name>Movie Matcher</display-name>
-	<servlet>
-		<servlet-name>Root</servlet-name>
-		<servlet-class>com.johnstarich.moviematcher.RootServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>Root</servlet-name>
+	<filter>
+		<filter-name>SparkFilter</filter-name>
+		<filter-class>spark.servlet.SparkFilter</filter-class>
+		<init-param>
+			<param-name>applicationClass</param-name>
+			<param-value>com.johnstarich.moviematcher.app.MovieMatcherApplication</param-value>
+		</init-param>
+	</filter>
+	<filter-mapping>
+		<filter-name>SparkFilter</filter-name>
 		<url-pattern>/*</url-pattern>
-	</servlet-mapping>
+		<dispatcher>REQUEST</dispatcher>
+		<dispatcher>FORWARD</dispatcher>
+		<dispatcher>INCLUDE</dispatcher>
+		<dispatcher>ERROR</dispatcher>
+	</filter-mapping>
+
+	<error-page>
+		<error-code>404</error-code>
+		<location>/404</location>
+	</error-page>
 </web-app>
