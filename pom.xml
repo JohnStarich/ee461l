@@ -41,6 +41,11 @@
 			<version>2.5</version>
 			<scope>compile</scope>
 		</dependency>
+		<dependency>
+			<groupId>com.darrinholst</groupId>
+			<artifactId>sass-java</artifactId>
+			<version>3.4.4</version>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -49,6 +54,9 @@
 				<groupId>org.eclipse.jetty</groupId>
 				<artifactId>jetty-maven-plugin</artifactId>
 				<version>${jettyVersion}</version>
+				<configuration>
+					<webAppSourceDirectory>${project.build.outputDirectory}</webAppSourceDirectory>
+				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -59,6 +67,31 @@
 					<target>1.8</target>
 				</configuration>
 			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-resources-plugin</artifactId>
+				<version>2.3</version>
+			</plugin>
+			<plugin>
+				<groupId>com.darrinholst</groupId>
+				<artifactId>sass-java-maven-plugin</artifactId>
+				<version>3.4.4.3</version>
+				<executions>
+					<execution>
+						<configuration>
+							<config>${project.build.outputDirectory}/WEB-INF/sass/config.rb</config>
+						</configuration>
+						<goals>
+							<goal>compile</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
+		<resources>
+			<resource>
+				<directory>src/main/webapp</directory>
+			</resource>
+		</resources>
 	</build>
 </project>

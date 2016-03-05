@@ -16,7 +16,7 @@ import java.nio.file.Paths;
  */
 public class MovieMatcherApplication extends JsonApplication {
 	/** Home page HTML to be rendered for any page without a route specified. */
-	private final String indexHtml = renderHTML("index.html");
+	private final String INDEX_HTML = renderHTML("index.html");
 
 	@Override
 	public String prefix() { return "/v1"; }
@@ -32,7 +32,19 @@ public class MovieMatcherApplication extends JsonApplication {
 		friendsService();
 		groupsService();
 
-		Spark.get("/*", (request, response) -> indexHtml);
+		htmlService();
+	}
+
+	public void htmlService() {
+		Route index = (request, response) -> INDEX_HTML;
+		Spark.get("/login", index);
+		Spark.get("/login/*", index);
+		Spark.get("/movies", index);
+		Spark.get("/movies/*", index);
+		Spark.get("/friends", index);
+		Spark.get("/friends/*", index);
+		Spark.get("/groups", index);
+		Spark.get("/groups/*", index);
 	}
 
 	/**
@@ -75,6 +87,12 @@ public class MovieMatcherApplication extends JsonApplication {
 		};
 		jget("/movies/:id", movieRoute);
 		jget("/movies/:id/*", movieRoute);
+
+		Route unimplemented = (request, response) -> {
+			throw new HTTPException(501);
+		};
+		jget("/movies", unimplemented);
+		jget("/movies/*", unimplemented);
 	}
 
 	/**
@@ -94,6 +112,12 @@ public class MovieMatcherApplication extends JsonApplication {
 		};
 		jget("/friends/:id", friendRoute);
 		jget("/friends/:id/*", friendRoute);
+
+		Route unimplemented = (request, response) -> {
+			throw new HTTPException(501);
+		};
+		jget("/friends", unimplemented);
+		jget("/friends/*", unimplemented);
 	}
 
 	/**
@@ -113,6 +137,12 @@ public class MovieMatcherApplication extends JsonApplication {
 		};
 		jget("/groups/:id", groupsRoute);
 		jget("/groups/:id/*", groupsRoute);
+
+		Route unimplemented = (request, response) -> {
+			throw new HTTPException(501);
+		};
+		jget("/groups", unimplemented);
+		jget("/groups/*", unimplemented);
 	}
 
 	/**

@@ -27,4 +27,14 @@
 		<error-code>404</error-code>
 		<location>/404</location>
 	</error-page>
+
+	<filter>
+		<filter-name>SassCompiler</filter-name>
+		<filter-class>com.darrinholst.sass_java.SassCompilingFilter</filter-class>
+	</filter>
+
+	<filter-mapping>
+		<filter-name>SassCompiler</filter-name>
+		<url-pattern>*.css</url-pattern>
+	</filter-mapping>
 </web-app>
