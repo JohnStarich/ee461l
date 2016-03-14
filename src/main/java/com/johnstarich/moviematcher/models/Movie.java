@@ -1,7 +1,12 @@
 package com.johnstarich.moviematcher.models;
 
 import com.mongodb.MongoClient;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
+import org.bson.Document;
 import org.bson.types.ObjectId;
+import static com.mongodb.client.model.Filters.eq;
+
 
 /**
  * Created by Josue on 3/10/2016.
@@ -35,7 +40,25 @@ public class Movie {
         }
 
         MongoClient mongoClient = new MongoClient(mongoHost);
+        MongoDatabase database = mongoClient.getDatabase("moviematcher");
+        MongoCollection<Document> collection = database.getCollection("movies");
 
-        return null;
+        //using first()because there should only be one movie with the specific "id"
+        //however, we could get an iterable and search through that ... but again there should only be one!
+        Document movie = collection.find(eq("_id",id)).first();
+
+
+        return new Movie(movie.get("title").toString(), movie.get("rating").toString(), movie.get("genre").toString(),
+                movie.get("release_date").toString(), movie.get("imdb_rating").toString(),
+                movie.get("poster").toString(), movie.get("plot").toString(), movie.get("language").toString());
     }
+
+    public String getTitle() {return title;}
+    public String getRating() {return rating;}
+    public String getGenre() {return genre;}
+    public String getReleaseDate() {return release_date;}
+    public String getImdbRating() {return imdb_rating;}
+    public String getPoster() {return poster;}
+    public String getPlot() {return plot;}
+    public String getLanguage() {return language;}
 }
