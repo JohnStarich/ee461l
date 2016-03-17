@@ -1,6 +1,8 @@
 package com.johnstarich.moviematcher.app;
 
+import com.johnstarich.moviematcher.models.Movie;
 import com.johnstarich.moviematcher.models.Status;
+import org.bson.types.ObjectId;
 import spark.Route;
 import spark.Spark;
 
@@ -83,7 +85,7 @@ public class MovieMatcherApplication extends JsonApplication {
 		Route movieRoute = (request, response) -> {
 			String movieId = request.params("id");
 			System.out.println("Looked up movie with ID: "+movieId);
-			throw new HTTPException(501);
+			return Movie.load(new ObjectId(movieId));
 		};
 		jget("/movies/:id", movieRoute);
 		jget("/movies/:id/*", movieRoute);
