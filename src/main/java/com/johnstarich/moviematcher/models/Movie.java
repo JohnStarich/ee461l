@@ -1,10 +1,15 @@
 package com.johnstarich.moviematcher.models;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.johnstarich.moviematcher.store.MoviesDatabase;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import org.bson.Document;
 import org.bson.types.ObjectId;
+import org.omg.CORBA.Object;
+
 import static com.mongodb.client.model.Filters.eq;
 
 
@@ -12,17 +17,31 @@ import static com.mongodb.client.model.Filters.eq;
  * Created by Josue on 3/10/2016.
  */
 public class Movie {
-    private String title;
-    private String rating;
-    private String genre;
-    private String release_date;
-    private String imdb_rating;
-    private String poster;
-    private String plot;
-    private String language;
+    public final ObjectId _id;
+    public final String title;
+    public final String rating;
+    public final String genre;
+    public final String release_date;
+    public final String imdb_rating;
+    public final String poster;
+    public final String plot;
+    public final String language;
 
-    public Movie(String title, String rating, String genre, String release_date, String imdb_rating, String poster,
+    public Movie(ObjectId _id) {
+        this._id = _id;
+        title = null;
+        rating = null;
+        genre = null;
+        release_date = null;
+        imdb_rating = null;
+        poster = null;
+        plot = null;
+        language = null;
+    }
+
+    public Movie(ObjectId _id, String title, String rating, String genre, String release_date, String imdb_rating, String poster,
                  String plot, String language) {
+        this._id = _id;
         this.title = title;
         this.rating = rating;
         this.genre = genre;
@@ -33,32 +52,10 @@ public class Movie {
         this.language = language;
     }
 
-    public static Movie load(ObjectId id) throws Exception {
-        String mongoHost = System.getenv("MONGO_HOST"); //gets an environment variable (this is where the db is located)
-        if(mongoHost == null) {
-            throw new Exception("Cannot get environment variable to database.");
-        }
-
-        MongoClient mongoClient = new MongoClient(mongoHost);
-        MongoDatabase database = mongoClient.getDatabase("moviematcher");
-        MongoCollection<Document> collection = database.getCollection("movies");
-
-        //using first()because there should only be one movie with the specific "id"
-        //however, we could get an iterable and search through that ... but again there should only be one!
-        Document movie = collection.find(eq("_id",id)).first();
-
-
-        return new Movie(movie.get("title").toString(), movie.get("rating").toString(), movie.get("genre").toString(),
-                movie.get("release_date").toString(), movie.get("imdb_rating").toString(),
-                movie.get("poster").toString(), movie.get("plot").toString(), movie.get("language").toString());
+    public Movie load() {
+        MongoCollection<Document> collection = MoviesDatabase.getCollection("movies");
+        Document movie = collection.find(eq("_id", _id)).first();
+        Gson gson = new GsonBuilder().create();
+        return gson.fromJson(movie.toJson(), Movie.class);
     }
-
-    public String getTitle() {return title;}
-    public String getRating() {return rating;}
-    public String getGenre() {return genre;}
-    public String getReleaseDate() {return release_date;}
-    public String getImdbRating() {return imdb_rating;}
-    public String getPoster() {return poster;}
-    public String getPlot() {return plot;}
-    public String getLanguage() {return language;}
 }
