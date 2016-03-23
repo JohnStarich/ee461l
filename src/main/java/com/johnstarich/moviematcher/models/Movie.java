@@ -25,7 +25,7 @@ public class Movie {
     public final String imdb_rating;
     public final String poster;
     public final String plot;
-    public final String language;
+    public final String movie_lang;
 
     public Movie(ObjectId _id) {
         this._id = _id;
@@ -36,11 +36,11 @@ public class Movie {
         imdb_rating = null;
         poster = null;
         plot = null;
-        language = null;
+        movie_lang = null;
     }
 
     public Movie(ObjectId _id, String title, String rating, String genre, String release_date, String imdb_rating, String poster,
-                 String plot, String language) {
+                 String plot, String movie_lang) {
         this._id = _id;
         this.title = title;
         this.rating = rating;
@@ -49,7 +49,7 @@ public class Movie {
         this.imdb_rating = imdb_rating;
         this.poster = poster;
         this.plot = plot;
-        this.language = language;
+        this.movie_lang = movie_lang;
     }
 
     public Movie load() {
