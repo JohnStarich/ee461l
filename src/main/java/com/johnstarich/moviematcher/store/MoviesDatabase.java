@@ -16,8 +16,7 @@ public class MoviesDatabase {
 	private MoviesDatabase() {
 		String mongoHost = System.getenv("MONGO_HOST"); //gets an environment variable (this is where the db is located)
 		if(mongoHost == null) {
-			System.out.println("Cannot get environment variable to database.");
-			return;
+			throw new EnvironmentError("Cannot get environment variable to database.");
 		}
 
 		MongoClient mongoClient = new MongoClient(mongoHost);
@@ -26,5 +25,11 @@ public class MoviesDatabase {
 
 	public static MongoCollection<Document> getCollection(String collectionName) {
 		return database.mongoDatabase.getCollection(collectionName);
+	}
+}
+
+class EnvironmentError extends Error {
+	public EnvironmentError(String message) {
+		super(message);
 	}
 }
