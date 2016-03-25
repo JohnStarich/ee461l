@@ -1,7 +1,7 @@
 # Homework 2: Design in Our Project
 
 ## Information Hiding
-The information hiding principle is being applied to the MoviesDatabase class as we hide the implementation of connecting to our database. The reason we decided to hide this implementation is because it could possibly change. Some of the changes include where the database is located, the database we are connecting to, and how we connect to the database. Since we hide this implementation, it will be easy enough to make these changes without having to modify the other classes. One potential disadvantage that could arise is where we would have to refactor most of the whole class if we switched to a completely different database. In order to mitigate this problem, we decided early to choose MongoDB because it best fit our design constraints.
+The information hiding principle is being applied to the MoviesDatabase class as we hide the implementation of connecting to our database. The reason we decided to hide this implementation is because it could possibly change. Some of the changes include where the database is located, the database we are connecting to, and how we connect to the database. Since we hide this implementation, it will be easy enough to make these changes without having to modify the other classes. One potential disadvantage that could arise is where we would have to refactor most of the whole class if we switched to a completely different database. In order to mitigate this problem, we decided early to choose MongoDB because it best fit our design constraints. The modularization of this class allows for easy feature additions such as the creation of a new collection in our Mongo database.
 
 ```java
 public class MoviesDatabase {
@@ -25,7 +25,7 @@ public class MoviesDatabase {
 }
 ```
 
-This load method is provided by our Movie class so that the application interacts solely with movies and not the database in which they are stored. The load method is designed for a future change in the kind of database we use. If we encounter an issue with MongoDB, then we could change the database we use and only have to change this load method to work with the new database. Then the application would be able to use the load method as before and still get a movie object. The Movie class is designed in such a way that additional methods to interact with the movies database in a variety of ways can be added to this class. 
+This load method is provided by our Movie class so that the application interacts solely with movies and not the database in which they are stored. The load method is designed for a future change in the kind of database we use. If we encounter an issue with MongoDB, then we could change the database we use and only have to change this load method to work with the new database. Then the application would be able to use the load method as before and still get a movie object. The Movie class is designed in such a way that additional methods to interact with the movies database in a variety of ways can be added to this class. A disadvantage of this approach is we don't allow fine-grained control over how movies are loaded. 
 
 ```java
 public class Movie {
@@ -43,7 +43,7 @@ public class Movie {
 ## Design Patterns
 
 ### Singleton
-In our MoviesDatabase class, we designed it to function as a singleton class. The only constructor is private. Additionally there is only one instance of the class stored in a private, immutable, and static field. The purpose of this class using the singleton design pattern is so that there is only one MongoDB connection at any time. This connection is reused every time someone asks for access to a MongoDB collection so the pattern helps cut down on unneeded network and memory usage.
+In our MoviesDatabase class, we designed it to function as a singleton class. The only constructor is private. Additionally there is only one instance of the class stored in a private, immutable, and static field. The purpose of this class using the singleton design pattern is so that there is only one MongoDB connection at any time. This connection is reused every time someone asks for access to a MongoDB collection so the pattern helps cut down on unneeded network and memory usage. However, more connections from multiple threads allow for better performance. 
 
 ```java
 public class MoviesDatabase {
@@ -59,7 +59,7 @@ public class MoviesDatabase {
 ```
 
 ### Builder
-In our Movie class, we implement the builder pattern. In methods such as `load()`, `save()`, `update()`, and `combine(Movie m)`, we are able to construct and fill in various data fields of a Movie and then modify the associate MongoDB document. By following the builder pattern, we manipulate the object’s internal representation and control the object’s construction. 
+In our Movie class, we implement the builder pattern. The builder pattern allows one to instantiate an object by calling methods instead of finding a specific constructor. In methods such as `load()`, `save()`, `update()`, and `combine(Movie m)`, we are able to construct and fill in various data fields of a Movie and then modify the associate MongoDB document. By following the builder pattern, we manipulate the object's internal representation and control the object's construction. This is beneficial to us as our Movie has many fields. One disadvantage is for a movie with fewer defined fields, a single constructor would suffice.
 
 ```java
 public class Movie { 
@@ -76,7 +76,7 @@ public class Movie {
 ```
 
 ### MVC
-Our application is based off the model view controller design pattern. In our web application, the model of a movie is a small HTML template showing the title, movie poster, and rating. The view is the user interface that connects the user to our movie controller. The controller is the application’s API.
+Our application is based off the model view controller design pattern. The model describes the data, the view gives a visual representation of the model, and the controller manages changes to the model. In our web application, the model of a movie is a small HTML template showing the title, movie poster, and rating. The view is the user interface that connects the user to our movie controller. The controller is the application’s API. The advantages of using MVC allows for a modular approach which makes development, modification and addition to our application easier. One disadvantage is the code base becomes spread out which can make large refactors difficult.
 
 For example, a user can search for movies through the provided search bar in the UI. The view would then send the search query to the API. The API would then query the database with the user’s search text and return the movie results. These movies are then sent to the view to show the user.
 
