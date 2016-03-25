@@ -64,14 +64,14 @@ In our Movie class, we implement the builder pattern. In methods such as `load()
 ```java
 public class Movie { 
 	public final ObjectId _id;
-public final String title; 
+	public final String title; 
 
-public Movie(ObjectId _id) {...}
-public Movie(...){...}
-public Movie load() {...}
-public Movie save(){...}
-public Movie update(){...}
-public Movie combine(Movie m){...}
+	public Movie(ObjectId _id) {...}
+	public Movie(...) {...}
+	public Movie load() {...}
+	public Movie save() {...}
+	public Movie update() {...}
+	public Movie combine(Movie m) {...}
 }
 ```
 
@@ -83,10 +83,10 @@ For example, a user can search for movies through the provided search bar in the
 #### View
 
 ```html
-<div>
-	Class Movie
-	Img Poster 
-	Rating
+<div class="movie">
+	<img class="movie-image" src="movie_poster.png" />
+	<span class="movie-title">Movie Title</span>
+	<span class="movie-rating" data-rating="3">&star;&star;&star;</span>
 </div>
 ```
 
