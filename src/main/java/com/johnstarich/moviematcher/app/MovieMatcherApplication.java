@@ -55,11 +55,11 @@ public class MovieMatcherApplication extends JsonApplication {
 	 */
 	public void loginService() {
 		jpost("/login", (request, response) -> {
-			throw new HTTPException(501);
+			throw new HttpException(HttpStatus.NOT_IMPLEMENTED);
 		});
 
 		jpost("/login/register", (request, response) -> {
-			throw new HTTPException(501);
+			throw new HttpException(HttpStatus.NOT_IMPLEMENTED);
 		});
 
 		Spark.before("/*", (request, response) -> {
@@ -79,7 +79,7 @@ public class MovieMatcherApplication extends JsonApplication {
 		jget("/movies/search/:search_query", (request, response) -> {
 			String searchQuery = request.params("search_query").replaceAll("\\+", " ");
 			System.out.println("Searched for \""+searchQuery+"\"");
-			throw new HTTPException(501);
+			throw new HttpException(HttpStatus.NOT_IMPLEMENTED);
 		});
 
 		Route movieRoute = (request, response) -> {
@@ -91,7 +91,7 @@ public class MovieMatcherApplication extends JsonApplication {
 		jget("/movies/:id/*", movieRoute);
 
 		Route unimplemented = (request, response) -> {
-			throw new HTTPException(501);
+			throw new HttpException(HttpStatus.NOT_IMPLEMENTED);
 		};
 		jget("/movies", unimplemented);
 		jget("/movies/*", unimplemented);
@@ -104,19 +104,19 @@ public class MovieMatcherApplication extends JsonApplication {
 		jget("/friends/search/:search_query", (request, response) -> {
 			String searchQuery = request.params("search_query").replaceAll("\\+", " ");
 			System.out.println("Searched for \""+searchQuery+"\"");
-			throw new HTTPException(501);
+			throw new HttpException(HttpStatus.NOT_IMPLEMENTED);
 		});
 
 		Route friendRoute = (request, response) -> {
 			String movieId = request.params("id");
 			System.out.println("Looked up movie with ID: "+movieId);
-			throw new HTTPException(501);
+			throw new HttpException(HttpStatus.NOT_IMPLEMENTED);
 		};
 		jget("/friends/:id", friendRoute);
 		jget("/friends/:id/*", friendRoute);
 
 		Route unimplemented = (request, response) -> {
-			throw new HTTPException(501);
+			throw new HttpException(HttpStatus.NOT_IMPLEMENTED);
 		};
 		jget("/friends", unimplemented);
 		jget("/friends/*", unimplemented);
@@ -129,19 +129,19 @@ public class MovieMatcherApplication extends JsonApplication {
 		jget("/groups/search/:search_query", (request, response) -> {
 			String searchQuery = request.params("search_query").replaceAll("\\+", " ");
 			System.out.println("Searched for \""+searchQuery+"\"");
-			throw new HTTPException(501);
+			throw new HttpException(HttpStatus.NOT_IMPLEMENTED);
 		});
 
 		Route groupsRoute = (request, response) -> {
 			String movieId = request.params("id");
 			System.out.println("Looked up movie with ID: "+movieId);
-			throw new HTTPException(501);
+			throw new HttpException(HttpStatus.NOT_IMPLEMENTED);
 		};
 		jget("/groups/:id", groupsRoute);
 		jget("/groups/:id/*", groupsRoute);
 
 		Route unimplemented = (request, response) -> {
-			throw new HTTPException(501);
+			throw new HttpException(HttpStatus.NOT_IMPLEMENTED);
 		};
 		jget("/groups", unimplemented);
 		jget("/groups/*", unimplemented);

@@ -35,11 +35,11 @@ public abstract class BasicApplication implements SparkApplication {
 		});
 
 		before("/404", (request, response) -> {
-			throw new HTTPException(404);
+			throw new HttpException(HttpStatus.NOT_FOUND);
 		});
 
-		exception(HTTPException.class, (e, request, response) -> {
-			int statusCode = ((HTTPException)e).getStatusCode();
+		exception(HttpException.class, (e, request, response) -> {
+			int statusCode = ((HttpException)e).getStatusCode();
 			response.type("text/html");
 			response.status(statusCode);
 			response.body(String.format("<h1>%d %s</h1>", statusCode, e.getMessage()));
@@ -47,7 +47,7 @@ public abstract class BasicApplication implements SparkApplication {
 
 		exception(Exception.class, (e, request, response) -> {
 			response.type("text/html");
-			response.status(500);
+			response.status(HttpStatus.SERVER_ERROR.code);
 			response.body("<h1>500 Internal Server Error</h1>");
 		});
 
