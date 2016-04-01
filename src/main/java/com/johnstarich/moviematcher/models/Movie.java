@@ -87,16 +87,12 @@ public class Movie {
 								append("plot",true).append("movie_lang", true).
 								append("score", new Document("$meta", "textScore"))),
 						new Document("$sort", new Document("score", -1))
-						)
+					)
 		);
 
 		ArrayList<Movie> queryResults = new ArrayList<Movie>();
 		Gson gson = new GsonBuilder().create();
-
-		/*iterable.forEach((Block<Document>) document -> {
-            queryResults.add(gson.fromJson(document.toJson(), Movie.class));
-        });*/
-
+		
 		iterable
 			.map(document -> gson.fromJson(document.toJson(), Movie.class))
 			.forEach((Block<Movie>) m -> queryResults.add(m));
