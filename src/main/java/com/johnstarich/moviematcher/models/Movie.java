@@ -2,7 +2,7 @@ package com.johnstarich.moviematcher.models;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.johnstarich.moviematcher.store.MoviesDatabase;
+import com.johnstarich.moviematcher.store.MovieMatcherDatabase;
 import com.mongodb.Block;
 import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.MongoCollection;
@@ -20,7 +20,7 @@ import static com.mongodb.client.model.Filters.eq;
  */
 public class Movie {
 	private static class LazyMoviesCollection {
-		public static final MongoCollection<Document> moviesCollection = MoviesDatabase.getCollection("movies");
+		public static final MongoCollection<Document> moviesCollection = MovieMatcherDatabase.getCollection("movies");
 	}
 	private static MongoCollection<Document> getCollection() {
 		return LazyMoviesCollection.moviesCollection;
