@@ -40,8 +40,6 @@ public class ServeStaticFileRoute implements Route {
     }
 
     private static StaticFile getPage(String path) throws HttpException {
-        System.out.println("Pages loaded: " + loadedFiles.size());
-
         StringBuilder relativeFilePathBuilder = new StringBuilder(STATIC_PREFIX);
         if(! path.startsWith("/")) relativeFilePathBuilder.append('/');
         relativeFilePathBuilder.append(path);
