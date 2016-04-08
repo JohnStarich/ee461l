@@ -17,9 +17,6 @@ import java.nio.file.Paths;
  * Created by johnstarich on 2/25/16.
  */
 public class MovieMatcherApplication extends JsonApplication {
-	/** Home page HTML to be rendered for any page without a route specified. */
-	private final String INDEX_HTML = renderHTML("index.html");
-
 	@Override
 	public String prefix() { return "/v1"; }
 
@@ -38,15 +35,8 @@ public class MovieMatcherApplication extends JsonApplication {
 	}
 
 	public void htmlService() {
-		Route index = (request, response) -> INDEX_HTML;
-		Spark.get("/login", index);
-		Spark.get("/login/*", index);
-		Spark.get("/movies", index);
-		Spark.get("/movies/*", index);
-		Spark.get("/friends", index);
-		Spark.get("/friends/*", index);
-		Spark.get("/groups", index);
-		Spark.get("/groups/*", index);
+		Spark.get("/assets/*", new ServeStaticFileRoute());
+		Spark.get("/*", new ServeStaticFileRoute("/index.html"));
 	}
 
 	/**
@@ -145,25 +135,5 @@ public class MovieMatcherApplication extends JsonApplication {
 		};
 		jget("/groups", unimplemented);
 		jget("/groups/*", unimplemented);
-	}
-
-	/**
-	 * Render an HTML file as a String we can send in a response body.
-	 * @param htmlFile the file location (relative to WEB-INF folder)
-	 * @return the content of that file
-	 */
-	public String renderHTML(String htmlFile) {
-		try {
-			URL url = MovieMatcherApplication.class.getClassLoader().getResource("WEB-INF/"+htmlFile);
-			if (url != null) {
-				Path path = Paths.get(url.toURI());
-				return new String(Files.readAllBytes(path), Charset.defaultCharset());
-			}
-		}
-		catch (Exception e) {
-			System.out.println("Could not find "+htmlFile);
-			e.printStackTrace();
-		}
-		return null;
 	}
 }

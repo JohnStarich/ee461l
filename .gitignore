@@ -1,6 +1,10 @@
 
 # Created by https://www.gitignore.io/api/osx,intellij,maven,eclipse,java
 
+### Ember UI ###
+
+src/main/static/
+
 
 ### Sass CSS ###
 .sass-cache/

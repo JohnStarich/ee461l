@@ -25,7 +25,7 @@ public abstract class BasicApplication implements SparkApplication {
 
 	@Override
 	public void init() {
-		staticFileLocation("WEB-INF");
+		staticFileLocation("static");
 
 		before(PREFIX+"/*", "text/html", (request, response) -> {
 			// Enable gzip compression if client supports it
@@ -43,12 +43,16 @@ public abstract class BasicApplication implements SparkApplication {
 			response.type("text/html");
 			response.status(statusCode);
 			response.body(String.format("<h1>%d %s</h1>", statusCode, e.getMessage()));
+			System.err.println(String.format("ERROR: %d %s", statusCode, e.getMessage()));
+			if(e.getCause() != null)
+				e.getCause().printStackTrace();
 		});
 
 		exception(Exception.class, (e, request, response) -> {
 			response.type("text/html");
 			response.status(HttpStatus.SERVER_ERROR.code);
 			response.body("<h1>500 Internal Server Error</h1>");
+			e.printStackTrace();
 		});
 
 		this.app();
