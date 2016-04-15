@@ -31,6 +31,8 @@ public class User {
 
     /* need to decide how to store user preferences ... */
 
+    private static Gson gson = new GsonBuilder().create();
+
     public final ObjectId _id;
     public final String email;
     public final String first_name;
@@ -49,7 +51,7 @@ public class User {
         this.password = null;
     }
 
-    public User(ObjectId _id, String email, String first_name, String last_name, List<User> friends, List groups, String password) {
+    private User(ObjectId _id, String email, String first_name, String last_name, List<User> friends, List groups, String password) {
         this._id = _id;
         this.email = email;
         this.first_name = first_name;
@@ -59,7 +61,7 @@ public class User {
         this.password = password;
     }
 
-    public User(ObjectId _id, String email, String first_name, String last_name, String password) {
+    private User(ObjectId _id, String email, String first_name, String last_name, String password) {
         this._id = _id;
         this.email = email;
         this.first_name = first_name;
@@ -87,14 +89,37 @@ public class User {
         return _id.hashCode();
     }
 
+    @Override
+    public String toString() { return _id + " " + email + " " + first_name + " " + last_name; }
+
     public User load() {
         Document user = getCollection().find(eq("_id", _id)).first();
-        Gson gson = new GsonBuilder().create();
+        //if(user.isEmpty() == true) { throw new UserNotFoundException("This User " + this.toString() + " has not been registered."); }
         return gson.fromJson(user.toJson(), User.class);
     }
 
+    private boolean isRegistered() {
+        Document user = getCollection().find(eq("_id", _id)).first();
+        if(user.isEmpty()) { return false; }
+        return gson.fromJson(user.toJson(), User.class).equals(this);
+    }
+
+    /* not sure how to add friends or groups to mongoDB since they are lists*/
+    /* will create the collection, once we insert our first user */
+    private void insert() {
+        getCollection().insertOne(
+                new Document("_id", _id)
+                        .append("email" , email)
+                        .append("first_name" , first_name)
+                        .append("last_name", last_name)
+                        .append("password", password)
+                        .append("friends", friends)
+                        .append("groups", groups)
+        );
+    }
+
     public User register(String password) throws HttpException {
-        if(this.load().equals(this)) { //need to test this, too see if it actually works!! ...
+        if(this.isRegistered() == true) {
             throw new HttpException(HttpStatus.BAD_REQUEST);
         }
 
@@ -103,14 +128,38 @@ public class User {
         return u;
     }
 
-    /* not sure how to add friends or groups to mongoDB since they are lists*/
-    /* will create the collection, once we insert our first user */
-    public void insert() {
-        getCollection().insertOne(
-                new Document("_id", _id).append("email" , email).append("first_name" , first_name)
-                        .append("last_name", last_name).append("password", password)
-                        .append("friends", friends).append("groups", groups)
+    private User updateDBPassword() {
+        getCollection().findOneAndUpdate(
+                new Document("_id", _id),
+                new Document("$set", new Document("password", password))
         );
+        return this;
+    }
+
+    public User resetPassword(String oldPassword, String newPassword) throws HttpException {
+        if(BCrypt.checkpw(oldPassword, password) == false) {
+            throw new HttpException(HttpStatus.BAD_REQUEST);
+        }
+
+        return new User(_id, email, first_name, last_name, friends, groups, BCrypt.hashpw(newPassword, BCrypt.gensalt()))
+                .updateDBPassword();
+    }
+
+
+    private User updateDBFriends() {
+        getCollection().findOneAndUpdate(
+                new Document("_id", _id),
+                new Document("$set", new Document("friends", friends))
+        );
+        return this;
+    }
+
+    private User updateDBGroups() {
+        getCollection().findOneAndUpdate(
+                new Document("_id", _id),
+                new Document("$set", new Document("groups", groups))
+        );
+        return this;
     }
 
     public static List<User> search(String query) {
@@ -132,7 +181,6 @@ public class User {
         );
 
         ArrayList<User> queryResults = new ArrayList<User>();
-        Gson gson = new GsonBuilder().create();
 
         iterable
                 .map(document -> gson.fromJson(document.toJson(), User.class))
@@ -143,15 +191,18 @@ public class User {
 
     public static User loadByUsername(String email) {
         Document user = getCollection().find(eq("email", email)).first();
-        Gson gson = new GsonBuilder().create();
         return gson.fromJson(user.toJson(), User.class);
     }
 
     public void removeUser() {
-        DeleteResult deleteResult = getCollection().deleteOne(new Document("_id", _id).append("email", email)
-                .append("first_name", first_name).append("last_name", last_name)
-                .append("friends", friends).append("groups", groups)
-                .append("password", password)
+        DeleteResult deleteResult = getCollection().deleteOne(
+                new Document("_id", _id)
+                    .append("email", email)
+                    .append("first_name", first_name)
+                    .append("last_name", last_name)
+                    .append("friends", friends)
+                    .append("groups", groups)
+                    .append("password", password)
         );
         //deleteResult.getDeletedCount() == 1 ? yay it worked : wtf;
     }
@@ -159,25 +210,25 @@ public class User {
     public User addFriend(User friend) {
         ArrayList<User> friends = new ArrayList<>(this.friends);
         friends.add(friend);
-        return new User(_id, email, first_name, last_name, friends, groups, password);
+        return new User(_id, email, first_name, last_name, friends, groups, password).updateDBFriends();
     }
 
     public User addFriends(Collection<User> friends) {
         ArrayList<User> amigos = new ArrayList<>(this.friends);
         amigos.addAll(friends);
-        return new User(_id, email, first_name, last_name, amigos, groups, password);
+        return new User(_id, email, first_name, last_name, amigos, groups, password).updateDBFriends();
     }
 
     public User removeFriend(User oldFriend) {
         ArrayList<User> newFriends = new ArrayList<>(this.friends);
         newFriends.remove(oldFriend);
-        return new User(_id, email, first_name, last_name, newFriends, groups, password);
+        return new User(_id, email, first_name, last_name, newFriends, groups, password).updateDBFriends();
     }
 
     public User removeFriends(Collection<User> oldFriends) {
         ArrayList<User> newFriends = new ArrayList<>(this.friends);
         newFriends.removeAll(oldFriends);
-        return new User(_id, email, first_name, last_name, newFriends, groups, password);
+        return new User(_id, email, first_name, last_name, newFriends, groups, password).updateDBFriends();
     }
 
     /* need to build Group class in order to implement */
@@ -185,7 +236,12 @@ public class User {
     public void addGroups() {}
     public void removeGroup() {}
     public void removeGroups() {}
-    /* not sure on how to implement just yet*/
-    public boolean resetPassword() { return false; }
+
     // this.login() {}  need to implement this method also
 }
+
+/*
+class UserNotFoundException extends Exception {
+    public UserNotFoundException(String message) { super(message); }
+}
+*/
