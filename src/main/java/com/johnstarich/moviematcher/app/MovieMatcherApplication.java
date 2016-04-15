@@ -12,6 +12,7 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 
 /**
  * Movie Matcher API is defined here. These routes make up the Movie Matcher services.
@@ -80,6 +81,7 @@ public class MovieMatcherApplication extends JsonApplication {
 			System.out.println("Looked up movie with ID: "+movieId);
 			return new Movie(new ObjectId(movieId)).load();
 		};
+
 		jget("/movies/:id", movieRoute);
 		jget("/movies/:id/*", movieRoute);
 
