@@ -100,8 +100,7 @@ public class User {
 
     private boolean isRegistered() {
         Document user = getCollection().find(eq("_id", _id)).first();
-        if(user.isEmpty()) { return false; }
-        return gson.fromJson(user.toJson(), User.class).equals(this);
+        return !user.isEmpty() && gson.fromJson(user.toJson(), User.class).equals(this);
     }
 
     /* not sure how to add friends or groups to mongoDB since they are lists*/
@@ -119,7 +118,7 @@ public class User {
     }
 
     public User register(String password) throws HttpException {
-        if(this.isRegistered() == true) {
+        if(this.isRegistered()) {
             throw new HttpException(HttpStatus.BAD_REQUEST);
         }
 
@@ -137,7 +136,7 @@ public class User {
     }
 
     public User resetPassword(String oldPassword, String newPassword) throws HttpException {
-        if(BCrypt.checkpw(oldPassword, password) == false) {
+        if(!BCrypt.checkpw(oldPassword, password)) {
             throw new HttpException(HttpStatus.BAD_REQUEST);
         }
 
