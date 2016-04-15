@@ -1,14 +1,14 @@
 package com.johnstarich.moviematcher.models;
 
+import com.johnstarich.moviematcher.app.AbstractMongoDBTest;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
 /**
  * Created by Josue on 3/31/2016.
  */
-public class MovieTest {
-    //we can only run this test when we have access to MONGO_HOST...
-    //@Test
+public class MovieTest extends AbstractMongoDBTest {
+    @Test
     public void moviesSearchShouldReturnRelevantResults() {
         java.util.List<Movie> movieList = Movie.search("Creed");
         assertNotEquals(0, movieList.size());
@@ -19,6 +19,5 @@ public class MovieTest {
 
         movieList = Movie.search("aklsjdflkj ajjasdkfj ajsfojoasjdfl");
         assertEquals(0, movieList.size());
-
     }
 }
