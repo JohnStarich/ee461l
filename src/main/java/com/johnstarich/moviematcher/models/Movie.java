@@ -25,6 +25,7 @@ public class Movie {
 	private static MongoCollection<Document> getCollection() {
 		return LazyMoviesCollection.moviesCollection;
 	}
+	private static Gson gson = new GsonBuilder().create();
 
 	public final ObjectId _id;
 	public final String title;
@@ -73,26 +74,29 @@ public class Movie {
 
 	public Movie load() {
 		Document movie = getCollection().find(eq("_id", _id)).first();
-		Gson gson = new GsonBuilder().create();
 		return gson.fromJson(movie.toJson(), Movie.class);
 	}
 
 	public static List<Movie> search(String query) {
 		AggregateIterable<Document> iterable = getCollection().aggregate(
-				asList( new Document("$match", new Document("$text", new Document("$search", query))),
+				asList( new Document("$match",
+						new Document("$text", new Document("$search", query))),
 						new Document("$project",
-								new Document("title", true).append("rating", true).
-								append("genre", true).append("release_date", true).
-								append("imdb_rating", true).append("poster", true).
-								append("plot",true).append("movie_lang", true).
-								append("score", new Document("$meta", "textScore"))),
+								new Document("title", true)
+									.append("rating", true)
+									.append("genre", true)
+									.append("release_date", true)
+									.append("imdb_rating", true)
+									.append("poster", true)
+									.append("plot",true)
+									.append("movie_lang", true)
+									.append("score", new Document("$meta", "textScore"))),
 						new Document("$sort", new Document("score", -1))
-					)
+				)
 		);
 
 		ArrayList<Movie> queryResults = new ArrayList<Movie>();
-		Gson gson = new GsonBuilder().create();
-		
+
 		iterable
 			.map(document -> gson.fromJson(document.toJson(), Movie.class))
 			.forEach((Block<Movie>) m -> queryResults.add(m));
