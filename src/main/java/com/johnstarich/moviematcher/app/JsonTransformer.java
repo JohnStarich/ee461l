@@ -9,7 +9,7 @@ import spark.ResponseTransformer;
  * Created by johnstarich on 2/23/16.
  */
 public class JsonTransformer implements ResponseTransformer {
-	private Gson gson = new Gson();
+	private Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
 	@Override
 	public String render(Object model) throws Exception {
