@@ -8,12 +8,12 @@ import org.bson.Document;
 /**
  * Created by johnstarich on 3/22/16.
  */
-public class MoviesDatabase {
-	private static final MoviesDatabase database = new MoviesDatabase();
+public class MovieMatcherDatabase {
+	private static final MovieMatcherDatabase database = new MovieMatcherDatabase();
 
 	private MongoDatabase mongoDatabase;
 
-	private MoviesDatabase() {
+	private MovieMatcherDatabase() {
 		String mongoHost = System.getenv("MONGO_HOST"); //gets an environment variable (this is where the db is located)
 		if(mongoHost == null) {
 			throw new EnvironmentError("Cannot get environment variable to database.");
