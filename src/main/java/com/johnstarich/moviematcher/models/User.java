@@ -242,7 +242,6 @@ public class User {
 		return new User(_id, email, first_name, last_name, newFriends, groups, password).updateFriends();
 	}
 
-	/* need to build Group class in order to implement */
 	public User addGroup(Group group) {
 		ArrayList<Group> groups = new ArrayList<>(this.groups);
 		groups.add(group);
@@ -265,6 +264,44 @@ public class User {
 		ArrayList<Group> newGroups = new ArrayList<>(this.groups);
 		newGroups.removeAll(groups);
 		return new User(_id, email, first_name, last_name, friends, newGroups, password).updateGroups();
+	}
+
+	public User removeFriendFromGroup(String groupName, User member) throws HttpException {
+		if(groupName == null || member == null) {
+			throw new HttpException(HttpStatus.BAD_REQUEST);
+		}
+
+		Group editThisGroup = null;
+		for(Group group : groups) {
+			if(group.name.equals(groupName)) { editThisGroup = group; break; }
+		}
+
+		if(editThisGroup == null) {
+			throw new HttpException(HttpStatus.BAD_REQUEST, "Could not find " + first_name + "'s group named " + groupName +".");
+		}
+
+		editThisGroup.removeFriend(member);
+
+		return new User(_id, email, first_name, last_name, friends, groups, password).updateGroups();
+	}
+
+	public User addFriendToGroup(String groupName, User newMember) throws HttpException{
+		if(groupName == null || newMember == null) {
+			throw new HttpException(HttpStatus.BAD_REQUEST);
+		}
+
+		Group editThisGroup = null;
+		for(Group group : groups) {
+			if(group.name.equals(groupName)) { editThisGroup = group; break; }
+		}
+
+		if(editThisGroup == null) {
+			throw new HttpException(HttpStatus.BAD_REQUEST, "Could not find " + first_name + "'s group named " + groupName +".");
+		}
+
+		editThisGroup.addFriend(newMember);
+
+		return new User(_id, email, first_name, last_name, friends, groups, password).updateGroups();
 	}
 
 	// this.login() {}  need to implement this method also
