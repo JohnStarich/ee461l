@@ -21,6 +21,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ServeStaticFileRoute implements Route {
 	private static final String STATIC_PREFIX = "static";
 	private static final Map<String, StaticFile> loadedFiles = new ConcurrentHashMap<>(16);
+	private static final boolean SHOULD_CACHE_FILES = ConfigManager.getPropertyOrDefault("ENVIRONMENT", "development").equals("production");
 
 	private final String file;
 
@@ -46,8 +47,7 @@ public class ServeStaticFileRoute implements Route {
 		relativeFilePathBuilder.append(path);
 		String relativeFilePath = relativeFilePathBuilder.toString();
 
-		if(ConfigManager.getPropertyOrDefault("ENVIRONMENT", "development").equals("production") &&
-			loadedFiles.containsKey(relativeFilePath)) {
+		if(SHOULD_CACHE_FILES && loadedFiles.containsKey(relativeFilePath)) {
 			return loadedFiles.get(relativeFilePath);
 		}
 
