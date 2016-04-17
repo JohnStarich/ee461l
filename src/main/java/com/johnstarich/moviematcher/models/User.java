@@ -17,6 +17,8 @@ import static java.util.Arrays.asList;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Predicate;
 
 import static com.mongodb.client.model.Filters.eq;
 
@@ -221,49 +223,49 @@ public class User {
 	public User addFriend(User friend) {
 		ArrayList<User> friends = new ArrayList<>(this.friends);
 		friends.add(friend);
-		return new User(_id, email, first_name, last_name, friends, groups, password).updateFriends();
+		return new User(_id, email, first_name, last_name, friends, groups, password);
 	}
 
 	public User addFriends(Collection<User> friends) {
 		ArrayList<User> amigos = new ArrayList<>(this.friends);
 		amigos.addAll(friends);
-		return new User(_id, email, first_name, last_name, amigos, groups, password).updateFriends();
+		return new User(_id, email, first_name, last_name, amigos, groups, password);
 	}
 
 	public User removeFriend(User oldFriend) {
 		ArrayList<User> newFriends = new ArrayList<>(this.friends);
 		newFriends.remove(oldFriend);
-		return new User(_id, email, first_name, last_name, newFriends, groups, password).updateFriends();
+		return new User(_id, email, first_name, last_name, newFriends, groups, password);
 	}
 
 	public User removeFriends(Collection<User> oldFriends) {
 		ArrayList<User> newFriends = new ArrayList<>(this.friends);
 		newFriends.removeAll(oldFriends);
-		return new User(_id, email, first_name, last_name, newFriends, groups, password).updateFriends();
+		return new User(_id, email, first_name, last_name, newFriends, groups, password);
 	}
 
 	public User addGroup(Group group) {
 		ArrayList<Group> groups = new ArrayList<>(this.groups);
 		groups.add(group);
-		return new User(_id, email, first_name, last_name, friends, groups, password).updateGroups();
+		return new User(_id, email, first_name, last_name, friends, groups, password);
 	}
 
 	public User addGroups(Collection<Group> groups) {
 		ArrayList<Group> newGroups = new ArrayList<>(this.groups);
 		newGroups.addAll(groups);
-		return new User(_id, email, first_name, last_name, friends, newGroups, password).updateGroups();
+		return new User(_id, email, first_name, last_name, friends, newGroups, password);
 	}
 
 	public User removeGroup(Group group) {
 		ArrayList<Group> groups = new ArrayList<>(this.groups);
 		groups.remove(group);
-		return new User(_id, email, first_name, last_name, friends, groups, password).updateGroups();
+		return new User(_id, email, first_name, last_name, friends, groups, password);
 	}
 
 	public User removeGroups(Collection<Group> groups) {
 		ArrayList<Group> newGroups = new ArrayList<>(this.groups);
 		newGroups.removeAll(groups);
-		return new User(_id, email, first_name, last_name, friends, newGroups, password).updateGroups();
+		return new User(_id, email, first_name, last_name, friends, newGroups, password);
 	}
 
 	public User removeFriendFromGroup(String groupName, User member) throws HttpException {
@@ -271,19 +273,24 @@ public class User {
 			throw new HttpException(HttpStatus.BAD_REQUEST);
 		}
 
-		Group editThisGroup = null;
-		for(Group group : groups) {
-			if(group.name.equals(groupName)) { editThisGroup = group; break; }
+		if(friends.parallelStream().noneMatch(Predicate.isEqual(member))) {
+			throw new HttpException(HttpStatus.BAD_REQUEST, "You are not friends with "+member);
 		}
 
-		if(editThisGroup == null) {
+		Optional<Group> editThisGroupOptional = groups.parallelStream()
+				.filter(group -> group.name.equals(groupName))
+				.findFirst();
+
+		if(! editThisGroupOptional.isPresent()) {
 			throw new HttpException(HttpStatus.BAD_REQUEST, "Could not find " + first_name + "'s group named " + groupName +".");
 		}
+
+		Group editThisGroup = editThisGroupOptional.get();
 
 		groups.remove(editThisGroup);
 		groups.add(editThisGroup.removeFriend(member));
 
-		return new User(_id, email, first_name, last_name, friends, groups, password).updateGroups();
+		return new User(_id, email, first_name, last_name, friends, groups, password);
 	}
 
 	public User addFriendToGroup(String groupName, User newMember) throws HttpException{
@@ -291,19 +298,24 @@ public class User {
 			throw new HttpException(HttpStatus.BAD_REQUEST);
 		}
 
-		Group editThisGroup = null;
-		for(Group group : groups) {
-			if(group.name.equals(groupName)) { editThisGroup = group; break; }
+		if(friends.parallelStream().noneMatch(Predicate.isEqual(newMember))) {
+			throw new HttpException(HttpStatus.BAD_REQUEST, "You are not friends with "+newMember);
 		}
 
-		if(editThisGroup == null) {
+		Optional<Group> editThisGroupOptional = groups.parallelStream()
+				.filter(group -> group.name.equals(groupName))
+				.findFirst();
+
+		if(! editThisGroupOptional.isPresent()) {
 			throw new HttpException(HttpStatus.BAD_REQUEST, "Could not find " + first_name + "'s group named " + groupName +".");
 		}
+
+		Group editThisGroup = editThisGroupOptional.get();
 
 		groups.remove(editThisGroup);
 		groups.add(editThisGroup.addFriend(newMember));
 
-		return new User(_id, email, first_name, last_name, friends, groups, password).updateGroups();
+		return new User(_id, email, first_name, last_name, friends, groups, password);
 	}
 
 	// this.login() {}  need to implement this method also
