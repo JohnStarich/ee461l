@@ -280,7 +280,8 @@ public class User {
 			throw new HttpException(HttpStatus.BAD_REQUEST, "Could not find " + first_name + "'s group named " + groupName +".");
 		}
 
-		editThisGroup.removeFriend(member);
+		groups.remove(editThisGroup);
+		groups.add(editThisGroup.removeFriend(member));
 
 		return new User(_id, email, first_name, last_name, friends, groups, password).updateGroups();
 	}
@@ -299,7 +300,8 @@ public class User {
 			throw new HttpException(HttpStatus.BAD_REQUEST, "Could not find " + first_name + "'s group named " + groupName +".");
 		}
 
-		editThisGroup.addFriend(newMember);
+		groups.remove(editThisGroup);
+		groups.add(editThisGroup.addFriend(newMember));
 
 		return new User(_id, email, first_name, last_name, friends, groups, password).updateGroups();
 	}
