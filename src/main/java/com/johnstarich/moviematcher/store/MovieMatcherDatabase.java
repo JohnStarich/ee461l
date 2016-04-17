@@ -14,7 +14,7 @@ public class MovieMatcherDatabase {
 	private MongoDatabase mongoDatabase;
 
 	private MovieMatcherDatabase() {
-		String mongoHost = System.getenv("MONGO_HOST"); //gets an environment variable (this is where the db is located)
+		String mongoHost = ConfigManager.getProperty("MONGO_HOST"); //gets an environment variable (this is where the db is located)
 		if(mongoHost == null) {
 			throw new EnvironmentError("Cannot get environment variable to database.");
 		}
