@@ -38,7 +38,7 @@ public class User {
 	public final String first_name;
 	public final String last_name;
 	public final List<User> friends;
-	public final List<?> groups; // ? should be replaced with Group class
+	public final List<Group> groups;
 	public final String password;
 
 	public User(ObjectId _id) {
@@ -243,10 +243,29 @@ public class User {
 	}
 
 	/* need to build Group class in order to implement */
-	public void addGroup() {}
-	public void addGroups() {}
-	public void removeGroup() {}
-	public void removeGroups() {}
+	public User addGroup(Group group) {
+		ArrayList<Group> groups = new ArrayList<>(this.groups);
+		groups.add(group);
+		return new User(_id, email, first_name, last_name, friends, groups, password).updateGroups();
+	}
+
+	public User addGroups(Collection<Group> groups) {
+		ArrayList<Group> newGroups = new ArrayList<>(this.groups);
+		newGroups.addAll(groups);
+		return new User(_id, email, first_name, last_name, friends, newGroups, password).updateGroups();
+	}
+
+	public User removeGroup(Group group) {
+		ArrayList<Group> groups = new ArrayList<>(this.groups);
+		groups.remove(group);
+		return new User(_id, email, first_name, last_name, friends, groups, password).updateGroups();
+	}
+
+	public User removeGroups(Collection<Group> groups) {
+		ArrayList<Group> newGroups = new ArrayList<>(this.groups);
+		newGroups.removeAll(groups);
+		return new User(_id, email, first_name, last_name, friends, newGroups, password).updateGroups();
+	}
 
 	// this.login() {}  need to implement this method also
 }
