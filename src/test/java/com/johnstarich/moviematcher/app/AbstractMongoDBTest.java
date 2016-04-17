@@ -15,39 +15,39 @@ import junit.framework.TestCase;
  * Created by johnstarich on 4/14/16.
  */
 public abstract class AbstractMongoDBTest extends TestCase {
-    /**
-     * EmbeddedMongo author's note:
-     * please store Starter or RuntimeConfig in a static final field
-     * if you want to use artifact store caching (or else disable caching)
-     */
-    private static final MongodStarter starter = MongodStarter.getDefaultInstance();
+	/**
+	 * EmbeddedMongo author's note:
+	 * please store Starter or RuntimeConfig in a static final field
+	 * if you want to use artifact store caching (or else disable caching)
+	 */
+	private static final MongodStarter starter = MongodStarter.getDefaultInstance();
+	private static final int MONGO_PORT = 27017;
+	private MongodExecutable _mongodExe;
+	private MongodProcess _mongod;
+	private MongoClient _mongo;
 
-    private MongodExecutable _mongodExe;
-    private MongodProcess _mongod;
-    private MongoClient _mongo;
+	@Override
+	protected void setUp() throws Exception {
+		_mongodExe = starter.prepare(new MongodConfigBuilder()
+				.version(Version.Main.PRODUCTION)
+				.net(new Net(MONGO_PORT, Network.localhostIsIPv6()))
+				.build());
+		_mongod = _mongodExe.start();
 
-    @Override
-    protected void setUp() throws Exception {
-        _mongodExe = starter.prepare(new MongodConfigBuilder()
-                .version(Version.Main.PRODUCTION)
-                .net(new Net(12345, Network.localhostIsIPv6()))
-                .build());
-        _mongod = _mongodExe.start();
+		super.setUp();
 
-        super.setUp();
+		_mongo = new MongoClient("localhost", MONGO_PORT);
+	}
 
-        _mongo = new MongoClient("localhost", 12345);
-    }
+	@Override
+	protected void tearDown() throws Exception {
+		super.tearDown();
 
-    @Override
-    protected void tearDown() throws Exception {
-        super.tearDown();
+		_mongod.stop();
+		_mongodExe.stop();
+	}
 
-        _mongod.stop();
-        _mongodExe.stop();
-    }
-
-    public Mongo getMongo() {
-        return _mongo;
-    }
+	public Mongo getMongo() {
+		return _mongo;
+	}
 }
