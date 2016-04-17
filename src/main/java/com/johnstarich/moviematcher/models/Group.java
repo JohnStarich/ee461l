@@ -11,7 +11,7 @@ public class Group {
     public final List<User> members;
 
     public Group() {
-        this.name = null;
+        this.name = "";
         this.members = new ArrayList<>(0);
     }
 
