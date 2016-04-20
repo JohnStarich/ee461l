@@ -4,6 +4,7 @@ import com.johnstarich.moviematcher.app.AbstractMongoDBTest;
 import com.johnstarich.moviematcher.store.MovieMatcherDatabase;
 import com.mongodb.client.MongoCollection;
 import org.bson.Document;
+import org.bson.types.ObjectId;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -14,19 +15,19 @@ import static org.junit.Assert.*;
 public class MovieTest extends AbstractMongoDBTest {
 	@Test
 	public void testLoad() throws Exception {
-		MongoCollection<Document> collection = MovieMatcherDatabase.getCollection("movies");
-		collection.createIndex(new Document("title", "text"));
-		collection.insertOne(new Document("title", "Creed"));
-		collection.insertOne(new Document("title", "The Dark Knight"));
+		new Movie(new ObjectId(), "Creed", null, null, null, null, null, null, null)
+			.save();
+		new Movie(new ObjectId(), "The Dark Knight", null, null, null, null, null, null, null)
+			.save();
 
-		java.util.List<Movie> movieList = Movie.search("Creed");
+		java.util.List<Movie> movieList = AbstractModel.search(Movie.class, "Creed");
 		assertNotEquals(0, movieList.size());
 
-		movieList = Movie.search("The Dark Knight");
+		movieList = AbstractModel.search(Movie.class, "The Dark Knight");
 		assertNotEquals(0, movieList.size());
 		assertEquals(true, movieList.get(0).title.contains("Dark"));
 
-		movieList = Movie.search("aklsjdflkj ajjasdkfj ajsfojoasjdfl");
+		movieList = AbstractModel.search(Movie.class, "aklsjdflkj ajjasdkfj ajsfojoasjdfl");
 		assertEquals(0, movieList.size());
 	}
 

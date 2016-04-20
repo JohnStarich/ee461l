@@ -6,6 +6,7 @@ import com.johnstarich.moviematcher.store.MovieMatcherDatabase;
 import com.mongodb.Block;
 import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.MongoCollection;
+import de.caluga.morphium.annotations.Index;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 import java.util.List;
@@ -18,16 +19,8 @@ import static com.mongodb.client.model.Filters.eq;
 /**
  * Created by Josue on 3/10/2016.
  */
-public class Movie {
-	private static class LazyMoviesCollection {
-		public static final MongoCollection<Document> moviesCollection = MovieMatcherDatabase.getCollection("movies");
-	}
-	private static MongoCollection<Document> getCollection() {
-		return LazyMoviesCollection.moviesCollection;
-	}
-	private static Gson gson = new GsonBuilder().create();
-
-	public final ObjectId _id;
+@Index("title:text")
+public class Movie extends AbstractModel<Movie> {
 	public final String title;
 	public final String rating;
 	public final String genre;
@@ -37,8 +30,8 @@ public class Movie {
 	public final String plot;
 	public final String movie_lang;
 
-	public Movie(ObjectId _id) {
-		this._id = _id;
+	public Movie(ObjectId id) {
+		super(Movie.class, id);
 		this.title = null;
 		this.rating = null;
 		this.genre = null;
@@ -49,9 +42,9 @@ public class Movie {
 		this.movie_lang = null;
 	}
 
-	public Movie(ObjectId _id, String title, String rating, String genre, String release_date, String imdb_rating, String poster,
+	public Movie(ObjectId id, String title, String rating, String genre, String release_date, String imdb_rating, String poster,
 				 String plot, String movie_lang) {
-		this._id = _id;
+		super(Movie.class, id);
 		this.title = title;
 		this.rating = rating;
 		this.genre = genre;
@@ -64,43 +57,6 @@ public class Movie {
 
 	@Override
 	public boolean equals(Object o) {
-		return o == this || o instanceof Movie && ((Movie) o)._id == _id;
-	}
-
-	@Override
-	public int hashCode() {
-		return _id.hashCode();
-	}
-
-	public Movie load() {
-		Document movie = getCollection().find(eq("_id", _id)).first();
-		return gson.fromJson(movie.toJson(), Movie.class);
-	}
-
-	public static List<Movie> search(String query) {
-		AggregateIterable<Document> iterable = getCollection().aggregate(
-				asList( new Document("$match",
-						new Document("$text", new Document("$search", query))),
-						new Document("$project",
-								new Document("title", true)
-									.append("rating", true)
-									.append("genre", true)
-									.append("release_date", true)
-									.append("imdb_rating", true)
-									.append("poster", true)
-									.append("plot",true)
-									.append("movie_lang", true)
-									.append("score", new Document("$meta", "textScore"))),
-						new Document("$sort", new Document("score", -1))
-				)
-		);
-
-		ArrayList<Movie> queryResults = new ArrayList<Movie>();
-
-		iterable
-			.map(document -> gson.fromJson(document.toJson(), Movie.class))
-			.forEach((Block<Movie>) m -> queryResults.add(m));
-
-		return queryResults;
+		return o == this || o instanceof Movie && ((Movie) o).id.equals(id);
 	}
 }

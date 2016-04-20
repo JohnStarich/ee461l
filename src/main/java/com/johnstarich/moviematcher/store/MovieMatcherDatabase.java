@@ -1,35 +1,31 @@
 package com.johnstarich.moviematcher.store;
 
-import com.mongodb.MongoClient;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
-import org.bson.Document;
+import de.caluga.morphium.Morphium;
+import de.caluga.morphium.MorphiumConfig;
+
+import java.net.UnknownHostException;
 
 /**
  * Created by johnstarich on 3/22/16.
  */
 public class MovieMatcherDatabase {
-	private static final MovieMatcherDatabase database = new MovieMatcherDatabase();
+	public static final Morphium morphium;
 
-	private MongoDatabase mongoDatabase;
+	private static final int GLOBAL_CACHE_VALID_TIME = 5000;
+	private static final int WRITE_CACHE_TIMEOUT = 100;
 
-	private MovieMatcherDatabase() {
+	static {
+		MorphiumConfig config = new MorphiumConfig();
 		String mongoHost = ConfigManager.getProperty("MONGO_HOST"); //gets an environment variable (this is where the db is located)
-		if(mongoHost == null) {
-			throw new EnvironmentError("Cannot get environment variable to database.");
+		try {
+			config.addHost(mongoHost);
 		}
-
-		MongoClient mongoClient = new MongoClient(mongoHost);
-		this.mongoDatabase = mongoClient.getDatabase("moviematcher");
-	}
-
-	public static MongoCollection<Document> getCollection(String collectionName) {
-		return database.mongoDatabase.getCollection(collectionName);
-	}
-}
-
-class EnvironmentError extends Error {
-	public EnvironmentError(String message) {
-		super(message);
+		catch(UnknownHostException e) {
+			e.printStackTrace();
+			System.exit(1);
+		}
+		config.setGlobalCacheValidTime(GLOBAL_CACHE_VALID_TIME);
+		config.setWriteCacheTimeout(WRITE_CACHE_TIMEOUT);
+		morphium = new Morphium(config);
 	}
 }
