@@ -1,5 +1,6 @@
 package com.johnstarich.moviematcher.app;
 
+import com.johnstarich.moviematcher.models.AbstractModel;
 import com.johnstarich.moviematcher.models.Movie;
 import com.johnstarich.moviematcher.models.Status;
 import org.bson.types.ObjectId;
@@ -69,7 +70,9 @@ public class MovieMatcherApplication extends JsonApplication {
 		jget("/movies/search/:search_query", (request, response) -> {
 			String searchQuery = request.params("search_query").replaceAll("\\+", " ");
 			System.out.println("Searched for \""+searchQuery+"\"");
-			throw new HttpException(HttpStatus.NOT_IMPLEMENTED);
+			int results = asIntOpt(request.queryParams("results")).orElse(20);
+			int page = asIntOpt(request.queryParams("page")).orElse(1);
+			return AbstractModel.search(Movie.class, searchQuery, results, page);
 		});
 
 		Route movieRoute = (request, response) -> {
