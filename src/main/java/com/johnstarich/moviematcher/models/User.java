@@ -17,25 +17,15 @@ import static java.util.Arrays.asList;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
-import java.util.function.Predicate;
 
 import static com.mongodb.client.model.Filters.eq;
 
 /**
  * Created by Josue on 4/7/2016.
  */
-public class User {
-	private static class LazyUsersCollection {
-		public static final MongoCollection<Document> usersCollection = MovieMatcherDatabase.getCollection("users");
-	}
-	private static MongoCollection<Document> getCollection() { return LazyUsersCollection.usersCollection; }
-
+public class User extends AbstractModel<User> {
 	/* need to decide how to store user preferences ... */
 
-	private static Gson gson = new GsonBuilder().create();
-
-	public final ObjectId _id;
 	public final String email;
 	public final String first_name;
 	public final String last_name;
@@ -43,8 +33,8 @@ public class User {
 	public final List<Group> groups;
 	public final String password;
 
-	public User(ObjectId _id) {
-		this._id = _id;
+	public User(ObjectId id) {
+		super(User.class, id);
 		this.email = null;
 		this.first_name = null;
 		this.last_name = null;
@@ -53,8 +43,8 @@ public class User {
 		this.password = null;
 	}
 
-	private User(ObjectId _id, String email, String first_name, String last_name, List<User> friends, List groups, String password) {
-		this._id = _id;
+	private User(ObjectId id, String email, String first_name, String last_name, List<User> friends, List groups, String password) {
+		super(User.class, id);
 		this.email = email;
 		this.first_name = first_name;
 		this.last_name = last_name;
@@ -63,8 +53,8 @@ public class User {
 		this.password = password;
 	}
 
-	private User(ObjectId _id, String email, String first_name, String last_name, String password) {
-		this._id = _id;
+	private User(ObjectId id, String email, String first_name, String last_name, String password) {
+		super(User.class, id);
 		this.email = email;
 		this.first_name = first_name;
 		this.last_name = last_name;
@@ -73,8 +63,8 @@ public class User {
 		this.password = password;
 	}
 
-	public User(ObjectId _id, String email, String first_name, String last_name) {
-		this._id = _id;
+	public User(ObjectId id, String email, String first_name, String last_name) {
+		super(User.class, id);
 		this.email = email;
 		this.first_name = first_name;
 		this.last_name = last_name;
@@ -85,45 +75,12 @@ public class User {
 
 	@Override
 	public boolean equals(Object o) {
-		return o == this || o instanceof User && ((User) o)._id == _id && ((User) o).email == email;
-	}
-
-	@Override
-	public int hashCode() {
-		return _id.hashCode();
+		return o == this || o instanceof User && ((User) o).id == id && ((User) o).email.equals(email);
 	}
 
 	@Override
 	public String toString() {
-		return _id + " " + email + " " + first_name + " " + last_name;
-	}
-
-	public User load() throws HttpException {
-		Document user = getCollection().find(eq("_id", _id)).first();
-		if(user.isEmpty()) {
-			throw new HttpException(HttpStatus.NOT_FOUND, "This User " + this.toString() + " has not been registered.");
-		}
-		return gson.fromJson(user.toJson(), User.class);
-	}
-
-	private boolean exists() {
-		Document user = getCollection().find(eq("_id", _id)).first();
-		return ! user.isEmpty();
-	}
-
-	/* not sure how to add friends or groups to mongoDB since they are lists*/
-	/* will create the collection, once we insert our first user */
-	private User insert() {
-		getCollection().insertOne(
-			new Document("_id", _id)
-				.append("email" , email)
-				.append("first_name" , first_name)
-				.append("last_name", last_name)
-				.append("password", password)
-				.append("friends", friends)
-				.append("groups", groups)
-		);
-		return this;
+		return id + " " + email + " " + first_name + " " + last_name;
 	}
 
 	public User register(String password) throws HttpException {
@@ -131,16 +88,8 @@ public class User {
 			throw new HttpException(HttpStatus.BAD_REQUEST);
 		}
 
-		User u = new User(_id, email, first_name, last_name, friends, groups, BCrypt.hashpw(password, BCrypt.gensalt()));
-		return u.insert();
-	}
-
-	private User updatePassword() {
-		getCollection().findOneAndUpdate(
-			new Document("_id", _id),
-			new Document("$set", new Document("password", password))
-		);
-		return this;
+		User u = new User(id, email, first_name, last_name, friends, groups, BCrypt.hashpw(password, BCrypt.gensalt()));
+		return u.save();
 	}
 
 	public User resetPassword(String oldPassword, String newPassword) throws HttpException {
@@ -151,121 +100,60 @@ public class User {
 			throw new HttpException(HttpStatus.BAD_REQUEST);
 		}
 
-		User u = new User(_id, email, first_name, last_name, friends, groups, BCrypt.hashpw(newPassword, BCrypt.gensalt()));
-		return u.updatePassword();
-	}
-
-
-	private User updateFriends() {
-		getCollection().findOneAndUpdate(
-			new Document("_id", _id),
-			new Document("$set", new Document("friends", friends))
-		);
-		return this;
-	}
-
-	private User updateGroups() {
-		getCollection().findOneAndUpdate(
-			new Document("_id", _id),
-			new Document("$set", new Document("groups", groups))
-		);
-		return this;
-	}
-
-	public static List<User> search(String query) {
-		return search(query, 20, 1);
-	}
-
-	public static List<User> search(String query, int results, int page) {
-		AggregateIterable<Document> iterable = getCollection().aggregate(
-			asList(
-				new Document("$match", new Document("$text", new Document("$search", query))),
-				new Document(
-					"$project",
-					new Document("email", true)
-						.append("first_name", true)
-						.append("last_name", true)
-						.append("friends", true)
-						.append("groups", true)
-						.append("password", true)
-						.append("score", new Document("$meta", "textScore"))
-				),
-				new Document("$sort", new Document("score",-1)),
-				new Document("$limit", results),
-				new Document("$skip", results * (page - 1))
-			)
-		);
-
-		ArrayList<User> queryResults = new ArrayList<User>();
-
-		iterable
-			.map(document -> gson.fromJson(document.toJson(), User.class))
-			.forEach((Block<User>) queryResults::add);
-
-		return queryResults;
+		User u = new User(id, email, first_name, last_name, friends, groups, BCrypt.hashpw(newPassword, BCrypt.gensalt()));
+		return u.save();
 	}
 
 	public static User loadByUsername(String email) {
-		Document user = getCollection().find(eq("email", email)).first();
-		return gson.fromJson(user.toJson(), User.class);
-	}
-
-	public User delete() throws HttpException {
-		DeleteResult deleteResult = getCollection().deleteOne(new Document("_id", _id));
-		if(deleteResult.getDeletedCount() == 1) {
-			return this;
-		}
-		else {
-			throw new HttpException(HttpStatus.NOT_FOUND);
-		}
+		return MovieMatcherDatabase.morphium.createQueryFor(User.class).f("email").eq(email).get();
 	}
 
 	public User addFriend(User friend) {
 		ArrayList<User> friends = new ArrayList<>(this.friends);
 		friends.add(friend);
-		return new User(_id, email, first_name, last_name, friends, groups, password);
+		return new User(id, email, first_name, last_name, friends, groups, password);
 	}
 
 	public User addFriends(Collection<User> friends) {
 		ArrayList<User> amigos = new ArrayList<>(this.friends);
 		amigos.addAll(friends);
-		return new User(_id, email, first_name, last_name, amigos, groups, password);
+		return new User(id, email, first_name, last_name, amigos, groups, password);
 	}
 
 	public User removeFriend(User oldFriend) {
 		ArrayList<User> newFriends = new ArrayList<>(this.friends);
 		newFriends.remove(oldFriend);
-		return new User(_id, email, first_name, last_name, newFriends, groups, password);
+		return new User(id, email, first_name, last_name, newFriends, groups, password);
 	}
 
 	public User removeFriends(Collection<User> oldFriends) {
 		ArrayList<User> newFriends = new ArrayList<>(this.friends);
 		newFriends.removeAll(oldFriends);
-		return new User(_id, email, first_name, last_name, newFriends, groups, password);
+		return new User(id, email, first_name, last_name, newFriends, groups, password);
 	}
 
 	public User addGroup(Group group) {
 		ArrayList<Group> groups = new ArrayList<>(this.groups);
 		groups.add(group);
-		return new User(_id, email, first_name, last_name, friends, groups, password);
+		return new User(id, email, first_name, last_name, friends, groups, password);
 	}
 
 	public User addGroups(Collection<Group> groups) {
 		ArrayList<Group> newGroups = new ArrayList<>(this.groups);
 		newGroups.addAll(groups);
-		return new User(_id, email, first_name, last_name, friends, newGroups, password);
+		return new User(id, email, first_name, last_name, friends, newGroups, password);
 	}
 
 	public User removeGroup(Group group) {
 		ArrayList<Group> groups = new ArrayList<>(this.groups);
 		groups.remove(group);
-		return new User(_id, email, first_name, last_name, friends, groups, password);
+		return new User(id, email, first_name, last_name, friends, groups, password);
 	}
 
 	public User removeGroups(Collection<Group> groups) {
 		ArrayList<Group> newGroups = new ArrayList<>(this.groups);
 		newGroups.removeAll(groups);
-		return new User(_id, email, first_name, last_name, friends, newGroups, password);
+		return new User(id, email, first_name, last_name, friends, newGroups, password);
 	}
 
 	public User removeFriendFromGroup(String groupName, User member) throws HttpException {
@@ -290,7 +178,7 @@ public class User {
 		groups.remove(editThisGroup);
 		groups.add(editThisGroup.removeFriend(member));
 
-		return new User(_id, email, first_name, last_name, friends, groups, password);
+		return new User(id, email, first_name, last_name, friends, groups, password);
 	}
 
 	public User addFriendToGroup(String groupName, User newMember) throws HttpException{
@@ -315,7 +203,7 @@ public class User {
 		groups.remove(editThisGroup);
 		groups.add(editThisGroup.addFriend(newMember));
 
-		return new User(_id, email, first_name, last_name, friends, groups, password);
+		return new User(id, email, first_name, last_name, friends, groups, password);
 	}
 
 	// this.login() {}  need to implement this method also
