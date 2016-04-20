@@ -41,6 +41,14 @@ public class AbstractModelTest extends AbstractMongoDBTest {
 		assertTrue(obj.exists());
 	}
 
+	public void testDelete() throws Exception {
+		DBTester obj = new DBTester(new ObjectId(), "test");
+		obj.save();
+		assertTrue(obj.exists());
+		obj.delete();
+		assertFalse(obj.exists());
+	}
+
 	public void testSearch() throws Exception {
 		DBTester obj = new DBTester(new ObjectId(), "test").save();
 		List<DBTester> results = AbstractModel.search(DBTester.class, "test");

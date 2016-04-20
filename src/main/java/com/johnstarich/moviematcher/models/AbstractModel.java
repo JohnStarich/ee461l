@@ -47,6 +47,11 @@ public abstract class AbstractModel<T extends AbstractModel> {
 		else return Optional.of(results.get(0));
 	}
 
+	public T delete() {
+		MovieMatcherDatabase.morphium.delete(this);
+		return (T) this;
+	}
+
 	public List<T> search(String query) throws HttpException {
 		return search(clazz, query, MODEL_DEFAULT_RESULTS, MODEL_MIN_PAGE);
 	}
