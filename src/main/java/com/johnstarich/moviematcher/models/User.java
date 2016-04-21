@@ -1,18 +1,11 @@
 package com.johnstarich.moviematcher.models;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.johnstarich.moviematcher.app.HttpException;
 import com.johnstarich.moviematcher.app.HttpStatus;
 import com.johnstarich.moviematcher.store.MovieMatcherDatabase;
-import com.mongodb.Block;
-import com.mongodb.client.AggregateIterable;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.result.DeleteResult;
-import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.mindrot.jbcrypt.BCrypt;
-import static java.util.Arrays.asList;
+
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -20,7 +13,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
 
-import static com.mongodb.client.model.Filters.eq;
+
 
 /**
  * Created by Josue on 4/7/2016.

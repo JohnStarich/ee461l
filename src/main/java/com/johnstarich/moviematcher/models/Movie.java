@@ -1,19 +1,8 @@
 package com.johnstarich.moviematcher.models;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.johnstarich.moviematcher.store.MovieMatcherDatabase;
-import com.mongodb.Block;
-import com.mongodb.client.AggregateIterable;
-import com.mongodb.client.MongoCollection;
 import de.caluga.morphium.annotations.Index;
-import org.bson.Document;
 import org.bson.types.ObjectId;
-import java.util.List;
-import java.util.ArrayList;
-import static java.util.Arrays.asList;
 
-import static com.mongodb.client.model.Filters.eq;
 
 
 /**
