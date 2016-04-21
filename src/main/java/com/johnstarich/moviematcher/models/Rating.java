@@ -24,12 +24,17 @@ public class Rating extends AbstractModel<Rating> {
         this.user_id = user_id;
         this.movie_id = movie_id;
         this.comment = comment;
-        if(numeric_rating>10) { this.numeric_rating = 10; }
-        else if (numeric_rating < 0) { this.numeric_rating = 0; }
+        if(numeric_rating > 10 || numeric_rating < 0 ) {
+            throw new IllegalArgumentException("Please provide a rating within these bounds, [0,10].");
+        }
         else { this.numeric_rating = numeric_rating; }
      }
 
     @Override
-    public boolean equals(Object o) { return o == this || o instanceof Rating && ((Rating) o).id == id; }
+    public boolean equals(Object o) {
+        if(o == null || !(o instanceof Rating)) return false;
+        if( ( (Rating) o).id == null) return false;
+        return ( (Rating) o).id.equals(id);
+    }
 }
 
