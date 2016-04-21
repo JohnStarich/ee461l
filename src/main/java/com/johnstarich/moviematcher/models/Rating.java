@@ -34,8 +34,7 @@ public class Rating extends AbstractModel<Rating> {
     public boolean equals(Object o) {
         if(o == null || !(o instanceof Rating)) return false;
         if( ( (Rating) o).id == null) return false;
-        if( ( (Rating) o ).id.equals(id)) return true;
-        else return false;
+        return ( (Rating) o).id.equals(id);
     }
 }
 
