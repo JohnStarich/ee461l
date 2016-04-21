@@ -70,7 +70,11 @@ public class User extends AbstractModel<User> {
 
 	@Override
 	public boolean equals(Object o) {
-		return o == this || o instanceof User && ((User) o).id == id && ((User) o).email.equals(email);
+		if(o == null || !(o instanceof User)) return false;
+		if(o == this) return true;
+		if( ((User) o).id == null || ((User) o).email == null) return false;
+		if( ((User) o).id.equals(id) && ((User) o).email.equals(email) ) return true;
+		else return false;
 	}
 
 	@Override
@@ -89,7 +93,7 @@ public class User extends AbstractModel<User> {
 
 	public User resetPassword(String oldPassword, String newPassword) throws HttpException {
 		if(password == null) {
-			throw new HttpException(HttpStatus.BAD_REQUEST);
+			throw new HttpException(HttpStatus.BAD_REQUEST, "No previous password set.");
 		}
 		if(! BCrypt.checkpw(oldPassword, password)) {
 			throw new HttpException(HttpStatus.BAD_REQUEST, "Invalid password.");
