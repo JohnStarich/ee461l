@@ -80,7 +80,7 @@ public class User extends AbstractModel<User> {
 
 	public User register(String password) throws HttpException {
 		if(this.exists()) {
-			throw new HttpException(HttpStatus.BAD_REQUEST);
+			throw new HttpException(HttpStatus.BAD_REQUEST, "User with this email already exists.");
 		}
 
 		User u = new User(id, email, first_name, last_name, friends, groups, BCrypt.hashpw(password, BCrypt.gensalt()));
@@ -92,7 +92,7 @@ public class User extends AbstractModel<User> {
 			throw new HttpException(HttpStatus.BAD_REQUEST);
 		}
 		if(! BCrypt.checkpw(oldPassword, password)) {
-			throw new HttpException(HttpStatus.BAD_REQUEST);
+			throw new HttpException(HttpStatus.BAD_REQUEST, "Invalid password.");
 		}
 
 		User u = new User(id, email, first_name, last_name, friends, groups, BCrypt.hashpw(newPassword, BCrypt.gensalt()));
