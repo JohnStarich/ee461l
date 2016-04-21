@@ -2,6 +2,8 @@ package com.johnstarich.moviematcher.app;
 
 import spark.servlet.SparkApplication;
 
+import java.util.Optional;
+
 import static spark.Spark.*;
 
 /**
@@ -60,5 +62,14 @@ public abstract class BasicApplication implements SparkApplication {
 
 	@Override
 	public void destroy() {
+	}
+
+	public Optional<Integer> asIntOpt(String param) {
+		try {
+			return Optional.of(Integer.parseInt(param));
+		}
+		catch(NumberFormatException e) {
+			return Optional.empty();
+		}
 	}
 }
