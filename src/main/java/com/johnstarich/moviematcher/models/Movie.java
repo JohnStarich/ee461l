@@ -3,6 +3,7 @@ package com.johnstarich.moviematcher.models;
 import de.caluga.morphium.annotations.Index;
 import org.bson.types.ObjectId;
 
+import java.util.Date;
 
 
 /**
@@ -13,7 +14,7 @@ public class Movie extends AbstractModel<Movie> {
 	public final String title;
 	public final String rating;
 	public final String genre;
-	public final String release_date;
+	public final Date release_date;
 	public final String imdb_rating;
 	public final String poster;
 	public final String plot;
@@ -31,7 +32,7 @@ public class Movie extends AbstractModel<Movie> {
 		this.movie_lang = null;
 	}
 
-	public Movie(ObjectId id, String title, String rating, String genre, String release_date, String imdb_rating, String poster,
+	public Movie(ObjectId id, String title, String rating, String genre, Date release_date, String imdb_rating, String poster,
 				 String plot, String movie_lang) {
 		super(Movie.class, id);
 		this.title = title;

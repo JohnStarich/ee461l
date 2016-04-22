@@ -7,20 +7,22 @@ import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.junit.Test;
 
+import java.util.Date;
+import java.util.List;
+
 import static org.junit.Assert.*;
 
 /**
  * Created by johnstarich on 4/17/16.
  */
 public class MovieTest extends AbstractMongoDBTest {
-	@Test
 	public void testLoad() throws Exception {
 		new Movie(new ObjectId(), "Creed", null, null, null, null, null, null, null)
 			.save();
 		new Movie(new ObjectId(), "The Dark Knight", null, null, null, null, null, null, null)
 			.save();
 
-		java.util.List<Movie> movieList = AbstractModel.search(Movie.class, "Creed");
+		List<Movie> movieList = AbstractModel.search(Movie.class, "Creed");
 		assertNotEquals(0, movieList.size());
 
 		movieList = AbstractModel.search(Movie.class, "The Dark Knight");
@@ -31,7 +33,13 @@ public class MovieTest extends AbstractMongoDBTest {
 		assertEquals(0, movieList.size());
 	}
 
-	@Test
-	public void testSearch() throws Exception {
+
+	public void testDateFormat() throws Exception{
+		Movie m = new Movie(new ObjectId(), "Cesar's Awesome Movie", null, null, new Date(), null, null, null, null);
+		m.save();
+		MovieMatcherDatabase.morphium.clearCachefor(Movie.class);
+		Movie loadedMovie = m.load().get();
+		assertEquals(m.release_date, loadedMovie.release_date);
 	}
+
 }
