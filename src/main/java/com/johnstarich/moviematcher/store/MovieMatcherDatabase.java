@@ -24,6 +24,7 @@ public class MovieMatcherDatabase {
 			e.printStackTrace();
 			System.exit(1);
 		}
+		config.setDatabase("moviematcher");
 		config.setGlobalCacheValidTime(GLOBAL_CACHE_VALID_TIME);
 		config.setWriteCacheTimeout(WRITE_CACHE_TIMEOUT);
 		morphium = new Morphium(config);
