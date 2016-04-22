@@ -138,5 +138,7 @@ public class UserTest extends AbstractMongoDBTest {
     public void testEquals() throws Exception {
         User user1 = new User(new ObjectId(), "joe@hotmail.com", "Joe", "Shmoe").register("password");
         User user2 = new User(new ObjectId(), "billybob@hotmail.com", "Billy", "Bob").register("password");
+
+        assertFalse(user1.equals(user2));
     }
 }
