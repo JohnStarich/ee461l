@@ -34,10 +34,14 @@ public class UserTest extends AbstractMongoDBTest {
         John = John.register("evenbetterPassword2");
         Cesar = Cesar.register("thebestPassword#3");
 
-        assertFalse(Cesar.password.equals("thebestPassword#3"));
-        assertFalse(John.password.equals("evenbetterPassword2"));
-        assertFalse(Jeremy.password.equals("betterPassword1"));
-        assertFalse(Josue.password.equals("goodPassword"));
+        assertNotSame(Cesar.password, "thebestPassword#3");
+        assertNotSame(John.password, "evenbetterPassword2");
+        assertNotSame(Jeremy.password, "betterPassword1");
+        assertNotSame(Josue.password, "goodPassword");
+
+        User test1 = new User(new ObjectId(), "blah@example.org", "Joe", "Shmoe");
+        User test2 = new User(new ObjectId(), "blah@example.org", "Joe", "Shmoe");
+        assertNotSame(test1.register("same_password").password, test2.register("same_password").password);
     }
 
     public void testResetPassword() throws Exception {
@@ -129,5 +133,10 @@ public class UserTest extends AbstractMongoDBTest {
         John = John.addFriendToGroup("Creators", Josue);
 
         assertTrue(John.groups.get(0).members.contains(Josue));
+    }
+
+    public void testEquals() throws Exception {
+        User user1 = new User(new ObjectId(), "joe@hotmail.com", "Joe", "Shmoe").register("password");
+        User user2 = new User(new ObjectId(), "billybob@hotmail.com", "Billy", "Bob").register("password");
     }
 }
