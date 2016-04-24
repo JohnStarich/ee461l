@@ -9,7 +9,9 @@ import de.flapdoodle.embed.mongo.MongodStarter;
 import de.flapdoodle.embed.mongo.config.*;
 import de.flapdoodle.embed.mongo.distribution.Version;
 import de.flapdoodle.embed.process.config.IRuntimeConfig;
+import de.flapdoodle.embed.process.config.io.ProcessOutput;
 import de.flapdoodle.embed.process.extract.UserTempNaming;
+import de.flapdoodle.embed.process.io.Processors;
 import de.flapdoodle.embed.process.runtime.Network;
 import junit.framework.TestCase;
 
@@ -24,12 +26,16 @@ public abstract class AbstractMongoDBTest extends TestCase {
 	 */
 	private static final MongodStarter starter;
 	private static final int MONGO_PORT = 27017;
-	private MongodExecutable _mongodExe;
-	private MongodProcess _mongod;
-	private MongoClient _mongo;
+	private MongodExecutable mongodExe;
+	private MongodProcess mongod;
+	private MongoClient mongo;
 
 	static {
 		Command command = Command.MongoD;
+
+
+		ProcessOutput processOutput = new ProcessOutput(Processors.namedConsole("[mongod]"),
+			Processors.namedConsole("[MONGOD]"), Processors.namedConsole("[command]"));
 
 		IRuntimeConfig runtimeConfig = new RuntimeConfigBuilder()
 			.defaults(command)
@@ -38,6 +44,7 @@ public abstract class AbstractMongoDBTest extends TestCase {
 				.download(new DownloadConfigBuilder()
 					.defaultsForCommand(command).build())
 				.executableNaming(new UserTempNaming()))
+			.processOutput(processOutput)
 			.build();
 
 		starter = MongodStarter.getInstance(runtimeConfig);
@@ -45,26 +52,26 @@ public abstract class AbstractMongoDBTest extends TestCase {
 
 	@Override
 	protected void setUp() throws Exception {
-		_mongodExe = starter.prepare(new MongodConfigBuilder()
+		mongodExe = starter.prepare(new MongodConfigBuilder()
 				.version(Version.Main.PRODUCTION)
 				.net(new Net(MONGO_PORT, Network.localhostIsIPv6()))
 				.build());
-		_mongod = _mongodExe.start();
+		mongod = mongodExe.start();
 
 		super.setUp();
 
-		_mongo = new MongoClient("localhost", MONGO_PORT);
+		mongo = new MongoClient("localhost", MONGO_PORT);
 	}
 
 	@Override
 	protected void tearDown() throws Exception {
 		super.tearDown();
 
-		_mongod.stop();
-		_mongodExe.stop();
+		mongod.stop();
+		mongodExe.stop();
 	}
 
 	public Mongo getMongo() {
-		return _mongo;
+		return mongo;
 	}
 }
