@@ -42,5 +42,4 @@ public class Rating extends AbstractModel<Rating> {
     public static List<Rating> loadRatingsByUser(ObjectId userID) {
         return MovieMatcherDatabase.morphium.findByField(Rating.class, "user_id", userID);
     }
-
 }

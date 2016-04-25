@@ -15,8 +15,8 @@ public class RatingTest extends AbstractMongoDBTest {
     private Rating rating2 = new Rating(new ObjectId(), Commodus.id, Gladiator.id, "It was okay. It was only cool when I was in the movie", 5);
 
     public void testEquals() throws Exception {
-        assertFalse(rating1.equals(rating2));
-        assertTrue(rating2.equals(rating2));
+        assertNotSame(rating1, rating2);
+        assertEquals(rating2, rating2);
     }
 
     public void testLoadRatingsByUser() {
@@ -26,19 +26,6 @@ public class RatingTest extends AbstractMongoDBTest {
 
         assertEquals(2, Rating.loadRatingsByUser(Maximus.id).size());
         assertEquals(0, Rating.loadRatingsByUser(Commodus.id).size());
-    }
-
-    public void testExists() {
-        rating1 = rating1.save();
-        assertTrue(rating1.exists());
-        assertFalse(rating2.exists());
-    }
-
-    public void testDelete() {
-        rating2 = rating2.save();
-        assertTrue(rating2.exists());
-        rating2 = rating2.delete();
-        assertFalse(rating2.exists());
     }
 
 }
