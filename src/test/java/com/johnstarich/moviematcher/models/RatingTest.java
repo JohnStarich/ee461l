@@ -12,10 +12,11 @@ public class RatingTest extends AbstractMongoDBTest {
     private User Commodus = new User(new ObjectId(), "Commodus@EmperorKilla.com", "Commodus", "Aurelius");
     private Movie Gladiator = new Movie(new ObjectId(), "Gladiator", null, null, null, null, null, null, null);
     private Rating rating1 = new Rating(new ObjectId(), Maximus.id, Gladiator.id, "Best movie ever. I love that last fight scene", 10 );
-    private Rating rating2 = new Rating( new ObjectId(), Commodus.id, Gladiator.id, "It was okay. It was only cool when I was in the movie", 5);
+    private Rating rating2 = new Rating(new ObjectId(), Commodus.id, Gladiator.id, "It was okay. It was only cool when I was in the movie", 5);
 
     public void testEquals() throws Exception {
         assertFalse(rating1.equals(rating2));
+        assertTrue(rating2.equals(rating2));
     }
 
     public void testLoadRatingsByUser() {

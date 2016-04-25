@@ -18,8 +18,8 @@ public class Rating extends AbstractModel<Rating> {
         super(Rating.class, rating_id);
         this.user_id = null;
         this.movie_id = null;
-        this.comment = "";
-        this.numeric_rating = Byte.MIN_VALUE;
+        this.comment = null;
+        this.numeric_rating = Integer.MIN_VALUE;
     }
 
     public Rating(ObjectId rating_id, ObjectId user_id, ObjectId movie_id, String comment, int numeric_rating) {
@@ -35,9 +35,8 @@ public class Rating extends AbstractModel<Rating> {
 
     @Override
     public boolean equals(Object o) {
-        if(o == null || !(o instanceof Rating)) return false;
-        if( ( (Rating) o).id == null) return false;
-        return ( (Rating) o).id.equals(id);
+        if (o == null || !(o instanceof Rating)) return false;
+        return ((Rating) o).id != null && ((Rating) o).id.equals(id);
     }
 
     public static List<Rating> loadRatingsByUser(ObjectId userID) {
@@ -45,5 +44,3 @@ public class Rating extends AbstractModel<Rating> {
     }
 
 }
-
-
