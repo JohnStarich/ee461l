@@ -29,9 +29,9 @@ public class GroupTest extends TestCase {
     public void testRemoveFriend() throws Exception {
         Group bffs = new Group("We da best", Arrays.asList(Josue, John, Jeremy, Cesar));
         bffs = bffs.removeFriend(Josue);
+
         assertFalse(bffs.members.contains(Josue));
         assertEquals(3, bffs.members.size());
-
     }
 
     public void testRenameGroup() {
@@ -39,6 +39,7 @@ public class GroupTest extends TestCase {
         g1 = g1.renameGroup("Cooler Group Name");
 
         assertNotSame("This Group Name Sucks", g1.name);
+        assertEquals("Cooler Group Name", g1.name);
     }
 
     public void testEquals() throws Exception {
@@ -46,9 +47,8 @@ public class GroupTest extends TestCase {
         Group g2 = new Group("goats FC", Arrays.asList(Jeremy, Cesar));
         Group g3 = new Group("goats FC", Arrays.asList(Jeremy, Cesar, John, Josue));
 
-        assertFalse(g1.equals(g2));
-        assertTrue(g2.equals(g2));
-        assertFalse(g3.equals(g2));
+        assertNotSame(g1, g2);
+        assertEquals(g2, g2);
+        assertNotSame(g3, g2);
     }
-
 }
