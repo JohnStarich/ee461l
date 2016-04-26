@@ -19,8 +19,6 @@ import java.util.function.Predicate;
  * Created by Josue on 4/7/2016.
  */
 public class User extends AbstractModel<User> {
-	/* need to decide how to store user preferences ... */
-
 	public final String email;
 	public final String first_name;
 	public final String last_name;
