@@ -36,4 +36,14 @@ public class Group {
         members.remove(friend);
         return new Group(name, members);
     }
+
+    public Group renameGroup(String newName) {
+        return new Group(newName, members);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if(o == null || !(o instanceof Group)) return false;
+        return ((Group) o).name != null && ((Group) o).name.equals(name) && ((Group) o).members.size() == members.size();
+    }
 }
