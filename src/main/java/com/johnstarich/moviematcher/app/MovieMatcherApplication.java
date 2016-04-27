@@ -8,6 +8,7 @@ import org.bson.types.ObjectId;
 import spark.Route;
 import spark.Spark;
 
+
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -104,6 +105,7 @@ public class MovieMatcherApplication extends JsonApplication {
 			System.out.println("Searched for \""+searchQuery+"\"");
 			int results = asIntOpt(request.queryParams("results")).orElse(20);
 			int page = asIntOpt(request.queryParams("page")).orElse(1);
+<<<<<<< 33789183e20050373de4392fc17fce32c702de0f
 			if(searchQuery.equals("") || results == 0)
 				return Collections.EMPTY_LIST;
 			return AbstractModel.search(Movie.class, searchQuery, results, page);
@@ -111,6 +113,11 @@ public class MovieMatcherApplication extends JsonApplication {
 		jget("/movies/search/:search_query", searchRoute);
 		jget("/movies/search/", searchRoute);
 		jget("/movies/search", searchRoute);
+=======
+			List<Movie> l = AbstractModel.search(Movie.class, searchQuery, results, page);
+			return l;
+		});
+>>>>>>> have register route implemented. should register new users if they are new users, all fields have value and passwords match
 
 		Route movieRoute = (request, response) -> {
 			String movieId = request.params("id");
