@@ -13,9 +13,8 @@ public class Session extends AbstractModel<Session> {
     @Reference
     public final User user;
 
-    @Index()
+    @Index(value = "createdAt:1", options = "expireAfterSeconds:60")//7200
     public final Date createdAt;
-    //public static final EXPIRATION_TIME = ;
 
     Session(ObjectId sessionId, User user) {
         super(Session.class, sessionId);
@@ -23,7 +22,7 @@ public class Session extends AbstractModel<Session> {
         createdAt = new Date();
     }
 
-    public static boolean isValid(Session s) {
+    /*public static boolean isValid(Session s) {
         if(!s.exists()) {
             //need to throw some sort of error!
         }
@@ -32,5 +31,5 @@ public class Session extends AbstractModel<Session> {
 
     public Optional<Session> loadUsersMostCurrrentSession() {
 
-    }
+    }*/
 }
