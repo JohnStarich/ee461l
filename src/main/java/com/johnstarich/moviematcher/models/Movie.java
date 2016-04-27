@@ -47,6 +47,53 @@ public class Movie extends AbstractModel<Movie> {
 
 	@Override
 	public boolean equals(Object o) {
+<<<<<<< Updated upstream
 		return o == this || o instanceof Movie && ((Movie) o).id.equals(id);
+=======
+		return o == this || o instanceof Movie && ((Movie) o)._id == _id;
+	}
+
+	@Override
+	public int hashCode() {
+		return _id.hashCode();
+	}
+
+	public Movie load() {
+		Document movie = getCollection().find(eq("_id", _id)).first();
+		return gson.fromJson(movie.toJson(), Movie.class);
+	}
+
+	public static List<Movie> search(String query, int results, int page) {
+		AggregateIterable<Document> iterable = getCollection().aggregate(
+				asList( new Document("$match",
+						new Document("$text", new Document("$search", query))),
+						new Document("$project",
+								new Document("title", true)
+									.append("rating", true)
+									.append("genre", true)
+									.append("release_date", true)
+									.append("imdb_rating", true)
+									.append("poster", true)
+									.append("plot",true)
+									.append("movie_lang", true)
+									.append("score", new Document("$meta", "textScore"))),
+						new Document("$sort", new Document("score", -1)),
+						new Document("$limit", results),
+						new Document("$skip", (page-1) * results )
+				)
+		);
+
+		ArrayList<Movie> queryResults = new ArrayList<Movie>();
+
+		iterable
+			.map(document -> gson.fromJson(document.toJson(), Movie.class))
+			.forEach((Block<Movie>) m -> queryResults.add(m));
+
+		return queryResults;
+	}
+
+	public static List<Movie> search(String query) {
+		return search(query, 20, 1);
+>>>>>>> Stashed changes
 	}
 }

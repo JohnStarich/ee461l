@@ -115,6 +115,7 @@ public class MovieMatcherApplication extends JsonApplication {
 		});
 >>>>>>> have register route implemented. should register new users if they are new users, all fields have value and passwords match
 
+
 		Route movieRoute = (request, response) -> {
 			String movieId = request.params("id");
 			System.out.println("Looked up movie with ID: "+movieId);
