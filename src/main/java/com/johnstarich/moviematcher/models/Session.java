@@ -10,6 +10,8 @@ import java.util.Date;
  * Created by Josue on 4/25/2016.
  */
 public class Session extends AbstractModel<Session> {
+    public final static long EXPIRATION_IN_MILLISECONDS = 7200000;
+
     @Reference
     public final User user;
 
@@ -22,14 +24,14 @@ public class Session extends AbstractModel<Session> {
         createdAt = new Date();
     }
 
-    /*public static boolean isValid(Session s) {
-        if(!s.exists()) {
-            //need to throw some sort of error!
-        }
-        new Date()
+    public static boolean isValid(Session s) {
+        if(! s.exists()) { return false; }
+        long rightNow = new Date().getTime();
+        long timeCreated = s.createdAt.getTime();
+        return Math.abs(rightNow - timeCreated) <= EXPIRATION_IN_MILLISECONDS;
     }
 
-    public Optional<Session> loadUsersMostCurrrentSession() {
+    /*public Optional<Session> loadUsersMostCurrrentSession() {
 
     }*/
 }
