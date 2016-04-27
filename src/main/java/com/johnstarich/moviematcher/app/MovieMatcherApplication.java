@@ -100,6 +100,7 @@ public class MovieMatcherApplication extends JsonApplication {
 		jget("/movies/search/", searchRoute);
 		jget("/movies/search", searchRoute);
 
+
 		Route movieRoute = (request, response) -> {
 			String movieId = request.params("id");
 			System.out.println("Looked up movie with ID: "+movieId);
