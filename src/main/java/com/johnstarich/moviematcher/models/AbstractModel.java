@@ -73,13 +73,11 @@ public abstract class AbstractModel<T extends AbstractModel> {
 		}
 		MovieMatcherDatabase.morphium.ensureIndicesFor(clazz);
 		Query<T> searchQuery = MovieMatcherDatabase.morphium.createQueryFor(clazz)
-			.text(query)
-			.skip(results * (page - 1))
-			.limit(results);
+			.text(query);
 		return MovieMatcherDatabase.morphium.createAggregator(clazz, clazz)
 			.match(searchQuery)
 			.project(getProjectFields(clazz))
-			.sort("score")
+			.sort("-score")
 			.skip(results * (page - 1))
 			.limit(results)
 			.aggregate();

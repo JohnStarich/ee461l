@@ -13,8 +13,8 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-
-import java.util.List;
+import java.util.Collections;
+import java.util.Optional;
 
 /**
  * Movie Matcher API is defined here. These routes make up the Movie Matcher services.
@@ -39,6 +39,9 @@ public class MovieMatcherApplication extends JsonApplication {
 	}
 
 	public void htmlService() {
+		Spark.get("/favicon.ico", new ServeStaticFileRoute());
+		Spark.get("/fonts/*", new ServeStaticFileRoute());
+		Spark.get("/tests/*", new ServeStaticFileRoute());
 		Spark.get("/assets/*", new ServeStaticFileRoute());
 		Spark.get("/*", new ServeStaticFileRoute("/index.html"));
 	}
@@ -93,15 +96,19 @@ public class MovieMatcherApplication extends JsonApplication {
 	 * Register movie services, like movie search and movie ID lookup
 	 */
 	public void moviesService() {
-		jget("/movies/search/:search_query", (request, response) -> {
-			String searchQuery = request.params("search_query").replaceAll("\\+", " ");
+		Route searchRoute = (request, response) -> {
+			Optional<String> queryParam = Optional.of(request.params("search_query"));
+			String searchQuery = queryParam.orElse("").replaceAll("\\+", " ").trim();
 			System.out.println("Searched for \""+searchQuery+"\"");
 			int results = asIntOpt(request.queryParams("results")).orElse(20);
 			int page = asIntOpt(request.queryParams("page")).orElse(1);
-			List<Movie> l = AbstractModel.search(Movie.class, searchQuery, results, page);
-			return l;
-		});
-
+			if(searchQuery.equals("") || results == 0)
+				return Collections.EMPTY_LIST;
+			return AbstractModel.search(Movie.class, searchQuery, results, page);
+		};
+		jget("/movies/search/:search_query", searchRoute);
+		jget("/movies/search/", searchRoute);
+		jget("/movies/search", searchRoute);
 
 		Route movieRoute = (request, response) -> {
 			String movieId = request.params("id");
