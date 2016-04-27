@@ -2,15 +2,10 @@ package com.johnstarich.moviematcher.models;
 
 import com.johnstarich.moviematcher.app.AbstractMongoDBTest;
 
-import com.johnstarich.moviematcher.app.MovieMatcherApplication;
 import com.johnstarich.moviematcher.store.MovieMatcherDatabase;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 import org.bson.types.ObjectId;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
 
 
 /**
@@ -20,33 +15,26 @@ public class SessionTest extends AbstractMongoDBTest {
     User Josue = new User(new ObjectId());
 
     public void testExpiration() throws Exception {
-        Josue.save();
+        /* test will usually run for 2m 4s */
 
         Session s = new Session(new ObjectId(), Josue);
-        s.save();
+        s = s.save();
+        /* need to drop expiration of two hours */
+        MovieMatcherDatabase.morphium.getDatabase().getCollection("session").dropIndex(
+                new BasicDBObject("created_at", 1)
+        );
 
-        //{"collMod" : <collection> , "<flag>" : <value> }
-        //{keyPattern: <index_spec>, expireAfterSeconds: <seconds> }
-        //db.runCommand({ collMod: "Session", index : { keyPattern: { createdAt : 1} , expireAfterSeconds: 60 } })
+        DBObject value = new BasicDBObject("created_at", 1);
+        DBObject property = new BasicDBObject("expireAfterSeconds", 60);
+        /* creates expiration for 60 seconds */
+        MovieMatcherDatabase.morphium.getDatabase().getCollection("session").createIndex(value, property);
 
-        /*Map hm = MovieMatcherDatabase.morphium.execCommand(
-                "{ collMod: \"Session\", index : { keyPattern: { createdAt : 1} , expireAfterSeconds: 60 } }"
-        );*/
-
-        /*assertTrue(hm.containsKey("expireAfterSeconds_new"));
-        assertTrue(hm.containsValue(60));*/
-        String index = MovieMatcherDatabase.morphium.getDatabase().getCollection("session").getIndexInfo().get(0).toString();
-        //DBObject index = MovieMatcherDatabase.morphium.getDatabase().getCollection("session").getIndexInfo().get(0);
-        MovieMatcherDatabase.morphium.getDatabase().getCollection("session").dropIndexes();
-        MovieMatcherDatabase.morphium.getDatabase().getCollection("session").createIndex(index);
-
-        //MovieMatcherDatabase.morphium.getDatabase().getCollection("session").createIndex();
-                //.createIndex("value = \"createdAt:1\", options = \"expireAfterSeconds:60\"");
+        Josue = Josue.save();
 
         Thread.sleep(120000);
 
+        /* ensures that only the session was removed */
         assertFalse(s.exists());
         assertTrue(Josue.exists());
-        assertFalse(s.load().isPresent());
     }
 }

@@ -13,7 +13,7 @@ public class Session extends AbstractModel<Session> {
     @Reference
     public final User user;
 
-    @Index(value = "createdAt:1", options = "expireAfterSeconds:60")//7200
+    @Index(value = "createdAt:1", options = "expireAfterSeconds:7200")
     public final Date createdAt;
 
     Session(ObjectId sessionId, User user) {
