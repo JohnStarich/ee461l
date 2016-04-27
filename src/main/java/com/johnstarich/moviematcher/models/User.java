@@ -103,6 +103,14 @@ public class User extends AbstractModel<User> {
 		return u.save();
 	}
 
+	public Session login(String psw) throws Exception {
+		if(! BCrypt.checkpw(psw, password)) {
+			throw new HttpException(HttpStatus.BAD_REQUEST, "Incorrect password.");
+		}
+
+		return new Session(new ObjectId(), this);
+	}
+
 	public static User loadByUsername(String email) {
 		return MovieMatcherDatabase.morphium.createQueryFor(User.class).f("email").eq(email).get();
 	}
@@ -204,6 +212,5 @@ public class User extends AbstractModel<User> {
 
 		return new User(id, email, first_name, last_name, friends, groups, password);
 	}
-
-	// this.login() {}  need to implement this method also
 }
+
