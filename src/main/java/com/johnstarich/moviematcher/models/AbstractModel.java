@@ -80,6 +80,8 @@ public abstract class AbstractModel<T extends AbstractModel> {
 			.match(searchQuery)
 			.project(getProjectFields(clazz))
 			.sort("score")
+			.skip(results * (page - 1))
+			.limit(results)
 			.aggregate();
 	}
 

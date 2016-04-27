@@ -3,15 +3,11 @@ package com.johnstarich.moviematcher.app;
 import com.johnstarich.moviematcher.models.AbstractModel;
 import com.johnstarich.moviematcher.models.Movie;
 import com.johnstarich.moviematcher.models.Status;
+import com.johnstarich.moviematcher.models.User;
 import org.bson.types.ObjectId;
 import spark.Route;
 import spark.Spark;
 
-import java.net.URL;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 
 /**
@@ -47,11 +43,34 @@ public class MovieMatcherApplication extends JsonApplication {
 	 */
 	public void loginService() {
 		jpost("/login", (request, response) -> {
-			throw new HttpException(HttpStatus.NOT_IMPLEMENTED);
+			if (request.queryParams().size() < 2) return "please fill in all fields";
+
+//			if(login info is valid) {
+			return "success";
+// 			}
+//			else {
+//			return "incorrect login info!"
+//			}
 		});
 
 		jpost("/login/register", (request, response) -> {
-			throw new HttpException(HttpStatus.NOT_IMPLEMENTED);
+			if(request.queryParams().size() < 6) return "please fill in all fields";
+
+			if(request.queryParams("password").compareTo(request.queryParams("confirmpassword")) == 0) {
+				User newUser = new User(
+						new ObjectId(),
+						request.queryParams("email"),
+						request.queryParams("firstname"),
+						request.queryParams("lastname"));
+				try {
+					newUser.register(request.queryParams("password"));
+				}
+				catch (Exception e) {
+					return e.getMessage();
+				}
+				return "success";
+			}
+			return "passwords don't match";
 		});
 
 		Spark.before("/*", (request, response) -> {
@@ -73,7 +92,8 @@ public class MovieMatcherApplication extends JsonApplication {
 			System.out.println("Searched for \""+searchQuery+"\"");
 			int results = asIntOpt(request.queryParams("results")).orElse(20);
 			int page = asIntOpt(request.queryParams("page")).orElse(1);
-			return AbstractModel.search(Movie.class, searchQuery, results, page);
+			List<Movie> l = AbstractModel.search(Movie.class, searchQuery, results, page);
+			return l;
 		});
 
 		Route movieRoute = (request, response) -> {
