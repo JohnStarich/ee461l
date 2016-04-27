@@ -29,6 +29,7 @@ public class JsonTransformer implements ResponseTransformer {
 		})
 		.create();
 
+
 	@Override
 	public String render(Object model) throws Exception {
 		return gson.toJson(model);
