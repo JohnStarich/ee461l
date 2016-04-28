@@ -27,7 +27,6 @@ public class Session extends AbstractModel<Session> {
     }
 
     public static boolean isValid(Session s) {
-        if(! s.exists()) { return false; }
         Optional<Session> session = s.load();
         if(session.isPresent()) {
             long rightNow = new Date().getTime();
