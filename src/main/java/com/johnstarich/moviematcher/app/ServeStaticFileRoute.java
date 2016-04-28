@@ -36,7 +36,6 @@ public class ServeStaticFileRoute implements Route {
 	@Override
 	public Object handle(Request request, Response response) throws Exception {
 		StaticFile staticFile = getPage(this.file != null ? this.file : request.uri());
-
 		response.type(staticFile.contentType);
 		return staticFile.content;
 	}
@@ -72,6 +71,7 @@ public class ServeStaticFileRoute implements Route {
 		String extension = fileName.substring(fileName.lastIndexOf('.') + 1);
 		switch(extension) {
 			case "css": return "text/css";
+			case "eot": return "application/vnd.ms-fontobject";
 			case "gif": return "image/gif";
 			case "html": return "text/html";
 			case "ico": return "image/x-icon";
@@ -80,6 +80,8 @@ public class ServeStaticFileRoute implements Route {
 			case "png": return "image/png";
 			case "svg": return "image/svg+xml";
 			case "txt": return "text/plain";
+			case "woff": return "application/font-woff";
+			case "woff2": return "application/font-woff2";
 			case "xml": return "application/xml";
 			default: return "application/octet-stream";
 		}
