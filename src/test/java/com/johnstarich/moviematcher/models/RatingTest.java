@@ -4,6 +4,8 @@ import com.johnstarich.moviematcher.app.AbstractMongoDBTest;
 import junit.framework.TestCase;
 import org.bson.types.ObjectId;
 
+import java.util.Optional;
+
 /**
  * Created by Josue on 4/21/2016.
  */
@@ -28,4 +30,12 @@ public class RatingTest extends AbstractMongoDBTest {
         assertEquals(0, Rating.loadRatingsByUser(Commodus.id).size());
     }
 
+    public void testLoadRatingByUser() {
+        rating1 = rating1.save();
+        Optional<Rating> r = Rating.loadRatingByUser(Maximus.id, Gladiator.id);
+        Optional<Rating> rDos = Rating.loadRatingByUser(Commodus.id, Gladiator.id);
+
+        assertEquals(r.get().id, rating1.id);
+        assertFalse(rDos.isPresent());
+    }
 }

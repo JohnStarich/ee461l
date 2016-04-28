@@ -4,6 +4,7 @@ import com.johnstarich.moviematcher.store.MovieMatcherDatabase;
 import org.bson.types.ObjectId;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Created by Josue on 4/17/2016.
@@ -41,5 +42,10 @@ public class Rating extends AbstractModel<Rating> {
 
     public static List<Rating> loadRatingsByUser(ObjectId userID) {
         return MovieMatcherDatabase.morphium.findByField(Rating.class, "user_id", userID);
+    }
+
+    public static Optional<Rating> loadRatingByUser(ObjectId userId, ObjectId movieId) {
+        List<Rating> ratings = loadRatingsByUser(userId);
+        return ratings.parallelStream().filter(movieID -> movieID.movie_id.equals(movieId)).findFirst();
     }
 }
