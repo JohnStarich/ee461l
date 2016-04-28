@@ -45,7 +45,10 @@ public class Rating extends AbstractModel<Rating> {
     }
 
     public static Optional<Rating> loadRatingByUser(ObjectId userId, ObjectId movieId) {
-        List<Rating> ratings = loadRatingsByUser(userId);
-        return ratings.parallelStream().filter(movieID -> movieID.movie_id.equals(movieId)).findFirst();
+        return MovieMatcherDatabase.morphium
+                .findByField(Rating.class, "user_id", userId)
+                .parallelStream()
+                .filter( movieID -> movieID.movie_id.equals(movieId))
+                .findFirst();
     }
 }

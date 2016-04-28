@@ -202,6 +202,5 @@ public class User extends AbstractModel<User> {
 
 		return new User(id, email, first_name, last_name, friends, groups, password);
 	}
-
-	// this.login() {}  need to implement this method also
 }
+
