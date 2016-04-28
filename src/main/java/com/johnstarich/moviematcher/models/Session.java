@@ -30,8 +30,5 @@ public class Session extends AbstractModel<Session> {
         long timeCreated = s.createdAt.getTime();
         return Math.abs(rightNow - timeCreated) <= EXPIRATION_IN_MILLISECONDS;
     }
-
-    /*public Optional<Session> loadUsersMostCurrrentSession() {
-
-    }*/
 }
+
