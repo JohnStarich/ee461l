@@ -5,10 +5,8 @@ import org.bson.types.ObjectId;
 import spark.Route;
 import spark.Spark;
 
-
 import java.util.Collections;
 import java.util.Optional;
-
 
 /**
  * Movie Matcher API is defined here. These routes make up the Movie Matcher services.
@@ -101,7 +99,6 @@ public class MovieMatcherApplication extends JsonApplication {
 			System.out.println("Searched for \""+searchQuery+"\"");
 			int results = asIntOpt(request.queryParams("results")).orElse(20);
 			int page = asIntOpt(request.queryParams("page")).orElse(1);
-
 			if(searchQuery.equals("") || results == 0)
 				return Collections.EMPTY_LIST;
 			return AbstractModel.search(Movie.class, searchQuery, results, page);
@@ -109,7 +106,6 @@ public class MovieMatcherApplication extends JsonApplication {
 		jget("/movies/search/:search_query", searchRoute);
 		jget("/movies/search/", searchRoute);
 		jget("/movies/search", searchRoute);
-
 
 		Route movieRoute = (request, response) -> {
 			String movieId = request.params("id");
