@@ -50,7 +50,7 @@ public class UserTest extends AbstractMongoDBTest {
 		try {
 			John = John.resetPassword("wrongPassword", "INeedBetterPassword@2013");
 		} catch (com.johnstarich.moviematcher.app.HttpException e) {
-			assertEquals("Invalid password.", e.getMessage());
+			assertEquals("Invalid old password.", e.getMessage());
 		}
 
 		String johnsOldPsw = John.password;
