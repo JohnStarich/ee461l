@@ -3,6 +3,7 @@ package com.johnstarich.moviematcher.models;
 import com.johnstarich.moviematcher.app.HttpException;
 import com.johnstarich.moviematcher.app.HttpStatus;
 import com.johnstarich.moviematcher.store.MovieMatcherDatabase;
+import de.caluga.morphium.annotations.Index;
 import org.bson.types.ObjectId;
 import org.mindrot.jbcrypt.BCrypt;
 
@@ -19,7 +20,7 @@ import java.util.function.Predicate;
  * Created by Josue on 4/7/2016.
  */
 public class User extends AbstractModel<User> {
-	public final String email;
+	public final String username;
 	public final String first_name;
 	public final String last_name;
 	public final List<User> friends;
@@ -28,7 +29,7 @@ public class User extends AbstractModel<User> {
 
 	public User(ObjectId id) {
 		super(User.class, id);
-		this.email = null;
+		this.username = null;
 		this.first_name = null;
 		this.last_name = null;
 		this.friends = new ArrayList<>(0);
@@ -36,9 +37,9 @@ public class User extends AbstractModel<User> {
 		this.password = null;
 	}
 
-	private User(ObjectId id, String email, String first_name, String last_name, List<User> friends, List groups, String password) {
+	private User(ObjectId id, String username, String first_name, String last_name, List<User> friends, List groups, String password) {
 		super(User.class, id);
-		this.email = email;
+		this.username = username;
 		this.first_name = first_name;
 		this.last_name = last_name;
 		this.friends = friends;
@@ -46,9 +47,9 @@ public class User extends AbstractModel<User> {
 		this.password = password;
 	}
 
-	private User(ObjectId id, String email, String first_name, String last_name, String password) {
+	private User(ObjectId id, String username, String first_name, String last_name, String password) {
 		super(User.class, id);
-		this.email = email;
+		this.username = username;
 		this.first_name = first_name;
 		this.last_name = last_name;
 		this.friends = new ArrayList<>(0);
@@ -56,9 +57,9 @@ public class User extends AbstractModel<User> {
 		this.password = password;
 	}
 
-	public User(ObjectId id, String email, String first_name, String last_name) {
+	public User(ObjectId id, String username, String first_name, String last_name) {
 		super(User.class, id);
-		this.email = email;
+		this.username = username;
 		this.first_name = first_name;
 		this.last_name = last_name;
 		this.friends = new ArrayList<>(0);
@@ -70,22 +71,22 @@ public class User extends AbstractModel<User> {
 	public boolean equals(Object o) {
 		if(o == null || !(o instanceof User)) return false;
 		if(o == this) return true;
-		if( ((User) o).id == null || ((User) o).email == null) return false;
-		if( ((User) o).id.equals(id) && ((User) o).email.equals(email) ) return true;
+		if( ((User) o).id == null || ((User) o).username == null) return false;
+		if( ((User) o).id.equals(id) && ((User) o).username.equals(username) ) return true;
 		else return false;
 	}
 
 	@Override
 	public String toString() {
-		return id + " " + email + " " + first_name + " " + last_name;
+		return id + " " + username + " " + first_name + " " + last_name;
 	}
 
 	public User register(String password) throws HttpException {
 		if(this.exists()) {
-			throw new HttpException(HttpStatus.BAD_REQUEST, "User with this email already exists.");
+			throw new HttpException(HttpStatus.BAD_REQUEST, "User with this username already exists.");
 		}
 
-		User u = new User(id, email, first_name, last_name, friends, groups, BCrypt.hashpw(password, BCrypt.gensalt()));
+		User u = new User(id, username, first_name, last_name, friends, groups, BCrypt.hashpw(password, BCrypt.gensalt()));
 		return u.save();
 	}
 
@@ -94,63 +95,80 @@ public class User extends AbstractModel<User> {
 			throw new HttpException(HttpStatus.BAD_REQUEST, "No previous password set.");
 		}
 		if(! BCrypt.checkpw(oldPassword, password)) {
-			throw new HttpException(HttpStatus.BAD_REQUEST, "Invalid password.");
+			throw new HttpException(HttpStatus.BAD_REQUEST, "Invalid old password.");
 		}
 
-		User u = new User(id, email, first_name, last_name, friends, groups, BCrypt.hashpw(newPassword, BCrypt.gensalt()));
+		User u = new User(id, username, first_name, last_name, friends, groups, BCrypt.hashpw(newPassword, BCrypt.gensalt()));
 		return u.save();
 	}
 
-	public static User loadByUsername(String email) {
-		return MovieMatcherDatabase.morphium.createQueryFor(User.class).f("email").eq(email).get();
+	public static Optional<User> loadByUsername(String username) {
+		List<User> users = MovieMatcherDatabase.morphium.createQueryFor(User.class).f("username").eq(username).limit(1).asList();
+		if(users.size() == 0 || users.get(0) == null) {
+			return Optional.empty();
+		}
+		return Optional.of(users.get(0));
+	}
+
+	public static Session login(String username, String password) throws HttpException {
+		Optional<User> user = loadByUsername(username);
+		// username does not exist
+		if(! user.isPresent()) {
+			throw new HttpException(HttpStatus.UNAUTHORIZED, "Bad username/password combination. Please try again.");
+		}
+		// passwords do not match
+		if(! BCrypt.checkpw(password, user.get().password)) {
+			throw new HttpException(HttpStatus.UNAUTHORIZED, "Bad username/password combination. Please try again.");
+		}
+		return new Session(null, user.get()).save();
 	}
 
 	public User addFriend(User friend) {
 		ArrayList<User> friends = new ArrayList<>(this.friends);
 		friends.add(friend);
-		return new User(id, email, first_name, last_name, friends, groups, password);
+		return new User(id, username, first_name, last_name, friends, groups, password);
 	}
 
 	public User addFriends(Collection<User> friends) {
 		ArrayList<User> amigos = new ArrayList<>(this.friends);
 		amigos.addAll(friends);
-		return new User(id, email, first_name, last_name, amigos, groups, password);
+		return new User(id, username, first_name, last_name, amigos, groups, password);
 	}
 
 	public User removeFriend(User oldFriend) {
 		ArrayList<User> newFriends = new ArrayList<>(this.friends);
 		newFriends.remove(oldFriend);
-		return new User(id, email, first_name, last_name, newFriends, groups, password);
+		return new User(id, username, first_name, last_name, newFriends, groups, password);
 	}
 
 	public User removeFriends(Collection<User> oldFriends) {
 		ArrayList<User> newFriends = new ArrayList<>(this.friends);
 		newFriends.removeAll(oldFriends);
-		return new User(id, email, first_name, last_name, newFriends, groups, password);
+		return new User(id, username, first_name, last_name, newFriends, groups, password);
 	}
 
 	public User addGroup(Group group) {
 		ArrayList<Group> groups = new ArrayList<>(this.groups);
 		groups.add(group);
-		return new User(id, email, first_name, last_name, friends, groups, password);
+		return new User(id, username, first_name, last_name, friends, groups, password);
 	}
 
 	public User addGroups(Collection<Group> groups) {
 		ArrayList<Group> newGroups = new ArrayList<>(this.groups);
 		newGroups.addAll(groups);
-		return new User(id, email, first_name, last_name, friends, newGroups, password);
+		return new User(id, username, first_name, last_name, friends, newGroups, password);
 	}
 
 	public User removeGroup(Group group) {
 		ArrayList<Group> groups = new ArrayList<>(this.groups);
 		groups.remove(group);
-		return new User(id, email, first_name, last_name, friends, groups, password);
+		return new User(id, username, first_name, last_name, friends, groups, password);
 	}
 
 	public User removeGroups(Collection<Group> groups) {
 		ArrayList<Group> newGroups = new ArrayList<>(this.groups);
 		newGroups.removeAll(groups);
-		return new User(id, email, first_name, last_name, friends, newGroups, password);
+		return new User(id, username, first_name, last_name, friends, newGroups, password);
 	}
 
 	public User removeFriendFromGroup(String groupName, User member) throws HttpException {
@@ -175,7 +193,7 @@ public class User extends AbstractModel<User> {
 		groups.remove(editThisGroup);
 		groups.add(editThisGroup.removeFriend(member));
 
-		return new User(id, email, first_name, last_name, friends, groups, password);
+		return new User(id, username, first_name, last_name, friends, groups, password);
 	}
 
 	public User addFriendToGroup(String groupName, User newMember) throws HttpException{
@@ -200,7 +218,7 @@ public class User extends AbstractModel<User> {
 		groups.remove(editThisGroup);
 		groups.add(editThisGroup.addFriend(newMember));
 
-		return new User(id, email, first_name, last_name, friends, groups, password);
+		return new User(id, username, first_name, last_name, friends, groups, password);
 	}
 }
 

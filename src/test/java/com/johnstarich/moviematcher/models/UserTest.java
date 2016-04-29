@@ -11,134 +11,135 @@ import java.util.Optional;
  * Created by Josue on 4/21/2016.
  */
 public class UserTest extends AbstractMongoDBTest {
-    private User Josue = new User( new ObjectId(), "jalfaro@MovieMatcher.com", "Josue" , "Alfaro");
-    private User Jeremy = new User( new ObjectId(), "jcastillo@MovieMatcher.com", "Jeremy", "Castillo");
-    private User John = new User( new ObjectId(), "jstarich@MovieMatcher.com", "John", "Starich");
-    private User Cesar = new User( new ObjectId(), "2cgonzalez@MovieMatcher.com", "Cesar", "Gonzalez");
+	private User Josue = new User( new ObjectId(), "jalfaro@MovieMatcher.com", "Josue" , "Alfaro");
+	private User Jeremy = new User( new ObjectId(), "jcastillo@MovieMatcher.com", "Jeremy", "Castillo");
+	private User John = new User( new ObjectId(), "jstarich@MovieMatcher.com", "John", "Starich");
+	private User Cesar = new User( new ObjectId(), "2cgonzalez@MovieMatcher.com", "Cesar", "Gonzalez");
 
-    public void testUserRegister() throws Exception {
-        Josue = Josue.register("goodPassword");
-        Jeremy = Jeremy.register("betterPassword1");
-        John = John.register("evenbetterPassword2");
-        Cesar = Cesar.register("thebestPassword#3");
+	public void testUserRegister() throws Exception {
+		Josue = Josue.register("goodPassword");
+		Jeremy = Jeremy.register("betterPassword1");
+		John = John.register("evenbetterPassword2");
+		Cesar = Cesar.register("thebestPassword#3");
 
-        assertTrue(Josue.exists());
-        assertTrue(Jeremy.exists());
-        assertTrue(John.exists());
-        assertTrue(Cesar.exists());
-    }
+		assertTrue(Josue.exists());
+		assertTrue(Jeremy.exists());
+		assertTrue(John.exists());
+		assertTrue(Cesar.exists());
+	}
 
-    public void testEncryption() throws Exception {
-        Josue = Josue.register("goodPassword");
-        Jeremy = Jeremy.register("betterPassword1");
-        John = John.register("evenbetterPassword2");
-        Cesar = Cesar.register("thebestPassword#3");
+	public void testEncryption() throws Exception {
+		Josue = Josue.register("goodPassword");
+		Jeremy = Jeremy.register("betterPassword1");
+		John = John.register("evenbetterPassword2");
+		Cesar = Cesar.register("thebestPassword#3");
 
-        assertNotSame(Cesar.password, "thebestPassword#3");
-        assertNotSame(John.password, "evenbetterPassword2");
-        assertNotSame(Jeremy.password, "betterPassword1");
-        assertNotSame(Josue.password, "goodPassword");
+		assertNotSame(Cesar.password, "thebestPassword#3");
+		assertNotSame(John.password, "evenbetterPassword2");
+		assertNotSame(Jeremy.password, "betterPassword1");
+		assertNotSame(Josue.password, "goodPassword");
 
-        User test1 = new User(new ObjectId(), "blah@example.org", "Joe", "Shmoe");
-        User test2 = new User(new ObjectId(), "blah@example.org", "Joe", "Shmoe");
-        assertNotSame(test1.register("same_password").password, test2.register("same_password").password);
-    }
+		User test1 = new User(new ObjectId(), "blah@example.org", "Joe", "Shmoe");
+		User test2 = new User(new ObjectId(), "blah@example.org", "Joe", "Shmoe");
+		assertNotSame(test1.register("same_password").password, test2.register("same_password").password);
+	}
 
-    public void testResetPassword() throws Exception {
-        John = John.register("evenbetterPassword2");
+	public void testResetPassword() throws Exception {
+		John = John.register("evenbetterPassword2");
 
-        try {
-            John = John.resetPassword("wrongPassword", "INeedBetterPassword@2013");
-        } catch (com.johnstarich.moviematcher.app.HttpException e) {
-            assertEquals("Invalid password.", e.getMessage());
-        }
+		try {
+			John = John.resetPassword("wrongPassword", "INeedBetterPassword@2013");
+		} catch (com.johnstarich.moviematcher.app.HttpException e) {
+			assertEquals("Invalid old password.", e.getMessage());
+		}
 
-        String johnsOldPsw = John.password;
+		String johnsOldPsw = John.password;
 
-        John = John.resetPassword("evenbetterPassword2", "INeedBetterPassword@2013");
+		John = John.resetPassword("evenbetterPassword2", "INeedBetterPassword@2013");
 
-        assertNotSame(johnsOldPsw, John.password);
+		assertNotSame(johnsOldPsw, John.password);
 
-    }
+	}
 
-    public void testLoadByUserName()  throws Exception {
-        Jeremy = Jeremy.register("betterPassword1");
+	public void testLoadByUserName()  throws Exception {
+		Jeremy = Jeremy.register("betterPassword1");
 
-        User u = User.loadByUsername("jcastillo@MovieMatcher.com");
-        assertEquals(u, Jeremy);
+		Optional<User> u = User.loadByUsername("jcastillo@MovieMatcher.com");
+		assertTrue(u.isPresent());
+		assertEquals(u.get(), Jeremy);
 
-        User nonExisting = User.loadByUsername("aventura@MovieMatcher.com");
-        assertEquals(null, nonExisting);
-    }
+		Optional<User> nonExisting = User.loadByUsername("aventura@MovieMatcher.com");
+		assertFalse(nonExisting.isPresent());
+	}
 
-    public void testAddFriend() throws Exception {
-        Josue = Josue.register("goodPassword");
-        Cesar = Cesar.register("thebestPassword#3");
+	public void testAddFriend() throws Exception {
+		Josue = Josue.register("goodPassword");
+		Cesar = Cesar.register("thebestPassword#3");
 
-        Josue = Josue.addFriend(Cesar);
-        Optional<User> noNewFriendsJosue = Josue.load();
-        assertNotSame(noNewFriendsJosue.get().friends, Josue.friends);
+		Josue = Josue.addFriend(Cesar);
+		Optional<User> noNewFriendsJosue = Josue.load();
+		assertNotSame(noNewFriendsJosue.get().friends, Josue.friends);
 
-        Josue.save();
-        Optional<User> newFriendJosue = Josue.load();
+		Josue.save();
+		Optional<User> newFriendJosue = Josue.load();
 
-        assertEquals(newFriendJosue.get().friends, Josue.friends);
-    }
+		assertEquals(newFriendJosue.get().friends, Josue.friends);
+	}
 
-    public void testAddFriends() throws Exception {
-        Josue = Josue.register("goodPassword");
-        Jeremy = Jeremy.register("betterPassword1");
-        John = John.register("evenbetterPassword2");
-        Cesar = Cesar.register("thebestPassword#3");
+	public void testAddFriends() throws Exception {
+		Josue = Josue.register("goodPassword");
+		Jeremy = Jeremy.register("betterPassword1");
+		John = John.register("evenbetterPassword2");
+		Cesar = Cesar.register("thebestPassword#3");
 
-        List<User> collectionOfFriends = new ArrayList<>(3);
-        collectionOfFriends.add(Jeremy); collectionOfFriends.add(John); collectionOfFriends.add(Cesar);
+		List<User> collectionOfFriends = new ArrayList<>(3);
+		collectionOfFriends.add(Jeremy); collectionOfFriends.add(John); collectionOfFriends.add(Cesar);
 
-        Josue = Josue.addFriends(collectionOfFriends);
+		Josue = Josue.addFriends(collectionOfFriends);
 
-        Josue.save();
-        Optional<User> newFriends = Josue.load();
+		Josue.save();
+		Optional<User> newFriends = Josue.load();
 
-        assertEquals(newFriends.get().friends, Josue.friends);
-    }
+		assertEquals(newFriends.get().friends, Josue.friends);
+	}
 
-    public void testRemoveFriend() throws Exception {
-        Josue = Josue.register("goodPassword");
-        Jeremy = Jeremy.register("betterPassword1");
-        John = John.register("evenbetterPassword2");
-        Cesar = Cesar.register("thebestPassword#3");
+	public void testRemoveFriend() throws Exception {
+		Josue = Josue.register("goodPassword");
+		Jeremy = Jeremy.register("betterPassword1");
+		John = John.register("evenbetterPassword2");
+		Cesar = Cesar.register("thebestPassword#3");
 
-        Josue = Josue.addFriend(Cesar);
+		Josue = Josue.addFriend(Cesar);
 
-        List<User> oldFriend = Josue.friends;
+		List<User> oldFriend = Josue.friends;
 
-        Josue = Josue.removeFriend(Cesar);
-        assertNotSame(oldFriend, Josue.friends);
+		Josue = Josue.removeFriend(Cesar);
+		assertNotSame(oldFriend, Josue.friends);
 
-    }
+	}
 
-    public void testAddFriendToGroup() throws Exception {
-        Josue = Josue.register("goodPassword");
-        Jeremy = Jeremy.register("betterPassword1");
-        John = John.register("evenbetterPassword2");
-        Cesar = Cesar.register("thebestPassword#3");
+	public void testAddFriendToGroup() throws Exception {
+		Josue = Josue.register("goodPassword");
+		Jeremy = Jeremy.register("betterPassword1");
+		John = John.register("evenbetterPassword2");
+		Cesar = Cesar.register("thebestPassword#3");
 
-        List<User> collectionOfFriends = new ArrayList<>(3);
-        collectionOfFriends.add(Jeremy); collectionOfFriends.add(John); collectionOfFriends.add(Cesar);
-        Group creators = new Group("Creators", collectionOfFriends);
+		List<User> collectionOfFriends = new ArrayList<>(3);
+		collectionOfFriends.add(Jeremy); collectionOfFriends.add(John); collectionOfFriends.add(Cesar);
+		Group creators = new Group("Creators", collectionOfFriends);
 
-        John = John.addGroup(creators);
+		John = John.addGroup(creators);
 
-        John = John.addFriend(Josue);
-        John = John.addFriendToGroup("Creators", Josue);
+		John = John.addFriend(Josue);
+		John = John.addFriendToGroup("Creators", Josue);
 
-        assertTrue(John.groups.get(0).members.contains(Josue));
-    }
+		assertTrue(John.groups.get(0).members.contains(Josue));
+	}
 
-    public void testEquals() throws Exception {
-        User user1 = new User(new ObjectId(), "joe@hotmail.com", "Joe", "Shmoe").register("password");
-        User user2 = new User(new ObjectId(), "billybob@hotmail.com", "Billy", "Bob").register("password");
+	public void testEquals() throws Exception {
+		User user1 = new User(new ObjectId(), "joe@hotmail.com", "Joe", "Shmoe").register("password");
+		User user2 = new User(new ObjectId(), "billybob@hotmail.com", "Billy", "Bob").register("password");
 
-        assertFalse(user1.equals(user2));
-    }
+		assertFalse(user1.equals(user2));
+	}
 }
