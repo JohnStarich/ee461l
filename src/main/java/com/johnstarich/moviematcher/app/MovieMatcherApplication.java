@@ -1,18 +1,10 @@
 package com.johnstarich.moviematcher.app;
 
-import com.johnstarich.moviematcher.models.AbstractModel;
-import com.johnstarich.moviematcher.models.Movie;
-import com.johnstarich.moviematcher.models.Status;
-import com.johnstarich.moviematcher.models.User;
+import com.johnstarich.moviematcher.models.*;
 import org.bson.types.ObjectId;
 import spark.Route;
 import spark.Spark;
 
-import java.net.URL;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.Optional;
 
@@ -43,7 +35,7 @@ public class MovieMatcherApplication extends JsonApplication {
 		Spark.get("/fonts/*", new ServeStaticFileRoute());
 		Spark.get("/tests/*", new ServeStaticFileRoute());
 		Spark.get("/assets/*", new ServeStaticFileRoute());
-		Spark.get("/*", new ServeStaticFileRoute("/index.html"));
+		Spark.get("/*", "text/html", new ServeStaticFileRoute("/index.html"));
 	}
 
 	/**
@@ -52,14 +44,12 @@ public class MovieMatcherApplication extends JsonApplication {
 	 */
 	public void loginService() {
 		jpost("/login", (request, response) -> {
-			if (request.queryParams().size() < 2) return "please fill in all fields";
+			Optional<String> username = bodyParam(request, "username");
+			Optional<String> password = bodyParam(request, "password");
+			if(! username.isPresent()) throw new HttpException(HttpStatus.BAD_REQUEST, "No username provided");
+			if(! password.isPresent()) throw new HttpException(HttpStatus.BAD_REQUEST, "No password provided");
 
-//			if(login info is valid) {
-			return "success";
-// 			}
-//			else {
-//			return "incorrect login info!"
-//			}
+			return Collections.singletonMap("session_id", User.login(username.get(), password.get()).id);
 		});
 
 		jpost("/login/register", (request, response) -> {
@@ -68,7 +58,7 @@ public class MovieMatcherApplication extends JsonApplication {
 			if(request.queryParams("password").compareTo(request.queryParams("confirmpassword")) == 0) {
 				User newUser = new User(
 						new ObjectId(),
-						request.queryParams("email"),
+						request.queryParams("username"),
 						request.queryParams("firstname"),
 						request.queryParams("lastname"));
 				try {
