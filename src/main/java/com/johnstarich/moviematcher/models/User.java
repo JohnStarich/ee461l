@@ -20,7 +20,6 @@ import java.util.function.Predicate;
  * Created by Josue on 4/7/2016.
  */
 public class User extends AbstractModel<User> {
-	@Index(options={"unique:true"})
 	public final String username;
 	public final String first_name;
 	public final String last_name;
