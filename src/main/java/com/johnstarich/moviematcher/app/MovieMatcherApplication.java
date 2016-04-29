@@ -114,6 +114,12 @@ public class MovieMatcherApplication extends JsonApplication {
 			return "true";
 		});
 
+		jget("/login/session", (request, response) -> {
+			User u = User.loadByUsername("berlg");
+			System.out.println(u.first_name);
+			return u;
+		});
+
 		Spark.before("/*", (request, response) -> {
 			String path = request.pathInfo();
 			if(path.equals(PREFIX) ||
