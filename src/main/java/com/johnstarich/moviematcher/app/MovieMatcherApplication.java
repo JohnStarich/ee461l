@@ -81,6 +81,12 @@ public class MovieMatcherApplication extends JsonApplication {
 			return "passwords don't match";
 		});
 
+		jget("/login/session", (request, response) -> {
+			User u = User.loadByUsername("berlg");
+			System.out.println(u.first_name);
+			return u;
+		});
+
 		Spark.before("/*", (request, response) -> {
 			if(request.pathInfo().equals(PREFIX) ||
 					request.pathInfo().equals(PREFIX+"/") ||
