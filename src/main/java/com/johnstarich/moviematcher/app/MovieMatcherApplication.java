@@ -6,13 +6,6 @@ import spark.Route;
 import spark.Spark;
 
 
-import java.net.URL;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-
-
 import java.util.Collections;
 import java.util.Optional;
 
@@ -82,9 +75,10 @@ public class MovieMatcherApplication extends JsonApplication {
 		});
 
 		jget("/login/session", (request, response) -> {
-			User u = User.loadByUsername("berlg");
-			System.out.println(u.first_name);
-			return u;
+//			User u = User.loadByUsername("berlg");
+//			System.out.println(u.first_name);
+//			return u;
+			return true;
 		});
 
 		Spark.before("/*", (request, response) -> {
