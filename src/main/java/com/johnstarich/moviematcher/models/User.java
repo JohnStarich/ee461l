@@ -87,7 +87,6 @@ public class User extends AbstractModel<User> {
 		}
 
 		User u = new User(id, username, first_name, last_name, friends, groups, BCrypt.hashpw(password, BCrypt.gensalt()));
-		// need to return session
 		return u.save();
 	}
 

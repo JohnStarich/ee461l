@@ -63,29 +63,25 @@ public class MovieMatcherApplication extends JsonApplication {
 			if(! lastname.isPresent()) throw new HttpException(HttpStatus.BAD_REQUEST, "No lastname provided");
 			if(! username.isPresent()) throw new HttpException(HttpStatus.BAD_REQUEST, "No username provided");
 			if(! password.isPresent()) throw new HttpException(HttpStatus.BAD_REQUEST, "No password provided");
-			if(! confirmpassword.isPresent()) throw new HttpException(HttpStatus.BAD_REQUEST, "No confirmation provided");
+			if(! confirmpassword.isPresent()) throw new HttpException(HttpStatus.BAD_REQUEST, "No password confirmation provided");
 
-			if(password.get().compareTo(confirmpassword.get()) == 0) {
+			if(password.get().equals(confirmpassword.get()) ) {
 				User newUser = new User(
 						new ObjectId(),
 						username.get(),
 						firstname.get(),
 						lastname.get());
-				try {
-					newUser.register(password.get());
-				}
-				catch (Exception e) {
-					return e.getMessage();
-				}
-				return "success";
+
+				return newUser.register(password.get());
+
 			}
-			return "passwords don't match";
+			throw new HttpException(HttpStatus.BAD_REQUEST, "Passwords don't match");
 		});
 
 		jget("/login", (request, response) -> {
 			Optional<String> session_id = Optional.ofNullable(request.headers("Authorization"));
 
-			if(! session_id.isPresent()) throw new HttpException(HttpStatus.UNAUTHORIZED, "No session");
+			if(! session_id.isPresent()) throw new HttpException(HttpStatus.UNAUTHORIZED, "Invalid session");
 			Optional<Session> session = new Session(new ObjectId(session_id.get()), null).load();
 
 			return session.get().user;
