@@ -118,7 +118,7 @@ public class MovieMatcherApplication extends JsonApplication {
 		jget("/login", (request, response) -> {
 			Optional<String> session_id = Optional.ofNullable(request.headers("Authorization"));
 
-			if(! session_id.isPresent()) throw new HttpException(HttpStatus.UNAUTHORIZED, "No session");
+			if(! session_id.isPresent()) throw new HttpException(HttpStatus.UNAUTHORIZED, "Invalid session");
 			Optional<Session> session = new Session(new ObjectId(session_id.get()), null).load();
 
 			return session.get().user;
