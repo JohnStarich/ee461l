@@ -1,10 +1,12 @@
 package com.johnstarich.moviematcher.models;
 
+import com.johnstarich.moviematcher.store.MovieMatcherDatabase;
 import de.caluga.morphium.annotations.Reference;
 import de.caluga.morphium.annotations.Index;
 import org.bson.types.ObjectId;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 /**

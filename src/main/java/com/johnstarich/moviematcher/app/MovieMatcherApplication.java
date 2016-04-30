@@ -47,6 +47,7 @@ public class MovieMatcherApplication extends JsonApplication {
 		jpost("/users/login", (request, response) -> {
 			Optional<String> username = bodyParam(request, "username");
 			Optional<String> password = bodyParam(request, "password");
+
 			if(! username.isPresent()) throw new HttpException(HttpStatus.BAD_REQUEST, "No username provided");
 			if(! password.isPresent()) throw new HttpException(HttpStatus.BAD_REQUEST, "No password provided");
 
@@ -81,6 +82,7 @@ public class MovieMatcherApplication extends JsonApplication {
 			if(! session.isPresent()) throw new HttpException(HttpStatus.UNAUTHORIZED, "Invalid session");
 
 			return session.get().user;
+
 		});
 
 		jpatch("/users", (request, response) -> {
@@ -114,10 +116,14 @@ public class MovieMatcherApplication extends JsonApplication {
 			return "true";
 		});
 
-		jget("/login/session", (request, response) -> {
-			User u = User.loadByUsername("berlg");
-			System.out.println(u.first_name);
-			return u;
+		jget("/login", (request, response) -> {
+			Optional<String> session_id = Optional.ofNullable(request.headers("Authorization"));
+
+			if(! session_id.isPresent()) throw new HttpException(HttpStatus.UNAUTHORIZED, "No session");
+			Optional<Session> session = new Session(new ObjectId(session_id.get()), null).load();
+
+			return session.get().user;
+
 		});
 
 		Spark.before("/*", (request, response) -> {
