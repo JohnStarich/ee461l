@@ -4,10 +4,10 @@ This paper talks about our testing plan and what tests we’ve already implement
 
 ## Unit and Integration Testing
 
-### Groups and Lists
+### Groups and Lists Unit Tests
 Groups are Lists of Users who want to meet up and check out movies together. Groups, then, involve adding and removing friends as well as renaming the group. Within our Group unit tests, we make sure that when a User wants to modify one of their groups their changes are saved. We test adding friends, removing friends, and renaming a group. Also, for completeness, we make sure that the `Group.equals(Object)` method also has a test method. 
 
-### Abstract MongoDB
+### Integration Tests
 We built an AbstractMongoDBTest class that extends the TestCase class to handle the setup and teardown of certain tests. The sole purpose of AbstractMongoDBTest is to setup a MonogoDB instance in order for other tests to use the embedded MongoDB instance. This way we can run the tests that require a MongoDB instance from anywhere. We do not have to create a local host connection on our computers while running tests. Additionally, if the tests are being run on the server, this provides us with the required MongoDB instance.
 
 So the following test are all integration tests since for each test method they are set up with a MongoDB instance. Each test uses the MongoDB instance to test these aspects:
@@ -26,7 +26,7 @@ User interface testing has been done primarily using Ember serve and compile com
 
 ## System Testing
 
-#### System testing for both UI and API repo
+### System testing for both UI and API repo
 
 We perform system testing by utilizing out automated build pipeline in Jenkins:
 
