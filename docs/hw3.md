@@ -4,7 +4,7 @@ This paper talks about our testing plan and what tests we’ve already implement
 
 ## Unit and Integration Testing
 
-### Groups and Lists Unit Tests
+### Groups and Users Unit Tests
 Groups are Lists of Users who want to meet up and check out movies together. Groups, then, involve adding and removing friends as well as renaming the group. Within our Group unit tests, we make sure that when a User wants to modify one of their groups their changes are saved. We test adding friends, removing friends, and renaming a group. Also, for completeness, we make sure that the `Group.equals(Object)` method also has a test method. 
 
 ### Integration Tests
