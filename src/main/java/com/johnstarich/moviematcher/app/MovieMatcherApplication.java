@@ -46,7 +46,6 @@ public class MovieMatcherApplication extends JsonApplication {
 		jpost("/login", (request, response) -> {
 			Optional<String> username = bodyParam(request, "username");
 			Optional<String> password = bodyParam(request, "password");
-
 			if(! username.isPresent()) throw new HttpException(HttpStatus.BAD_REQUEST, "No username provided");
 			if(! password.isPresent()) throw new HttpException(HttpStatus.BAD_REQUEST, "No password provided");
 
@@ -120,7 +119,6 @@ public class MovieMatcherApplication extends JsonApplication {
 		jget("/movies/search/:search_query", searchRoute);
 		jget("/movies/search/", searchRoute);
 		jget("/movies/search", searchRoute);
-
 
 		Route movieRoute = (request, response) -> {
 			String movieId = request.params("id");
