@@ -1,10 +1,12 @@
 package com.johnstarich.moviematcher.models;
 
+import com.johnstarich.moviematcher.store.MovieMatcherDatabase;
 import de.caluga.morphium.annotations.Reference;
 import de.caluga.morphium.annotations.Index;
 import org.bson.types.ObjectId;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -20,7 +22,7 @@ public class Session extends AbstractModel<Session> {
     @Index(value = "createdAt:1", options = "expireAfterSeconds:7200")
     public final Date createdAt;
 
-    Session(ObjectId sessionId, User user) {
+    public Session(ObjectId sessionId, User user) {
         super(Session.class, sessionId);
         this.user = user;
         createdAt = new Date();
@@ -35,5 +37,6 @@ public class Session extends AbstractModel<Session> {
         }
         return false;
     }
+
 }
 

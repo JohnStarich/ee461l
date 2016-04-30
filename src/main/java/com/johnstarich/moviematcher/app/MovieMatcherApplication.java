@@ -46,6 +46,7 @@ public class MovieMatcherApplication extends JsonApplication {
 		jpost("/login", (request, response) -> {
 			Optional<String> username = bodyParam(request, "username");
 			Optional<String> password = bodyParam(request, "password");
+
 			if(! username.isPresent()) throw new HttpException(HttpStatus.BAD_REQUEST, "No username provided");
 			if(! password.isPresent()) throw new HttpException(HttpStatus.BAD_REQUEST, "No password provided");
 
@@ -53,16 +54,26 @@ public class MovieMatcherApplication extends JsonApplication {
 		});
 
 		jpost("/login/register", (request, response) -> {
-			if(request.queryParams().size() < 6) return "please fill in all fields";
+			Optional<String> firstname = bodyParam(request, "firstname");
+			Optional<String> lastname = bodyParam(request, "lastname");
+			Optional<String> username = bodyParam(request, "username");
+			Optional<String> password = bodyParam(request, "password");
+			Optional<String> confirmpassword = bodyParam(request, "confirmpassword");
 
-			if(request.queryParams("password").compareTo(request.queryParams("confirmpassword")) == 0) {
+			if(! firstname.isPresent()) throw new HttpException(HttpStatus.BAD_REQUEST, "No firstname provided");
+			if(! lastname.isPresent()) throw new HttpException(HttpStatus.BAD_REQUEST, "No lastname provided");
+			if(! username.isPresent()) throw new HttpException(HttpStatus.BAD_REQUEST, "No username provided");
+			if(! password.isPresent()) throw new HttpException(HttpStatus.BAD_REQUEST, "No password provided");
+			if(! confirmpassword.isPresent()) throw new HttpException(HttpStatus.BAD_REQUEST, "No confirmation provided");
+
+			if(password.get().compareTo(confirmpassword.get()) == 0) {
 				User newUser = new User(
 						new ObjectId(),
-						request.queryParams("username"),
-						request.queryParams("firstname"),
-						request.queryParams("lastname"));
+						username.get(),
+						firstname.get(),
+						lastname.get());
 				try {
-					newUser.register(request.queryParams("password"));
+					newUser.register(password.get());
 				}
 				catch (Exception e) {
 					return e.getMessage();
@@ -72,10 +83,14 @@ public class MovieMatcherApplication extends JsonApplication {
 			return "passwords don't match";
 		});
 
-		jget("/login/session", (request, response) -> {
-			User u = User.loadByUsername("berlg");
-			System.out.println(u.first_name);
-			return u;
+		jget("/login", (request, response) -> {
+			Optional<String> session_id = Optional.ofNullable(request.headers("Authorization"));
+
+			if(! session_id.isPresent()) throw new HttpException(HttpStatus.UNAUTHORIZED, "No session");
+			Optional<Session> session = new Session(new ObjectId(session_id.get()), null).load();
+
+			return session.get().user;
+
 		});
 
 		Spark.before("/*", (request, response) -> {
