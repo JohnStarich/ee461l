@@ -20,7 +20,7 @@ public class Session extends AbstractModel<Session> {
     @Index(value = "createdAt:1", options = "expireAfterSeconds:7200")
     public final Date createdAt;
 
-    Session(ObjectId sessionId, User user) {
+    public Session(ObjectId sessionId, User user) {
         super(Session.class, sessionId);
         this.user = user;
         createdAt = new Date();
@@ -35,5 +35,6 @@ public class Session extends AbstractModel<Session> {
         }
         return false;
     }
+
 }
 

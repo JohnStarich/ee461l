@@ -53,23 +53,39 @@ public class MovieMatcherApplication extends JsonApplication {
 		});
 
 		jpost("/login/register", (request, response) -> {
-			if(request.queryParams().size() < 6) return "please fill in all fields";
+			Optional<String> firstname = bodyParam(request, "firstname");
+			Optional<String> lastname = bodyParam(request, "lastname");
+			Optional<String> username = bodyParam(request, "username");
+			Optional<String> password = bodyParam(request, "password");
+			Optional<String> confirmpassword = bodyParam(request, "confirmpassword");
 
-			if(request.queryParams("password").compareTo(request.queryParams("confirmpassword")) == 0) {
+			if(! firstname.isPresent()) throw new HttpException(HttpStatus.BAD_REQUEST, "No firstname provided");
+			if(! lastname.isPresent()) throw new HttpException(HttpStatus.BAD_REQUEST, "No lastname provided");
+			if(! username.isPresent()) throw new HttpException(HttpStatus.BAD_REQUEST, "No username provided");
+			if(! password.isPresent()) throw new HttpException(HttpStatus.BAD_REQUEST, "No password provided");
+			if(! confirmpassword.isPresent()) throw new HttpException(HttpStatus.BAD_REQUEST, "No password confirmation provided");
+
+			if(password.get().equals(confirmpassword.get()) ) {
 				User newUser = new User(
 						new ObjectId(),
-						request.queryParams("username"),
-						request.queryParams("firstname"),
-						request.queryParams("lastname"));
-				try {
-					newUser.register(request.queryParams("password"));
-				}
-				catch (Exception e) {
-					return e.getMessage();
-				}
-				return "success";
+						username.get(),
+						firstname.get(),
+						lastname.get());
+
+				return newUser.register(password.get());
+
 			}
-			return "passwords don't match";
+			throw new HttpException(HttpStatus.BAD_REQUEST, "Passwords don't match");
+		});
+
+		jget("/login", (request, response) -> {
+			Optional<String> session_id = Optional.ofNullable(request.headers("Authorization"));
+
+			if(! session_id.isPresent()) throw new HttpException(HttpStatus.UNAUTHORIZED, "Invalid session");
+			Optional<Session> session = new Session(new ObjectId(session_id.get()), null).load();
+
+			return session.get().user;
+
 		});
 
 		Spark.before("/*", (request, response) -> {
