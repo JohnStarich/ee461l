@@ -42,7 +42,6 @@ public abstract class BasicApplication implements SparkApplication {
 
 		exception(HttpException.class, (e, request, response) -> {
 			int statusCode = ((HttpException)e).getStatusCode();
-//			response.type("text/html");
 			response.status(statusCode);
 			response.body(String.format("%d %s", statusCode, e.getMessage()));
 			System.err.println(String.format("ERROR: %d %s", statusCode, e.getMessage()));
@@ -51,7 +50,6 @@ public abstract class BasicApplication implements SparkApplication {
 		});
 
 		exception(Exception.class, (e, request, response) -> {
-//			response.type("text/html");
 			response.status(HttpStatus.SERVER_ERROR.code);
 			response.body("500 Internal Server Error");
 			e.printStackTrace();
