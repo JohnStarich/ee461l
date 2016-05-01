@@ -1,26 +1,35 @@
 package com.johnstarich.moviematcher.models;
 
+import de.caluga.morphium.annotations.Index;
+import de.caluga.morphium.annotations.Reference;
+import org.bson.types.ObjectId;
+
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Created by Josue on 4/16/2016.
  */
-public class Group {
+@Index("name:text")
+public class Group extends AbstractModel<Group> {
     public final String name;
+    @Reference
     public final List<User> members;
 
-    public Group() {
+    public Group(ObjectId id) {
+        super(Group.class, id);
         this.name = "";
         this.members = new ArrayList<>(0);
     }
 
-    public Group(String name) {
+    public Group(ObjectId id, String name) {
+        super(Group.class, id);
         this.name = name;
         this.members = new ArrayList<>(0);
     }
 
-    public Group(String name, List<User> members) {
+    public Group(ObjectId id, String name, List<User> members) {
+        super(Group.class, id);
         this.name = name;
         this.members = members;
     }
@@ -28,17 +37,17 @@ public class Group {
     public Group addFriend(User friend) {
         ArrayList<User> members = new ArrayList<>(this.members);
         members.add(friend);
-        return new Group(name, members);
+        return new Group(null, name, members);
     }
 
     public Group removeFriend(User friend) {
         ArrayList<User> members = new ArrayList<>(this.members);
         members.remove(friend);
-        return new Group(name, members);
+        return new Group(null, name, members);
     }
 
     public Group renameGroup(String newName) {
-        return new Group(newName, members);
+        return new Group(null, newName, members);
     }
 
     @Override

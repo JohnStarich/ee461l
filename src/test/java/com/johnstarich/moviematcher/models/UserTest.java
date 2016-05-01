@@ -126,7 +126,7 @@ public class UserTest extends AbstractMongoDBTest {
 
 		List<User> collectionOfFriends = new ArrayList<>(3);
 		collectionOfFriends.add(Jeremy); collectionOfFriends.add(John); collectionOfFriends.add(Cesar);
-		Group creators = new Group("Creators", collectionOfFriends);
+		Group creators = new Group(null, "Creators", collectionOfFriends);
 
 		John = John.addGroup(creators);
 

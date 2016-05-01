@@ -19,7 +19,7 @@ public class GroupTest extends TestCase {
         User Henry = new User(new ObjectId());
         User Lenny = new User(new ObjectId());
         User Max = new User(new ObjectId());
-        Group aventura = new Group("KOB", Arrays.asList(Lenny, Max, Henry, Romeo));
+        Group aventura = new Group(null, "KOB", Arrays.asList(Lenny, Max, Henry, Romeo));
         aventura = aventura.addFriend(Josue);
 
         assertEquals(5, aventura.members.size());
@@ -27,7 +27,7 @@ public class GroupTest extends TestCase {
     }
 
     public void testRemoveFriend() throws Exception {
-        Group bffs = new Group("We da best", Arrays.asList(Josue, John, Jeremy, Cesar));
+        Group bffs = new Group(null, "We da best", Arrays.asList(Josue, John, Jeremy, Cesar));
         bffs = bffs.removeFriend(Josue);
 
         assertFalse(bffs.members.contains(Josue));
@@ -35,7 +35,7 @@ public class GroupTest extends TestCase {
     }
 
     public void testRenameGroup() {
-        Group g1 = new Group("This Group Name Sucks", Arrays.asList(Cesar, John, Jeremy, Josue));
+        Group g1 = new Group(null, "This Group Name Sucks", Arrays.asList(Cesar, John, Jeremy, Josue));
         g1 = g1.renameGroup("Cooler Group Name");
 
         assertNotSame("This Group Name Sucks", g1.name);
@@ -43,9 +43,9 @@ public class GroupTest extends TestCase {
     }
 
     public void testEquals() throws Exception {
-        Group g1 = new Group("g.o.a.t.s", Arrays.asList(Josue, John));
-        Group g2 = new Group("goats FC", Arrays.asList(Jeremy, Cesar));
-        Group g3 = new Group("goats FC", Arrays.asList(Jeremy, Cesar, John, Josue));
+        Group g1 = new Group(null, "g.o.a.t.s", Arrays.asList(Josue, John));
+        Group g2 = new Group(null, "goats FC", Arrays.asList(Jeremy, Cesar));
+        Group g3 = new Group(null, "goats FC", Arrays.asList(Jeremy, Cesar, John, Josue));
 
         assertNotSame(g1, g2);
         assertEquals(g2, g2);
