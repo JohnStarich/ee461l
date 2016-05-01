@@ -72,7 +72,7 @@ public class MovieMatcherApplication extends JsonApplication {
 						firstname.get(),
 						lastname.get());
 
-				return newUser.register(password.get());
+				return newUser.register(password.get()).id;
 
 			}
 			throw new HttpException(HttpStatus.BAD_REQUEST, "Passwords don't match");
@@ -83,7 +83,7 @@ public class MovieMatcherApplication extends JsonApplication {
 
 			if(! session_id.isPresent()) throw new HttpException(HttpStatus.UNAUTHORIZED, "Invalid session");
 			Optional<Session> session = new Session(new ObjectId(session_id.get()), null).load();
-
+			if(! session.isPresent()) throw new HttpException(HttpStatus.UNAUTHORIZED, "Invalid session");
 			return session.get().user;
 
 		});
@@ -199,7 +199,18 @@ public class MovieMatcherApplication extends JsonApplication {
 		Route unimplemented = (request, response) -> {
 			throw new HttpException(HttpStatus.NOT_IMPLEMENTED);
 		};
-		jget("/groups", unimplemented);
-		jget("/groups/*", unimplemented);
+		Route userGroups = (request, response) -> {
+			if(request==null) { return Collections.EMPTY_LIST; }
+			User u = request.attribute("user");
+			Optional<User> user = u.load(User.class);
+			if(user.isPresent()){
+				return user.get().groups;
+			}
+			return Collections.EMPTY_LIST;
+		};
+
+		jget("/groups", userGroups);
+		jget("/groups/", userGroups);
+		jget("/groups/*", userGroups);
 	}
 }

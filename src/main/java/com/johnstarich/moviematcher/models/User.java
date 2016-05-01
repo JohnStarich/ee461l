@@ -19,6 +19,7 @@ import java.util.function.Predicate;
 /**
  * Created by Josue on 4/7/2016.
  */
+@Index("username:text")
 public class User extends AbstractModel<User> {
 	public final String username;
 	public final String first_name;

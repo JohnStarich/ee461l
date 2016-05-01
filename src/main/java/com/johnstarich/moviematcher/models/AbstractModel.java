@@ -41,7 +41,10 @@ public abstract class AbstractModel<T extends AbstractModel> {
 		return (T) this;
 	}
 
-	public Optional<T> load() {
+	public Optional<T> load(){
+		return load(clazz);
+	}
+	public Optional<T> load(Class<T> clazz) {
 		List<T> results = MovieMatcherDatabase.morphium.findByField(clazz, "id", id);
 		if(results.isEmpty()) return Optional.empty();
 		else {
