@@ -89,12 +89,33 @@ public class MovieMatcherApplication extends JsonApplication {
 		});
 
 		Spark.before("/*", (request, response) -> {
-			if(request.pathInfo().equals(PREFIX) ||
-					request.pathInfo().equals(PREFIX+"/") ||
-					request.pathInfo().startsWith("/login") ||
-					request.pathInfo().startsWith(PREFIX+"/login"))
+			String path = request.pathInfo();
+			if(path.equals(PREFIX) ||
+					path.equals(PREFIX+"/") ||
+					path.startsWith("/login") ||
+					path.startsWith(PREFIX+"/login") ||
+					path.startsWith("/assets") ||
+					path.startsWith("/fonts") ||
+					path.equals("robots.txt")
+				)
 				return;
+
 			System.out.println("Checking authentication for path: "+request.pathInfo());
+
+			Optional<String> authorization = Optional.ofNullable(request.headers("Authorization"));
+			if(! authorization.isPresent()) {
+				if(request.headers("Accept") != null && request.headers("Accept").contains("text/html")){
+					// requesting HTML page
+					return;
+				}
+				throw new HttpException(HttpStatus.UNAUTHORIZED, "No authorization provided.");
+			}
+
+			Optional<Session> session = new Session(new ObjectId(authorization.get().trim()), null).load();
+			if(! session.isPresent()) throw new HttpException(HttpStatus.UNAUTHORIZED, "Invalid session.");
+			if(! Session.isValid(session.get())) throw new HttpException(HttpStatus.UNAUTHORIZED, "Invalid session.");
+
+			request.attribute("user", session.get().user);
 		});
 	}
 
@@ -103,7 +124,7 @@ public class MovieMatcherApplication extends JsonApplication {
 	 */
 	public void moviesService() {
 		Route searchRoute = (request, response) -> {
-			Optional<String> queryParam = Optional.of(request.params("search_query"));
+			Optional<String> queryParam = Optional.ofNullable(request.params("search_query"));
 			String searchQuery = queryParam.orElse("").replaceAll("\\+", " ").trim();
 			System.out.println("Searched for \""+searchQuery+"\"");
 			int results = asIntOpt(request.queryParams("results")).orElse(20);

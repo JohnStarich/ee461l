@@ -10,7 +10,7 @@ function error {
 
 function validate_args {
     SCRIPT_NAME=$0
-    SCRIPT_DIR=$(dirname $0)
+    SCRIPT_DIR=$(cd $(dirname ${BASH_SOURCE[0]}) && pwd)
     BASE_DIR=$(dirname ${SCRIPT_DIR})
     EMBER_DIR="$BASE_DIR/src/main/static"
     EMBER_OUTPUT_DIR="$BASE_DIR/target/classes/static"

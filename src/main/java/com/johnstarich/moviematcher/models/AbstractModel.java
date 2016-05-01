@@ -25,7 +25,7 @@ public abstract class AbstractModel<T extends AbstractModel> {
 	public final ObjectId id;
 
 	@Transient
-	private final Class<T> clazz;
+	private Class<T> clazz;
 
 	public AbstractModel(Class<T> clazz, ObjectId id) {
 		this.id = id;
@@ -44,7 +44,11 @@ public abstract class AbstractModel<T extends AbstractModel> {
 	public Optional<T> load() {
 		List<T> results = MovieMatcherDatabase.morphium.findByField(clazz, "id", id);
 		if(results.isEmpty()) return Optional.empty();
-		else return Optional.of(results.get(0));
+		else {
+			T result = results.get(0);
+			((AbstractModel<T>) result).clazz = clazz;
+			return Optional.of(results.get(0));
+		}
 	}
 
 	public T delete() {
