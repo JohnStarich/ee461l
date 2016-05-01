@@ -157,25 +157,55 @@ public class MovieMatcherApplication extends JsonApplication {
 	 * Register friend services, like friend search and friend ID lookup
 	 */
 	public void friendsService() {
-		jget("/friends/search/:search_query", (request, response) -> {
-			String searchQuery = request.params("search_query").replaceAll("\\+", " ");
-			System.out.println("Searched for \""+searchQuery+"\"");
-			throw new HttpException(HttpStatus.NOT_IMPLEMENTED);
-		});
+		Route friendSearchRoute = (request,response) -> {
+			Optional<String> queryParam = Optional.ofNullable(request.params("search_query"));
+			String searchQuery = queryParam.orElse("").replaceAll("\\+"," ").trim();
+			System.out.println("Searched for \"" + searchQuery + "\"");
+			int results = asIntOpt(request.queryParams("results")).orElse(20);
+			int page = asIntOpt(request.queryParams("page")).orElse(1);
+			if(searchQuery.equals("") || results == 0)
+				return Collections.EMPTY_LIST;
+			return AbstractModel.search(User.class, searchQuery, results, page);
+		};
+
+		jget("/friends/search/:search_query", friendSearchRoute);
+		jget("/friends/search/", friendSearchRoute);
+		jget("/friends/search", friendSearchRoute);
 
 		Route friendRoute = (request, response) -> {
-			String movieId = request.params("id");
-			System.out.println("Looked up movie with ID: "+movieId);
-			throw new HttpException(HttpStatus.NOT_IMPLEMENTED);
+			String userId = request.params("id");
+			System.out.println("Looked up user with ID: "+userId);
+			return new User(new ObjectId(userId)).load();
 		};
+
 		jget("/friends/:id", friendRoute);
 		jget("/friends/:id/*", friendRoute);
 
+
+
+		jget("/friends", (request, response) -> {
+			/** return the user's friends */
+			User u = request.attribute("user");
+			if(u==null) return Collections.EMPTY_LIST;
+			Optional<User> user = u.load(User.class);
+			if(user.isPresent()) {
+				return user.get().friends;
+			}
+			return Collections.EMPTY_LIST;
+		});
+
 		Route unimplemented = (request, response) -> {
+			System.out.println("Not Implemented");
 			throw new HttpException(HttpStatus.NOT_IMPLEMENTED);
 		};
-		jget("/friends", unimplemented);
-		jget("/friends/*", unimplemented);
+
+		//jget("/friends/*", unimplemented);
+		/** let us add some friends :) */
+		jpost("/friends", unimplemented);
+
+		/** delete some friends */
+		jdelete("/friends/:id", unimplemented);
+
 	}
 
 	/**
