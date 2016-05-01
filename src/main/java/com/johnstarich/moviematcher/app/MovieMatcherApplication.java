@@ -100,13 +100,14 @@ public class MovieMatcherApplication extends JsonApplication {
 				)
 				return;
 
-			boolean requestingHtml = request.headers("Accept") != null && request.headers("Accept").contains("text/html");
-
 			System.out.println("Checking authentication for path: "+request.pathInfo());
 
 			Optional<String> authorization = Optional.ofNullable(request.headers("Authorization"));
 			if(! authorization.isPresent()) {
-				if(requestingHtml) return;
+				if(request.headers("Accept") != null && request.headers("Accept").contains("text/html")){
+					// requesting HTML page
+					return;
+				}
 				throw new HttpException(HttpStatus.UNAUTHORIZED, "No authorization provided.");
 			}
 
@@ -123,7 +124,7 @@ public class MovieMatcherApplication extends JsonApplication {
 	 */
 	public void moviesService() {
 		Route searchRoute = (request, response) -> {
-			Optional<String> queryParam = Optional.of(request.params("search_query"));
+			Optional<String> queryParam = Optional.ofNullable(request.params("search_query"));
 			String searchQuery = queryParam.orElse("").replaceAll("\\+", " ").trim();
 			System.out.println("Searched for \""+searchQuery+"\"");
 			int results = asIntOpt(request.queryParams("results")).orElse(20);
