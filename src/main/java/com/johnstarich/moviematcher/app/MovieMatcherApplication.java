@@ -387,7 +387,6 @@ public class MovieMatcherApplication extends JsonApplication {
 			System.out.println("Looked up group with ID: "+group_id);
 			return new Group(new ObjectId(group_id)).load();
 		};
-
 		jget("/groups/:id", idRoute);
 
 		Route userGroups = (request, response) -> {
