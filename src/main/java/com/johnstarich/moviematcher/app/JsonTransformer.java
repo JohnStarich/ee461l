@@ -5,6 +5,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
+import com.johnstarich.moviematcher.store.MovieMatcherDatabase;
 import org.bson.types.ObjectId;
 import spark.ResponseTransformer;
 
@@ -31,7 +32,7 @@ public class JsonTransformer implements ResponseTransformer {
 
 	@Override
 	public String render(Object model) throws Exception {
-		return gson.toJson(model);
+		return MovieMatcherDatabase.morphium.toJsonString(model);
 	}
 
 	public <T> T parse(String model, Class<T> clazz) throws Exception {

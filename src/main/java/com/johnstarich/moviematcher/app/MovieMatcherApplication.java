@@ -6,6 +6,7 @@ import spark.Route;
 import spark.Spark;
 
 import java.util.Collections;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -22,7 +23,7 @@ public class MovieMatcherApplication extends JsonApplication {
 		jget("", statusRoute);
 		jget("/", statusRoute);
 
-		loginService();
+		usersService();
 		moviesService();
 		friendsService();
 		groupsService();
@@ -42,70 +43,93 @@ public class MovieMatcherApplication extends JsonApplication {
 	 * Register login services, like registration and user login API,
 	 * as well as authentication services.
 	 */
-	public void loginService() {
-		jpost("/login", (request, response) -> {
+	public void usersService() {
+		jpost("/users/login", (request, response) -> {
 			Optional<String> username = bodyParam(request, "username");
 			Optional<String> password = bodyParam(request, "password");
 			if(! username.isPresent()) throw new HttpException(HttpStatus.BAD_REQUEST, "No username provided");
 			if(! password.isPresent()) throw new HttpException(HttpStatus.BAD_REQUEST, "No password provided");
 
-			return Collections.singletonMap("session_id", User.login(username.get(), password.get()).id);
+			return User.login(username.get(), password.get());
 		});
 
-		jpost("/login/register", (request, response) -> {
-			Optional<String> firstname = bodyParam(request, "firstname");
-			Optional<String> lastname = bodyParam(request, "lastname");
+		jpost("/users", (request, response) -> {
+			Optional<String> firstName = bodyParam(request, "firstname");
+			Optional<String> lastName = bodyParam(request, "lastname");
 			Optional<String> username = bodyParam(request, "username");
 			Optional<String> password = bodyParam(request, "password");
-			Optional<String> confirmpassword = bodyParam(request, "confirmpassword");
 
-			if(! firstname.isPresent()) throw new HttpException(HttpStatus.BAD_REQUEST, "No firstname provided");
-			if(! lastname.isPresent()) throw new HttpException(HttpStatus.BAD_REQUEST, "No lastname provided");
+			if(! firstName.isPresent()) throw new HttpException(HttpStatus.BAD_REQUEST, "No firstname provided");
+			if(! lastName.isPresent()) throw new HttpException(HttpStatus.BAD_REQUEST, "No lastname provided");
 			if(! username.isPresent()) throw new HttpException(HttpStatus.BAD_REQUEST, "No username provided");
 			if(! password.isPresent()) throw new HttpException(HttpStatus.BAD_REQUEST, "No password provided");
-			if(! confirmpassword.isPresent()) throw new HttpException(HttpStatus.BAD_REQUEST, "No password confirmation provided");
 
-			if(password.get().equals(confirmpassword.get()) ) {
-				User newUser = new User(
-						new ObjectId(),
-						username.get(),
-						firstname.get(),
-						lastname.get());
-
-				return newUser.register(password.get()).id;
-
-			}
-			throw new HttpException(HttpStatus.BAD_REQUEST, "Passwords don't match");
+			User newUser = new User(
+				new ObjectId(),
+				username.get(),
+				firstName.get(),
+				lastName.get()
+			);
+			return newUser.register(password.get());
 		});
 
-		jget("/login", (request, response) -> {
+		jget("/users", (request, response) -> {
 			Optional<String> session_id = Optional.ofNullable(request.headers("Authorization"));
-
 			if(! session_id.isPresent()) throw new HttpException(HttpStatus.UNAUTHORIZED, "Invalid session");
+
 			Optional<Session> session = new Session(new ObjectId(session_id.get()), null).load();
 			if(! session.isPresent()) throw new HttpException(HttpStatus.UNAUTHORIZED, "Invalid session");
-			return session.get().user;
 
+			return session.get().user;
+		});
+
+		jpatch("/users", (request, response) -> {
+			Optional<String> session_id = Optional.ofNullable(request.headers("Authorization"));
+			if(! session_id.isPresent()) throw new HttpException(HttpStatus.UNAUTHORIZED, "Invalid session");
+
+			Optional<Session> session = new Session(new ObjectId(session_id.get()), null).load();
+			if(! session.isPresent()) throw new HttpException(HttpStatus.UNAUTHORIZED, "Invalid session");
+
+			Optional<Map<String, Object>> userFieldsOpt = bodyParam(request, "user");
+			if(! userFieldsOpt.isPresent()) throw new HttpException(HttpStatus.BAD_REQUEST, "Invalid user parameters");
+
+			Map<String, Object> userFields = userFieldsOpt.get();
+			String firstName = (String)userFields.get("first_name");
+			String lastName = (String)userFields.get("last_name");
+			String password = (String)userFields.get("password");
+			String oldPassword = (String)userFields.get("old_password");
+
+			if((password == null && oldPassword != null) || (password != null && oldPassword == null)) {
+				throw new HttpException(HttpStatus.BAD_REQUEST, "New password and old password must be provided together.");
+			}
+
+			User patch = new User(session.get().user.id, null, firstName, lastName);
+			patch.update();
+
+			Optional<User> user = patch.load();
+
+			if(password != null && user.isPresent()) {
+				user.get().resetPassword(oldPassword, password);
+			}
+			return true;
 		});
 
 		Spark.before("/*", (request, response) -> {
 			String path = request.pathInfo();
 			if(path.equals(PREFIX) ||
 					path.equals(PREFIX+"/") ||
-					path.startsWith("/login") ||
-					path.startsWith(PREFIX+"/login") ||
+					path.startsWith("/users") ||
+					path.startsWith(PREFIX+"/users") ||
 					path.startsWith("/assets") ||
 					path.startsWith("/fonts") ||
 					path.equals("robots.txt")
 				)
 				return;
 
-			System.out.println("Checking authentication for path: "+request.pathInfo());
-
 			Optional<String> authorization = Optional.ofNullable(request.headers("Authorization"));
 			if(! authorization.isPresent()) {
 				if(request.headers("Accept") != null && request.headers("Accept").contains("text/html")){
-					// requesting HTML page
+					// requesting HTML page, allow the UI to handle the errors for other requests
 					return;
 				}
 				throw new HttpException(HttpStatus.UNAUTHORIZED, "No authorization provided.");
@@ -195,17 +219,14 @@ public class MovieMatcherApplication extends JsonApplication {
 		});
 
 		Route unimplemented = (request, response) -> {
-			System.out.println("Not Implemented");
 			throw new HttpException(HttpStatus.NOT_IMPLEMENTED);
 		};
 
-		//jget("/friends/*", unimplemented);
-		/** let us add some friends :) */
+		/* let us add some friends :) */
 		jpost("/friends", unimplemented);
 
-		/** delete some friends */
+		/* delete some friends */
 		jdelete("/friends/:id", unimplemented);
-
 	}
 
 	/**

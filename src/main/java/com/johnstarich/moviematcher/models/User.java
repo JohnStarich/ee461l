@@ -7,20 +7,18 @@ import de.caluga.morphium.annotations.Index;
 import org.bson.types.ObjectId;
 import org.mindrot.jbcrypt.BCrypt;
 
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
 
-
-
 /**
  * Created by Josue on 4/7/2016.
  */
 @Index("username:text")
 public class User extends AbstractModel<User> {
+	@Index(options={"unique"})
 	public final String username;
 	public final String first_name;
 	public final String last_name;
@@ -33,12 +31,12 @@ public class User extends AbstractModel<User> {
 		this.username = null;
 		this.first_name = null;
 		this.last_name = null;
-		this.friends = new ArrayList<>(0);
-		this.groups = new ArrayList<>(0);
+		this.friends = null;
+		this.groups = null;
 		this.password = null;
 	}
 
-	private User(ObjectId id, String username, String first_name, String last_name, List<User> friends, List groups, String password) {
+	private User(ObjectId id, String username, String first_name, String last_name, List<User> friends, List<Group> groups, String password) {
 		super(User.class, id);
 		this.username = username;
 		this.first_name = first_name;
@@ -53,8 +51,8 @@ public class User extends AbstractModel<User> {
 		this.username = username;
 		this.first_name = first_name;
 		this.last_name = last_name;
-		this.friends = new ArrayList<>(0);
-		this.groups = new ArrayList<>(0);
+		this.friends = null;
+		this.groups = null;
 		this.password = password;
 	}
 
@@ -63,8 +61,8 @@ public class User extends AbstractModel<User> {
 		this.username = username;
 		this.first_name = first_name;
 		this.last_name = last_name;
-		this.friends = new ArrayList<>(0);
-		this.groups = new ArrayList<>(0);
+		this.friends = null;
+		this.groups = null;
 		this.password = null;
 	}
 
@@ -99,8 +97,8 @@ public class User extends AbstractModel<User> {
 			throw new HttpException(HttpStatus.BAD_REQUEST, "Invalid old password.");
 		}
 
-		User u = new User(id, username, first_name, last_name, friends, groups, BCrypt.hashpw(newPassword, BCrypt.gensalt()));
-		return u.save();
+		User u = new User(id, null, null, null, null, null, BCrypt.hashpw(newPassword, BCrypt.gensalt()));
+		return u.update();
 	}
 
 	public static Optional<User> loadByUsername(String username) {
@@ -125,49 +123,65 @@ public class User extends AbstractModel<User> {
 	}
 
 	public User addFriend(User friend) {
-		ArrayList<User> friends = new ArrayList<>(this.friends);
+		ArrayList<User> friends;
+		if(this.friends != null) friends = new ArrayList<>(this.friends);
+		else friends = new ArrayList<>(1);
 		friends.add(friend);
 		return new User(id, username, first_name, last_name, friends, groups, password);
 	}
 
-	public User addFriends(Collection<User> friends) {
-		ArrayList<User> amigos = new ArrayList<>(this.friends);
-		amigos.addAll(friends);
-		return new User(id, username, first_name, last_name, amigos, groups, password);
+	public User addFriends(Collection<User> friendsCollection) {
+		ArrayList<User> friends;
+		if(this.friends != null) friends = new ArrayList<>(this.friends);
+		else friends = new ArrayList<>(friendsCollection.size());
+		friends.addAll(friendsCollection);
+		return new User(id, username, first_name, last_name, friends, groups, password);
 	}
 
 	public User removeFriend(User oldFriend) {
-		ArrayList<User> newFriends = new ArrayList<>(this.friends);
+		ArrayList<User> newFriends;
+		if(this.friends != null ) newFriends = new ArrayList<>(this.friends);
+		else newFriends = new ArrayList<>(0);
 		newFriends.remove(oldFriend);
 		return new User(id, username, first_name, last_name, newFriends, groups, password);
 	}
 
 	public User removeFriends(Collection<User> oldFriends) {
-		ArrayList<User> newFriends = new ArrayList<>(this.friends);
+		ArrayList<User> newFriends;
+		if(this.friends != null) newFriends = new ArrayList<>(this.friends);
+		else newFriends = new ArrayList<>(0);
 		newFriends.removeAll(oldFriends);
 		return new User(id, username, first_name, last_name, newFriends, groups, password);
 	}
 
 	public User addGroup(Group group) {
-		ArrayList<Group> groups = new ArrayList<>(this.groups);
+		ArrayList<Group> groups;
+		if(this.groups != null) groups = new ArrayList<>(this.groups);
+		else groups = new ArrayList<>(1);
 		groups.add(group);
 		return new User(id, username, first_name, last_name, friends, groups, password);
 	}
 
 	public User addGroups(Collection<Group> groups) {
-		ArrayList<Group> newGroups = new ArrayList<>(this.groups);
+		ArrayList<Group> newGroups;
+		if(this.groups != null) newGroups = new ArrayList<>(this.groups);
+		else newGroups = new ArrayList<>(groups.size());
 		newGroups.addAll(groups);
 		return new User(id, username, first_name, last_name, friends, newGroups, password);
 	}
 
 	public User removeGroup(Group group) {
-		ArrayList<Group> groups = new ArrayList<>(this.groups);
+		ArrayList<Group> groups;
+		if(this.groups != null) groups = new ArrayList<>(this.groups);
+		else groups = new ArrayList<>(0);
 		groups.remove(group);
 		return new User(id, username, first_name, last_name, friends, groups, password);
 	}
 
 	public User removeGroups(Collection<Group> groups) {
-		ArrayList<Group> newGroups = new ArrayList<>(this.groups);
+		ArrayList<Group> newGroups;
+		if(this.groups != null) newGroups = new ArrayList<>(this.groups);
+		else newGroups = new ArrayList<>(0);
 		newGroups.removeAll(groups);
 		return new User(id, username, first_name, last_name, friends, newGroups, password);
 	}

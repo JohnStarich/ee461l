@@ -1,8 +1,10 @@
 package com.johnstarich.moviematcher.models;
 
+import com.johnstarich.moviematcher.app.CheckedRunnable;
 import com.johnstarich.moviematcher.app.HttpException;
 import com.johnstarich.moviematcher.app.HttpStatus;
 import com.johnstarich.moviematcher.store.MovieMatcherDatabase;
+import com.mongodb.DuplicateKeyException;
 import de.caluga.morphium.annotations.Entity;
 import de.caluga.morphium.annotations.Id;
 import de.caluga.morphium.annotations.Transient;
@@ -11,6 +13,7 @@ import org.bson.types.ObjectId;
 
 import java.lang.reflect.Field;
 import java.util.*;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
@@ -36,8 +39,15 @@ public abstract class AbstractModel<T extends AbstractModel> {
 		return load().isPresent();
 	}
 
-	public T save() {
-		MovieMatcherDatabase.morphium.store(this);
+	public T save() throws HttpException {
+		handleMongoExceptions(clazz, () -> MovieMatcherDatabase.morphium.store(this));
+		return (T) this;
+	}
+
+	public T update() throws HttpException {
+		handleMongoExceptions(clazz, () -> {
+			MovieMatcherDatabase.morphium.updateUsingFields(this, getNonNullFieldsNames(clazz, this).toArray(new String[0]));
+		});
 		return (T) this;
 	}
 
@@ -51,7 +61,7 @@ public abstract class AbstractModel<T extends AbstractModel> {
 		else {
 			T result = results.get(0);
 			((AbstractModel<T>) result).clazz = clazz;
-			return Optional.of(results.get(0));
+			return Optional.ofNullable(results.get(0));
 		}
 	}
 
@@ -91,6 +101,22 @@ public abstract class AbstractModel<T extends AbstractModel> {
 			.aggregate();
 	}
 
+	private static void handleMongoExceptions(Class clazz, CheckedRunnable runnable) throws HttpException {
+		try {
+			runnable.run();
+		}
+		catch(RuntimeException e) {
+			if(e.getCause() != null) {
+				Throwable cause = e.getCause();
+				if(cause instanceof DuplicateKeyException) {
+					throw new HttpException(HttpStatus.BAD_REQUEST, "Duplicate " + clazz.getSimpleName() + " cannot be saved");
+				}
+				else cause.printStackTrace();
+			}
+			throw e;
+		}
+	}
+
 	private static Map<String, Object> getProjectFields(Class clazz) {
 		Map<String, Object> map = new HashMap<>();
 		map.put("score", Collections.singletonMap("$meta", "textScore"));
@@ -100,6 +126,21 @@ public abstract class AbstractModel<T extends AbstractModel> {
 
 	private static List<String> getFieldNames(Class clazz) {
 		return Arrays.stream(clazz.getFields())
+			.map(Field::getName)
+			.collect(Collectors.toList());
+	}
+
+	private static List<String> getNonNullFieldsNames(Class clazz, Object instance) {
+		return Arrays.stream(clazz.getFields()).filter(field -> {
+				try {
+					return field.get(instance) != null;
+				}
+				catch(IllegalAccessException e) {
+					// should never occur because we access public fields only
+					e.printStackTrace();
+				}
+				return false;
+			})
 			.map(Field::getName)
 			.collect(Collectors.toList());
 	}
