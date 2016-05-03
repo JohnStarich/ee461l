@@ -21,7 +21,7 @@ public class RatingTest extends AbstractMongoDBTest {
         assertEquals(rating2, rating2);
     }
 
-    public void testLoadRatingsByUser() {
+    public void testLoadRatingsByUser() throws Exception {
         rating1 = rating1.save();
         Movie theNiceGuys = new Movie(new ObjectId(), "The Nice Guys", null, null, null, null, null, null, null);
         new Rating(new ObjectId(), Maximus.id, theNiceGuys.id, "Purely Awesome!", 10).save();
@@ -30,7 +30,7 @@ public class RatingTest extends AbstractMongoDBTest {
         assertEquals(0, Rating.loadRatingsByUser(Commodus.id).size());
     }
 
-    public void testLoadRatingByUser() {
+    public void testLoadRatingByUser() throws Exception {
         rating1 = rating1.save();
         Optional<Rating> r = Rating.loadRatingByUser(Maximus.id, Gladiator.id);
         Optional<Rating> rDos = Rating.loadRatingByUser(Commodus.id, Gladiator.id);

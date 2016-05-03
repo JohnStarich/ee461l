@@ -40,7 +40,7 @@ public class UserTest extends AbstractMongoDBTest {
 		assertNotSame(Josue.password, "goodPassword");
 
 		User test1 = new User(new ObjectId(), "blah@example.org", "Joe", "Shmoe");
-		User test2 = new User(new ObjectId(), "blah@example.org", "Joe", "Shmoe");
+		User test2 = new User(new ObjectId(), "blah2@example.org", "Joe", "Shmoe");
 		assertNotSame(test1.register("same_password").password, test2.register("same_password").password);
 	}
 

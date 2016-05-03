@@ -38,7 +38,7 @@ public class SessionTest extends AbstractMongoDBTest {
         assertTrue(Josue.exists());
     }
 
-    public void testIsValid() {
+    public void testIsValid() throws Exception {
         Session s = new Session(new ObjectId(), Josue);
         s = s.save();
         assertTrue(Session.isValid(s));
@@ -46,5 +46,4 @@ public class SessionTest extends AbstractMongoDBTest {
         s = s.delete();
         assertFalse(Session.isValid(s));
     }
-
 }
