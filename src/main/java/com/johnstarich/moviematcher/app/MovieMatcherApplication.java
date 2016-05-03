@@ -6,6 +6,7 @@ import spark.Route;
 import spark.Spark;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -97,11 +98,18 @@ public class MovieMatcherApplication extends JsonApplication {
 			Map<String, Object> userFields = userFieldsOpt.get();
 			String firstName = (String)userFields.get("first_name");
 			String lastName = (String)userFields.get("last_name");
-			String password = (String)userFields.get("password");
 			String oldPassword = (String)userFields.get("old_password");
+			String password = (String)userFields.get("password");
+			String newPassword = (String) userFields.get("new_password");
 
 			if((password == null && oldPassword != null) || (password != null && oldPassword == null)) {
 				throw new HttpException(HttpStatus.BAD_REQUEST, "New password and old password must be provided together.");
+			}
+
+			if(password != null && newPassword != null) {
+				if(! password.equals(newPassword)) {
+					throw new HttpException(HttpStatus.BAD_REQUEST, "New password does not match confirmation");
+				}
 			}
 
 			User patch = new User(session.get().user.id, null, firstName, lastName);
@@ -110,9 +118,9 @@ public class MovieMatcherApplication extends JsonApplication {
 			Optional<User> user = patch.load();
 
 			if(password != null && user.isPresent()) {
-				user.get().resetPassword(oldPassword, password);
+				user.get().resetPassword(oldPassword, newPassword);
 			}
-			return "true";
+			return "success";
 		});
 
 		jget("/login", (request, response) -> {
@@ -122,6 +130,43 @@ public class MovieMatcherApplication extends JsonApplication {
 			Optional<Session> session = new Session(new ObjectId(session_id.get()), null).load();
 
 			return session.get().user;
+
+		});
+
+		jpost("/users/ratings", (request, response) -> {
+			Optional<String> session_id = Optional.ofNullable(request.headers("Authorization"));
+			if(! session_id.isPresent()) throw new HttpException(HttpStatus.UNAUTHORIZED, "Invalid session");
+
+			Optional<Session> session = new Session(new ObjectId(session_id.get()), null).load();
+			if(! session.isPresent()) throw new HttpException(HttpStatus.UNAUTHORIZED, "Invalid session");
+
+			Optional<Map<String, Object>> userFieldsOpt = bodyParam(request, "user");
+			if(! userFieldsOpt.isPresent()) throw new HttpException(HttpStatus.BAD_REQUEST, "Invalid user parameters");
+
+			Map<String, Object> userFields = userFieldsOpt.get();
+			String movieId = (String) userFields.get("id");
+			double rating = (double) userFields.get("rating");
+			System.out.println(movieId);
+			System.out.println(rating);
+
+			Optional<Movie> m =  new Movie(new ObjectId(movieId)).load();
+
+			// may need to check if movie is present
+
+			User u  = session.get().user;
+			List<Rating> ratings = Rating.loadRatingsByUser(u.id);
+
+			for(Rating r : ratings) {
+				if(r.movie_id.compareTo(m.get().id) == 0) {
+					// rating exists so delete
+					r.delete();
+				}
+			}
+
+			// create rating to maintain property
+			new Rating(new ObjectId(), u.id, m.get().id, "", (int) rating).save();
+
+			return "rating saved!";
 
 		});
 
@@ -167,7 +212,24 @@ public class MovieMatcherApplication extends JsonApplication {
 			int page = asIntOpt(request.queryParams("page")).orElse(1);
 			if(searchQuery.equals("") || results == 0)
 				return Collections.EMPTY_LIST;
-			return AbstractModel.search(Movie.class, searchQuery, results, page);
+
+			User u = request.attribute("user");
+			List<Movie> movies = AbstractModel.search(Movie.class, searchQuery, results, page);
+			List<Rating> ratings = Rating.loadRatingsByUser(u.id);
+			// need to check if any user ratings exist on these movies
+			for(Movie m : movies) {
+				for(Rating r : ratings) {
+					if(r.movie_id != null && m.id.compareTo(r.movie_id) == 0) {
+						m.imdb_rating = Integer.toString(r.numeric_rating);
+					}
+					else {
+						if(m.imdb_rating != null && m.imdb_rating.compareTo("") != 0) {
+							m.imdb_rating = Double.toString(Double.parseDouble(m.imdb_rating) / 2);
+						}
+					}
+				}
+ 			}
+			return movies;
 		};
 		jget("/movies/search/:search_query", searchRoute);
 		jget("/movies/search/", searchRoute);
