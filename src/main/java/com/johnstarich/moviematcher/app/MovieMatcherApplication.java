@@ -118,7 +118,8 @@ public class MovieMatcherApplication extends JsonApplication {
 			String path = request.pathInfo();
 			if(path.equals(PREFIX) ||
 					path.equals(PREFIX+"/") ||
-					path.startsWith("/users") ||
+					path.startsWith("/login") ||
+					path.startsWith("/register") ||
 					path.startsWith(PREFIX+"/users") ||
 					path.startsWith("/assets") ||
 					path.startsWith("/fonts") ||
