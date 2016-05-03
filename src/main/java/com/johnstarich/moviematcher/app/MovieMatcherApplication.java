@@ -380,17 +380,10 @@ public class MovieMatcherApplication extends JsonApplication {
 		Route idRoute = (request, response) -> {
 			String group_id = request.params("id");
 			System.out.println("Looked up group with ID: "+group_id);
-			// java.lang.UnsupportedOperationException: Attempted to serialize java.lang.Class: com.johnstarich.moviematcher.models.Group. Forgot to register a type adapter?
-			// at com.google.gson.internal.bind.TypeAdapters$1.write(TypeAdapters.java:76)
-			//at com.google.gson.internal.bind.TypeAdapters$1.write(TypeAdapters.java:69)
 			return new Group(new ObjectId(group_id)).load();
 		};
 		jget("/groups/:id", idRoute);
 
-
-		Route unimplemented = (request, response) -> {
-			throw new HttpException(HttpStatus.NOT_IMPLEMENTED);
-		};
 		Route userGroups = (request, response) -> {
 			if(request==null) { return Collections.EMPTY_LIST; }
 			User u = request.attribute("user");
@@ -400,7 +393,6 @@ public class MovieMatcherApplication extends JsonApplication {
 			}
 			return Collections.EMPTY_LIST;
 		};
-
 		jget("/groups", userGroups);
 		jget("/groups/", userGroups);
 
