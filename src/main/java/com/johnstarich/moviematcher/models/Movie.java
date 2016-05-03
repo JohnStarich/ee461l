@@ -15,7 +15,7 @@ public class Movie extends AbstractModel<Movie> {
 	public final String rating;
 	public final String genre;
 	public final Date release_date;
-	public String imdb_rating;
+	public final String imdb_rating;
 	public final String poster;
 	public final String plot;
 	public final String movie_lang;

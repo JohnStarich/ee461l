@@ -5,10 +5,7 @@ import org.bson.types.ObjectId;
 import spark.Route;
 import spark.Spark;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * Movie Matcher API is defined here. These routes make up the Movie Matcher services.
@@ -128,25 +125,18 @@ public class MovieMatcherApplication extends JsonApplication {
 			Map<String, Object> userFields = userFieldsOpt.get();
 			String movieId = (String) userFields.get("id");
 			double rating = (double) userFields.get("rating");
-			System.out.println(movieId);
-			System.out.println(rating);
 
 			Optional<Movie> m =  new Movie(new ObjectId(movieId)).load();
 
-			// may need to check if movie is present
+			if(m.isPresent()) {
+				User u = session.get().user;
+				Optional<Rating> r = Rating.loadRatingByUser(u.id, m.get().id);
 
-			User u  = session.get().user;
-			List<Rating> ratings = Rating.loadRatingsByUser(u.id);
+				if(r.isPresent())
+					r.get().delete();
 
-			for(Rating r : ratings) {
-				if(r.movie_id.compareTo(m.get().id) == 0) {
-					// rating exists so delete
-					r.delete();
-				}
+				new Rating(new ObjectId(), u.id, m.get().id, "", (int) rating).save();
 			}
-
-			// create rating to maintain property
-			new Rating(new ObjectId(), u.id, m.get().id, "", (int) rating).save();
 
 			return "rating saved!";
 
@@ -197,22 +187,24 @@ public class MovieMatcherApplication extends JsonApplication {
 
 			User u = request.attribute("user");
 			List<Movie> movies = AbstractModel.search(Movie.class, searchQuery, results, page);
-			List<Rating> ratings = Rating.loadRatingsByUser(u.id);
-			// need to check if any user ratings exist on these movies
-			for(Movie m : movies) {
-				for(Rating r : ratings) {
-					if(r.movie_id != null && m.id.compareTo(r.movie_id) == 0) {
-						m.imdb_rating = Integer.toString(r.numeric_rating);
-					}
-					else {
-						if(m.imdb_rating != null && m.imdb_rating.compareTo("") != 0) {
-							m.imdb_rating = Double.toString(Double.parseDouble(m.imdb_rating) / 2);
-						}
-					}
+			Map<ObjectId, Integer> ratingsMap = new HashMap<>();
+
+			for(Movie m: movies) {
+				Optional<Rating> r = Rating.loadRatingByUser(u.id, m.id);
+				if(r.isPresent()) {
+					ratingsMap.put(m.id, r.get().numeric_rating);
 				}
- 			}
-			return movies;
+				else {
+					ratingsMap.put(m.id, null);
+				}
+			}
+
+			Map<String, Object> ret = new HashMap<>();
+			ret.put("movies", movies);
+			ret.put("ratings", ratingsMap);
+			return ret;
 		};
+
 		jget("/movies/search/:search_query", searchRoute);
 		jget("/movies/search/", searchRoute);
 		jget("/movies/search", searchRoute);
