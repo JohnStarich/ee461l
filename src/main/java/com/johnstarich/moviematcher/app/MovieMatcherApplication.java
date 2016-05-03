@@ -5,7 +5,11 @@ import org.bson.types.ObjectId;
 import spark.Route;
 import spark.Spark;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * Movie Matcher API is defined here. These routes make up the Movie Matcher services.
