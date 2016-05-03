@@ -136,10 +136,14 @@ public class MovieMatcherApplication extends JsonApplication {
 				User u = session.get().user;
 				Optional<Rating> r = Rating.loadRatingByUser(u.id, m.get().id);
 
-				if(r.isPresent())
-					r.get().delete();
 
-				new Rating(new ObjectId(), u.id, m.get().id, "", (int) rating).save();
+				if(r.isPresent()) {
+					Rating patch = new Rating(r.get().id, u.id, m.get().id, null, (int) rating).update();
+					patch.update();
+				}
+				else {
+					new Rating(new ObjectId(), u.id, m.get().id, "", (int) rating).save();
+				}
 			}
 
 			return "rating saved!";
