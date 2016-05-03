@@ -54,13 +54,13 @@ public class MovieMatcherApplication extends JsonApplication {
 		});
 
 		jpost("/users", (request, response) -> {
-			Optional<String> firstName = bodyParam(request, "firstname");
-			Optional<String> lastName = bodyParam(request, "lastname");
+			Optional<String> firstName = bodyParam(request, "first_name");
+			Optional<String> lastName = bodyParam(request, "last_name");
 			Optional<String> username = bodyParam(request, "username");
 			Optional<String> password = bodyParam(request, "password");
 
-			if(! firstName.isPresent()) throw new HttpException(HttpStatus.BAD_REQUEST, "No firstname provided");
-			if(! lastName.isPresent()) throw new HttpException(HttpStatus.BAD_REQUEST, "No lastname provided");
+			if(! firstName.isPresent()) throw new HttpException(HttpStatus.BAD_REQUEST, "No first_name provided");
+			if(! lastName.isPresent()) throw new HttpException(HttpStatus.BAD_REQUEST, "No last_name provided");
 			if(! username.isPresent()) throw new HttpException(HttpStatus.BAD_REQUEST, "No username provided");
 			if(! password.isPresent()) throw new HttpException(HttpStatus.BAD_REQUEST, "No password provided");
 
@@ -111,7 +111,7 @@ public class MovieMatcherApplication extends JsonApplication {
 			if(password != null && user.isPresent()) {
 				user.get().resetPassword(oldPassword, password);
 			}
-			return true;
+			return "true";
 		});
 
 		Spark.before("/*", (request, response) -> {
