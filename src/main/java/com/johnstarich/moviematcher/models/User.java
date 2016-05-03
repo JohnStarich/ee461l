@@ -240,6 +240,7 @@ public class User extends AbstractModel<User> {
 		updatedGroups.remove(editThisGroup);
 		updatedGroups.add(editThisGroup.addFriend(newMember).save());
 		return new User(id, username, first_name, last_name, friends, updatedGroups, password);
+
 	}
 
 
@@ -270,7 +271,6 @@ public class User extends AbstractModel<User> {
 
 		return new User(id,username,first_name,last_name,friends,groupUpdates,password);
 	}
-
 	public Optional<Group> findGroup(String groupName) {
 		return groups.parallelStream().filter(group -> group.name.equals(groupName)).findFirst();
 	}
@@ -281,13 +281,14 @@ public class User extends AbstractModel<User> {
 		if(! g.isPresent()) { throw new HttpException(HttpStatus.BAD_REQUEST, "Could not find "+groupName); }
 		/** I want the users who are my friends and not in this group */
 		/** these are members of the group , so return friends who are not in the member */
+
 		if(friends == null) return Optional.of(new ArrayList<>(0));
 		if(g.get().members == null) return Optional.of(new ArrayList<>(friends));
 		return Optional.ofNullable(
 					friends.parallelStream()
 					.filter(friend -> g.get().members.parallelStream().noneMatch(Predicate.isEqual(friend)))
 					.collect(Collectors.toList())
-				);
+		);
 	}
 
 }
