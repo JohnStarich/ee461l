@@ -341,6 +341,30 @@ public class MovieMatcherApplication extends JsonApplication {
 	 * Register group services, like group search and group ID lookup
 	 */
 	public void groupsService() {
+
+		Route addGroup = (request, response) ->{
+			Optional<String> group_name = bodyParam(request, "group_name");
+			if(! group_name.isPresent()) throw new HttpException(HttpStatus.BAD_REQUEST, "No group name provided");
+			String groupName = group_name.get();
+			User u = request.attribute("user");
+			Optional<User> user = u.load(User.class);
+			if(user.isPresent()) {
+				for(Group existingGroup : user.get().groups){
+					// does group already exist
+					if(existingGroup.name.equals(groupName)){
+						throw new HttpException(HttpStatus.BAD_REQUEST, groupName + " already exists");
+					}
+				}
+				// create new group, save group, add to user, and save changes to user
+				Group g = new Group(null, groupName).save();
+				user.get().addGroup(g).save();
+				return g.id;
+			}
+			throw new HttpException(HttpStatus.UNAUTHORIZED, "Invalid session");
+		};
+		jpost("/groups", addGroup);
+		jpost("/groups/", addGroup);
+
 		jget("/groups/search/:search_query", (request, response) -> {
 			String searchQuery = request.params("search_query").replaceAll("\\+", " ");
 			System.out.println("Searched for \""+searchQuery+"\"");
@@ -352,8 +376,17 @@ public class MovieMatcherApplication extends JsonApplication {
 			System.out.println("Looked up movie with ID: "+movieId);
 			throw new HttpException(HttpStatus.NOT_IMPLEMENTED);
 		};
-		jget("/groups/:id", groupsRoute);
-		jget("/groups/:id/*", groupsRoute);
+
+		Route idRoute = (request, response) -> {
+			String group_id = request.params("id");
+			System.out.println("Looked up group with ID: "+group_id);
+			// java.lang.UnsupportedOperationException: Attempted to serialize java.lang.Class: com.johnstarich.moviematcher.models.Group. Forgot to register a type adapter?
+			// at com.google.gson.internal.bind.TypeAdapters$1.write(TypeAdapters.java:76)
+			//at com.google.gson.internal.bind.TypeAdapters$1.write(TypeAdapters.java:69)
+			return new Group(new ObjectId(group_id)).load();
+		};
+		jget("/groups/:id", idRoute);
+
 
 		Route unimplemented = (request, response) -> {
 			throw new HttpException(HttpStatus.NOT_IMPLEMENTED);
@@ -370,6 +403,40 @@ public class MovieMatcherApplication extends JsonApplication {
 
 		jget("/groups", userGroups);
 		jget("/groups/", userGroups);
-		jget("/groups/*", userGroups);
+
+		Route userSubGroup = (request, response) -> {
+			String group_name = request.params("group_name");
+			User u = request.attribute("user");
+			Optional<User> user = u.load(User.class);
+			if(user.isPresent()){
+				return user.get().getFriendsToAdd(group_name);
+			}
+			throw new HttpException(HttpStatus.UNAUTHORIZED, "Invalid session");
+		};
+		jget("/groups/:group_name/user", userSubGroup);
+		jget("/groups/:group_name/user/", userSubGroup);
+
+		Route addUserToGroup = (request, response) -> {
+			// self
+			User u = request.attribute("user");
+			Optional<User> self = u.load(User.class);
+			if(! self.isPresent()){throw new HttpException(HttpStatus.UNAUTHORIZED, "Invalid session"); }
+			// friend to add to group
+			Optional<String> username = bodyParam(request, "username");
+			Optional<User> friend = User.loadByUsername(username.get());
+			if(! friend.isPresent()) throw new HttpException(HttpStatus.BAD_REQUEST, username.get() + " does not exist");
+			// don't add self to group
+			if(self.get().username.equals(friend.get().username)) throw new HttpException(HttpStatus.BAD_REQUEST, "Cannot add self to group");
+			// group to add to
+			String groupName = request.params("group_name");
+			if(groupName == null) throw new HttpException(HttpStatus.BAD_REQUEST, "No group name provided");
+
+			// attempt to add to group
+			u = self.get().addFriendToGroup(groupName, friend.get()).save();
+
+			return u.groups.parallelStream().filter(group -> group.name.equals(groupName)).findFirst().get().id;
+		};
+		jpost("/groups/:group_name/user", addUserToGroup);
+		jpost("/groups/:group_name/user/", addUserToGroup);
 	}
 }

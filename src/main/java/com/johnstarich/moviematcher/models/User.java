@@ -4,6 +4,7 @@ import com.johnstarich.moviematcher.app.HttpException;
 import com.johnstarich.moviematcher.app.HttpStatus;
 import com.johnstarich.moviematcher.store.MovieMatcherDatabase;
 import de.caluga.morphium.annotations.Index;
+import de.caluga.morphium.annotations.Reference;
 import org.bson.types.ObjectId;
 import org.mindrot.jbcrypt.BCrypt;
 
@@ -11,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.Arrays;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -23,7 +25,9 @@ public class User extends AbstractModel<User> {
 	public final String username;
 	public final String first_name;
 	public final String last_name;
+	@Reference
 	public final List<User> friends;
+	@Reference
 	public final List<Group> groups;
 	public final String password;
 
@@ -218,7 +222,7 @@ public class User extends AbstractModel<User> {
 		}
 
 		if(friends.parallelStream().noneMatch(Predicate.isEqual(newMember))) {
-			throw new HttpException(HttpStatus.BAD_REQUEST, "You are not friends with "+newMember);
+			throw new HttpException(HttpStatus.BAD_REQUEST, "You are not friends with "+ newMember.username);
 		}
 
 		Optional<Group> editThisGroupOptional = groups.parallelStream()
@@ -230,7 +234,7 @@ public class User extends AbstractModel<User> {
 		}
 
 		Group editThisGroup = editThisGroupOptional.get();
-
+		if(editThisGroup.members.contains(newMember)) { throw new HttpException(HttpStatus.BAD_REQUEST, newMember.username + " is already in group"); }
 		groups.remove(editThisGroup);
 		groups.add(editThisGroup.addFriend(newMember));
 
@@ -263,5 +267,23 @@ public class User extends AbstractModel<User> {
 
 		return new User(id,username,first_name,last_name,friends,groupUpdates,password);
 	}
+	public Optional<Group> findGroup(String groupName) {
+		return groups.parallelStream().filter(group -> group.name.equals(groupName)).findFirst();
+	}
+	public Optional<List<User>> getFriendsToAdd(String groupName) throws HttpException{
+		if(groups == null) throw new HttpException(HttpStatus.BAD_REQUEST, "Could not find "+groupName);
+		Optional<Group> g = groups.parallelStream().filter(group -> group.name.equals(groupName)).findFirst();
+		if(! g.isPresent()) { throw new HttpException(HttpStatus.BAD_REQUEST, "Could not find "+groupName); }
+		/** I want the users who are my friends and not in this group */
+		/** these are members of the group , so return friends who are not in the member */
+		if(g.get().members == null) return Optional.of(new ArrayList<>(friends));
+		User[] couldAdd =  friends
+			.parallelStream()
+			.filter( friend -> g.get().members.parallelStream().noneMatch(Predicate.isEqual(friend)))
+			.toArray(User[]::new);
+
+		return Optional.of(new ArrayList<>(Arrays.asList(couldAdd)));
+	}
+
 }
 
