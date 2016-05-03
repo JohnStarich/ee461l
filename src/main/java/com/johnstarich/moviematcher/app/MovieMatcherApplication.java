@@ -6,7 +6,9 @@ import spark.Route;
 import spark.Spark;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -97,7 +99,7 @@ public class MovieMatcherApplication extends JsonApplication {
 			String firstName = (String)userFields.get("first_name");
 			String lastName = (String)userFields.get("last_name");
 			String password = (String)userFields.get("password");
-			String oldPassword = (String)userFields.get("old_password");
+			String oldPassword = (String) userFields.get("old_password");
 
 			if((password == null && oldPassword != null) || (password != null && oldPassword == null)) {
 				throw new HttpException(HttpStatus.BAD_REQUEST, "New password and old password must be provided together.");
@@ -111,7 +113,41 @@ public class MovieMatcherApplication extends JsonApplication {
 			if(password != null && user.isPresent()) {
 				user.get().resetPassword(oldPassword, password);
 			}
-			return "true";
+			return "success";
+		});
+
+		jpost("/users/ratings", (request, response) -> {
+			Optional<String> session_id = Optional.ofNullable(request.headers("Authorization"));
+			if(! session_id.isPresent()) throw new HttpException(HttpStatus.UNAUTHORIZED, "Invalid session");
+
+			Optional<Session> session = new Session(new ObjectId(session_id.get()), null).load();
+			if(! session.isPresent()) throw new HttpException(HttpStatus.UNAUTHORIZED, "Invalid session");
+
+			Optional<Map<String, Object>> userFieldsOpt = bodyParam(request, "user");
+			if(! userFieldsOpt.isPresent()) throw new HttpException(HttpStatus.BAD_REQUEST, "Invalid user parameters");
+
+			Map<String, Object> userFields = userFieldsOpt.get();
+			String movieId = (String) userFields.get("id");
+			double rating = (double) userFields.get("rating");
+
+			Optional<Movie> m =  new Movie(new ObjectId(movieId)).load();
+
+			if(m.isPresent()) {
+				User u = session.get().user;
+				Optional<Rating> r = Rating.loadRatingByUser(u.id, m.get().id);
+
+
+				if(r.isPresent()) {
+					Rating patch = new Rating(r.get().id, u.id, m.get().id, null, (int) rating).update();
+					patch.update();
+				}
+				else {
+					new Rating(new ObjectId(), u.id, m.get().id, "", (int) rating).save();
+				}
+			}
+
+			return "rating saved!";
+
 		});
 
 		Spark.before("/*", (request, response) -> {
@@ -156,8 +192,27 @@ public class MovieMatcherApplication extends JsonApplication {
 			int page = asIntOpt(request.queryParams("page")).orElse(1);
 			if(searchQuery.equals("") || results == 0)
 				return Collections.EMPTY_LIST;
-			return AbstractModel.search(Movie.class, searchQuery, results, page);
+
+			User u = request.attribute("user");
+			List<Movie> movies = AbstractModel.search(Movie.class, searchQuery, results, page);
+			Map<ObjectId, Integer> ratingsMap = new HashMap<>();
+
+			for(Movie m: movies) {
+				Optional<Rating> r = Rating.loadRatingByUser(u.id, m.id);
+				if(r.isPresent()) {
+					ratingsMap.put(m.id, r.get().numeric_rating);
+				}
+				else {
+					ratingsMap.put(m.id, null);
+				}
+			}
+
+			Map<String, Object> ret = new HashMap<>();
+			ret.put("movies", movies);
+			ret.put("ratings", ratingsMap);
+			return ret;
 		};
+
 		jget("/movies/search/:search_query", searchRoute);
 		jget("/movies/search/", searchRoute);
 		jget("/movies/search", searchRoute);
