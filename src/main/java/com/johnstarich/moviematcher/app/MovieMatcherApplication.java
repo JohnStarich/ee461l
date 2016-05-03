@@ -82,7 +82,6 @@ public class MovieMatcherApplication extends JsonApplication {
 			if(! session.isPresent()) throw new HttpException(HttpStatus.UNAUTHORIZED, "Invalid session");
 
 			return session.get().user;
-
 		});
 
 		jpatch("/users", (request, response) -> {
@@ -98,18 +97,11 @@ public class MovieMatcherApplication extends JsonApplication {
 			Map<String, Object> userFields = userFieldsOpt.get();
 			String firstName = (String)userFields.get("first_name");
 			String lastName = (String)userFields.get("last_name");
-			String oldPassword = (String)userFields.get("old_password");
 			String password = (String)userFields.get("password");
-			String newPassword = (String) userFields.get("new_password");
+			String oldPassword = (String) userFields.get("old_password");
 
 			if((password == null && oldPassword != null) || (password != null && oldPassword == null)) {
 				throw new HttpException(HttpStatus.BAD_REQUEST, "New password and old password must be provided together.");
-			}
-
-			if(password != null && newPassword != null) {
-				if(! password.equals(newPassword)) {
-					throw new HttpException(HttpStatus.BAD_REQUEST, "New password does not match confirmation");
-				}
 			}
 
 			User patch = new User(session.get().user.id, null, firstName, lastName);
@@ -118,19 +110,9 @@ public class MovieMatcherApplication extends JsonApplication {
 			Optional<User> user = patch.load();
 
 			if(password != null && user.isPresent()) {
-				user.get().resetPassword(oldPassword, newPassword);
+				user.get().resetPassword(oldPassword, password);
 			}
 			return "success";
-		});
-
-		jget("/login", (request, response) -> {
-			Optional<String> session_id = Optional.ofNullable(request.headers("Authorization"));
-
-			if(! session_id.isPresent()) throw new HttpException(HttpStatus.UNAUTHORIZED, "Invalid session");
-			Optional<Session> session = new Session(new ObjectId(session_id.get()), null).load();
-
-			return session.get().user;
-
 		});
 
 		jpost("/users/ratings", (request, response) -> {
