@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 /**
@@ -261,7 +262,7 @@ public class MovieMatcherApplication extends JsonApplication {
 			System.out.println("Looked up user with ID: "+userId);
 			Optional<User> user = new User(new ObjectId(userId)).load();
 			if(! user.isPresent()) throw new HttpException(HttpStatus.NOT_FOUND, "User not found");
-			return user.get();
+			return user.get().noPassword();
 		};
 
 		jget("/friends/:id", friendRoute);
@@ -270,12 +271,16 @@ public class MovieMatcherApplication extends JsonApplication {
 
 
 		jget("/friends", (request, response) -> {
-			/** return the user's friends */
+			/* return the user's friends */
 			User u = request.attribute("user");
 			if(u==null) return Collections.EMPTY_LIST;
 			Optional<User> user = u.load(User.class);
 			if(user.isPresent()) {
-				return user.get().friends;
+				if(user.get().friends == null ) return Collections.EMPTY_LIST;
+				return user.get().friends
+					.parallelStream()
+					.map(User::noPassword)
+					.collect(Collectors.toList());
 			}
 			return Collections.EMPTY_LIST;
 		});
@@ -283,12 +288,39 @@ public class MovieMatcherApplication extends JsonApplication {
 		Route unimplemented = (request, response) -> {
 			throw new HttpException(HttpStatus.NOT_IMPLEMENTED);
 		};
-
+		Route addFriend = (request, response) -> {
+				Optional<String> potentialFriend = bodyParam(request, "friend_user_name");
+				if(! potentialFriend.isPresent()) throw new HttpException(HttpStatus.BAD_REQUEST, "No potential friend user name provided.");
+				Optional<User> newFriend = User.search(User.class, potentialFriend.get()).parallelStream().findFirst();
+				if(! newFriend.isPresent()) throw new HttpException(HttpStatus.BAD_REQUEST, "No potential friend user name provided.");
+				User u = request.attribute("user");
+				Optional<User> user = u.load(User.class);
+				if(! user.isPresent()) throw new HttpException(HttpStatus.UNAUTHORIZED, "Invalid session.");
+				User currentuser = user.get().noPassword();
+				User nf = newFriend.get();
+				for(User friend : currentuser.friends) {
+						if(friend.equals(nf)) throw new HttpException(HttpStatus.BAD_REQUEST, "Already friends.");
+					}
+				currentuser = currentuser.addFriend(nf).save();
+				return currentuser.id;
+			};
 		/* let us add some friends :) */
-		jpost("/friends", unimplemented);
+		jpost("/friends", addFriend);
+		jpost("/friends/", addFriend);
 
+		Route removeFriend = (request, response) -> {
+			String userId = request.params("id");
+			Optional<User> removeUser = new User(new ObjectId(userId)).load();
+			if(! removeUser.isPresent()) throw new HttpException(HttpStatus.BAD_REQUEST, "No user with that id found");
+			User u = request.attribute("user");
+			Optional<User> user = u.load(User.class);
+			if(! user.isPresent()) throw new HttpException(HttpStatus.UNAUTHORIZED, "Invalid Session");
+			user.get().removeFriend(removeUser.get()).save();
+			return user.get().id;
+		};
 		/* delete some friends */
-		jdelete("/friends/:id", unimplemented);
+		jdelete("/friends/:id", removeFriend);
+		jdelete("/friends/:id/", removeFriend);
 	}
 
 	/**
