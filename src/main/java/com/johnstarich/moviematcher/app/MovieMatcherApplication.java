@@ -52,6 +52,7 @@ public class MovieMatcherApplication extends JsonApplication {
 			Optional<String> password = bodyParam(request, "password");
 			if(! username.isPresent()) throw new HttpException(HttpStatus.BAD_REQUEST, "No username provided");
 			if(! password.isPresent()) throw new HttpException(HttpStatus.BAD_REQUEST, "No password provided");
+
 			return User.login(username.get(), password.get());
 		});
 
@@ -175,6 +176,7 @@ public class MovieMatcherApplication extends JsonApplication {
 			Optional<Session> session = new Session(new ObjectId(authorization.get().trim()), null).load();
 			if(! session.isPresent()) throw new HttpException(HttpStatus.UNAUTHORIZED, "Invalid session.");
 			if(! Session.isValid(session.get())) throw new HttpException(HttpStatus.UNAUTHORIZED, "Invalid session.");
+
 			request.attribute("user", session.get().user);
 		});
 	}
