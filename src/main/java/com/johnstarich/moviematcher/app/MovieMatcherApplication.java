@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
@@ -244,7 +245,11 @@ public class MovieMatcherApplication extends JsonApplication {
 			System.out.println("Searched for \"" + searchQuery + "\"");
 			int results = asIntOpt(request.queryParams("results")).orElse(20);
 			int page = asIntOpt(request.queryParams("page")).orElse(1);
-			if(searchQuery.equals("") || results == 0)
+			User u = request.attribute("user");
+			Optional<User> user = u.load(User.class);
+			if(! user.isPresent()) throw new HttpException(HttpStatus.UNAUTHORIZED, "Invalid Session");
+			if(searchQuery.equals("") || results == 0 || searchQuery.equals(user.get().username)
+				|| searchQuery.equals(user.get().first_name) || searchQuery.equals(user.get().last_name))
 				return Collections.EMPTY_LIST;
 			return AbstractModel.search(User.class, searchQuery, results, page)
 				.parallelStream()
@@ -261,34 +266,75 @@ public class MovieMatcherApplication extends JsonApplication {
 			System.out.println("Looked up user with ID: "+userId);
 			Optional<User> user = new User(new ObjectId(userId)).load();
 			if(! user.isPresent()) throw new HttpException(HttpStatus.NOT_FOUND, "User not found");
-			return user.get();
+			return user.get().noPassword();
 		};
 
 		jget("/friends/:id", friendRoute);
 		jget("/friends/:id/*", friendRoute);
 
 
-
-		jget("/friends", (request, response) -> {
-			/** return the user's friends */
+		Route displayFriends = (request, response) -> {
+			/* return the user's friends */
 			User u = request.attribute("user");
 			if(u==null) return Collections.EMPTY_LIST;
 			Optional<User> user = u.load(User.class);
 			if(user.isPresent()) {
-				return user.get().friends;
+				if(user.get().friends == null ) return Collections.EMPTY_LIST;
+				return user.get().friends
+					.parallelStream()
+					.map(User::noPassword)
+					.collect(Collectors.toList());
 			}
 			return Collections.EMPTY_LIST;
-		});
+		};
+
+		jget("/friends", displayFriends);
+		jget("/friends/", displayFriends);
 
 		Route unimplemented = (request, response) -> {
 			throw new HttpException(HttpStatus.NOT_IMPLEMENTED);
 		};
 
+		Route addFriend = (request, response) -> {
+				Optional<String> potentialFriend = bodyParam(request, "newFriend_id");
+				if(! potentialFriend.isPresent()) throw new HttpException(HttpStatus.BAD_REQUEST, "No potential friend provided.");
+				Optional<User> newFriend = new User(new ObjectId(potentialFriend.get())).load();
+				if(! newFriend.isPresent()) throw new HttpException(HttpStatus.BAD_REQUEST, "No potential friend user name provided.");
+				User u = request.attribute("user");
+				Optional<User> user = u.load(User.class);
+				if(! user.isPresent()) throw new HttpException(HttpStatus.UNAUTHORIZED, "Invalid session.");
+				User currentuser = user.get().noPassword();
+				User nf = newFriend.get();
+				if(currentuser.friends == null) {
+					currentuser = currentuser.addFriend(nf).save();
+					return "Congrats! You are now friends with " + nf.username;
+				} else {
+					if(currentuser.friends.parallelStream().anyMatch(Predicate.isEqual(nf)))
+						throw new HttpException(HttpStatus.BAD_REQUEST, "Already friends.");
+					currentuser = currentuser.addFriend(nf).save();
+					return "Congrats! You are now friends with " + nf.username;
+				}
+			};
+
 		/* let us add some friends :) */
-		jpost("/friends", unimplemented);
+		jpost("/friends", addFriend);
+		jpost("/friends/", addFriend);
+
+		Route removeFriend = (request, response) -> {
+			String userId = request.params("id");
+			Optional<User> removeUser = new User(new ObjectId(userId)).load();
+			if(! removeUser.isPresent()) throw new HttpException(HttpStatus.BAD_REQUEST, "No user with that id found");
+			User u = request.attribute("user");
+			Optional<User> user = u.load(User.class);
+			if(! user.isPresent()) throw new HttpException(HttpStatus.UNAUTHORIZED, "Invalid Session");
+			if(user.get().id.equals(new ObjectId(userId))) throw new HttpException(HttpStatus.BAD_REQUEST, "Can't delete yourself, sorry bud.");
+			user.get().removeFriend(removeUser.get()).removeFriendFromGroups(removeUser.get()).save();
+			return "Succes, you are no longer friends with " + removeUser.get().username;
+		};
 
 		/* delete some friends */
-		jdelete("/friends/:id", unimplemented);
+		jdelete("/friends/:id", removeFriend);
+		jdelete("/friends/:id/", removeFriend);
 	}
 
 	/**
