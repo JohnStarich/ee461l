@@ -270,6 +270,7 @@ public class User extends AbstractModel<User> {
 	public Optional<Group> findGroup(String groupName) {
 		return groups.parallelStream().filter(group -> group.name.equals(groupName)).findFirst();
 	}
+
 	public Optional<List<User>> getFriendsToAdd(String groupName) throws HttpException{
 		if(groups == null) throw new HttpException(HttpStatus.BAD_REQUEST, "Could not find "+groupName);
 		Optional<Group> g = groups.parallelStream().filter(group -> group.name.equals(groupName)).findFirst();
@@ -278,14 +279,11 @@ public class User extends AbstractModel<User> {
 		/** these are members of the group , so return friends who are not in the member */
 		if(friends == null) return Optional.of(new ArrayList<>(0));
 		if(g.get().members == null) return Optional.of(new ArrayList<>(friends));
-		
-		User[] couldAdd =  friends
- 				.parallelStream()
- 		.filter( friend -> g.get().members.parallelStream().noneMatch(Predicate.isEqual(friend)))
- 			.toArray(User[]::new);
-
-		return Optional.of(new ArrayList<>(Arrays.asList(couldAdd)));
-
+		return Optional.ofNullable(
+					friends.parallelStream()
+					.filter(friend -> g.get().members.parallelStream().noneMatch(Predicate.isEqual(friend)))
+					.collect(Collectors.toList())
+				);
 	}
 
 }
