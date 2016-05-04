@@ -289,20 +289,25 @@ public class MovieMatcherApplication extends JsonApplication {
 			throw new HttpException(HttpStatus.NOT_IMPLEMENTED);
 		};
 		Route addFriend = (request, response) -> {
-				Optional<String> potentialFriend = bodyParam(request, "friend_user_name");
-				if(! potentialFriend.isPresent()) throw new HttpException(HttpStatus.BAD_REQUEST, "No potential friend user name provided.");
-				Optional<User> newFriend = User.search(User.class, potentialFriend.get()).parallelStream().findFirst();
+				Optional<String> potentialFriend = bodyParam(request, "newFriend_id");
+				if(! potentialFriend.isPresent()) throw new HttpException(HttpStatus.BAD_REQUEST, "No potential friend provided.");
+				Optional<User> newFriend = new User(new ObjectId(potentialFriend.get())).load();
 				if(! newFriend.isPresent()) throw new HttpException(HttpStatus.BAD_REQUEST, "No potential friend user name provided.");
 				User u = request.attribute("user");
 				Optional<User> user = u.load(User.class);
 				if(! user.isPresent()) throw new HttpException(HttpStatus.UNAUTHORIZED, "Invalid session.");
 				User currentuser = user.get().noPassword();
 				User nf = newFriend.get();
-				for(User friend : currentuser.friends) {
-						if(friend.equals(nf)) throw new HttpException(HttpStatus.BAD_REQUEST, "Already friends.");
+				if(currentuser.friends == null) {
+					currentuser = currentuser.addFriend(nf).save();
+					return "Congrats! You are now friends with " + nf.username;
+				} else {
+					for (User friend : currentuser.friends) {
+						if (friend.equals(nf)) throw new HttpException(HttpStatus.BAD_REQUEST, "Already friends.");
 					}
-				currentuser = currentuser.addFriend(nf).save();
-				return currentuser.id;
+					currentuser = currentuser.addFriend(nf).save();
+					return "Congrats! You are now friends with " + nf.username;
+				}
 			};
 		/* let us add some friends :) */
 		jpost("/friends", addFriend);
@@ -316,7 +321,7 @@ public class MovieMatcherApplication extends JsonApplication {
 			Optional<User> user = u.load(User.class);
 			if(! user.isPresent()) throw new HttpException(HttpStatus.UNAUTHORIZED, "Invalid Session");
 			user.get().removeFriend(removeUser.get()).save();
-			return user.get().id;
+			return "Succes, you are no longer friends with " + removeUser.get().username;
 		};
 		/* delete some friends */
 		jdelete("/friends/:id", removeFriend);
