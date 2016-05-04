@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
  */
 @Entity
 public abstract class AbstractModel<T extends AbstractModel> {
+	@Transient
 	protected static final int MODEL_DEFAULT_RESULTS = 20, MODEL_MAX_RESULTS = 100, MODEL_MIN_PAGE = 1;
 
 	@Id

@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Movie Matcher API is defined here. These routes make up the Movie Matcher services.
@@ -72,7 +73,7 @@ public class MovieMatcherApplication extends JsonApplication {
 				firstName.get(),
 				lastName.get()
 			);
-			return newUser.register(password.get());
+			return newUser.register(password.get()).noPassword();
 		});
 
 		jget("/users", (request, response) -> {
@@ -82,7 +83,7 @@ public class MovieMatcherApplication extends JsonApplication {
 			Optional<Session> session = new Session(new ObjectId(session_id.get()), null).load();
 			if(! session.isPresent()) throw new HttpException(HttpStatus.UNAUTHORIZED, "Invalid session");
 
-			return session.get().user;
+			return session.get().user.noPassword();
 		});
 
 		jpatch("/users", (request, response) -> {
@@ -245,7 +246,10 @@ public class MovieMatcherApplication extends JsonApplication {
 			int page = asIntOpt(request.queryParams("page")).orElse(1);
 			if(searchQuery.equals("") || results == 0)
 				return Collections.EMPTY_LIST;
-			return AbstractModel.search(User.class, searchQuery, results, page);
+			return AbstractModel.search(User.class, searchQuery, results, page)
+				.parallelStream()
+				.map(User::noPassword)
+				.collect(Collectors.toList());
 		};
 
 		jget("/friends/search/:search_query", friendSearchRoute);
@@ -255,7 +259,9 @@ public class MovieMatcherApplication extends JsonApplication {
 		Route friendRoute = (request, response) -> {
 			String userId = request.params("id");
 			System.out.println("Looked up user with ID: "+userId);
-			return new User(new ObjectId(userId)).load();
+			Optional<User> user = new User(new ObjectId(userId)).load();
+			if(! user.isPresent()) throw new HttpException(HttpStatus.NOT_FOUND, "User not found");
+			return user.get();
 		};
 
 		jget("/friends/:id", friendRoute);

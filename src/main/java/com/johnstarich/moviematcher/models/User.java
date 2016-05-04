@@ -235,5 +235,9 @@ public class User extends AbstractModel<User> {
 
 		return new User(id, username, first_name, last_name, friends, groups, password);
 	}
+
+	public User noPassword() {
+		return new User(id, username, first_name, last_name, friends, groups, null);
+	}
 }
 
