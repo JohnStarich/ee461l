@@ -11,6 +11,8 @@ import org.bson.types.ObjectId;
 import spark.ResponseTransformer;
 
 import java.io.IOException;
+import java.util.Collection;
+import java.util.stream.Collectors;
 
 /**
  * Transforms objects into JSON strings
@@ -34,6 +36,12 @@ public class JsonTransformer implements ResponseTransformer {
 	@Override
 	public String render(Object model) throws Exception {
 		if(model instanceof AbstractModel) return MovieMatcherDatabase.morphium.toJsonString(model);
+		else if(model instanceof Collection) {
+			return ((Collection<AbstractModel>) model)
+				.parallelStream()
+				.map(MovieMatcherDatabase.morphium::toJsonString)
+				.collect(Collectors.toList()).toString();
+		}
 		else return gson.toJson(model);
 	}
 
