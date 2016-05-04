@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
@@ -83,7 +84,7 @@ public class MovieMatcherApplication extends JsonApplication {
 			Optional<Session> session = new Session(new ObjectId(session_id.get()), null).load();
 			if(! session.isPresent()) throw new HttpException(HttpStatus.UNAUTHORIZED, "Invalid session");
 
-			return session.get().user;
+			return session.get().user.noPassword();
 		});
 
 		jpatch("/users", (request, response) -> {
@@ -308,13 +309,13 @@ public class MovieMatcherApplication extends JsonApplication {
 					currentuser = currentuser.addFriend(nf).save();
 					return "Congrats! You are now friends with " + nf.username;
 				} else {
-					for (User friend : currentuser.friends) {
-						if (friend.equals(nf)) throw new HttpException(HttpStatus.BAD_REQUEST, "Already friends.");
-					}
+					if(currentuser.friends.parallelStream().anyMatch(Predicate.isEqual(nf)))
+						throw new HttpException(HttpStatus.BAD_REQUEST, "Already friends.");
 					currentuser = currentuser.addFriend(nf).save();
 					return "Congrats! You are now friends with " + nf.username;
 				}
 			};
+
 		/* let us add some friends :) */
 		jpost("/friends", addFriend);
 		jpost("/friends/", addFriend);
@@ -330,6 +331,7 @@ public class MovieMatcherApplication extends JsonApplication {
 			user.get().removeFriend(removeUser.get()).removeFriendFromGroups(removeUser.get()).save();
 			return "Succes, you are no longer friends with " + removeUser.get().username;
 		};
+
 		/* delete some friends */
 		jdelete("/friends/:id", removeFriend);
 		jdelete("/friends/:id/", removeFriend);
