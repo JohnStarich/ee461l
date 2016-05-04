@@ -16,9 +16,9 @@ import java.util.function.Predicate;
 /**
  * Created by Josue on 4/7/2016.
  */
-@Index("username:text")
+@Index("username:text,first_name:text,last_name:text")
 public class User extends AbstractModel<User> {
-	@Index(options={"unique"})
+	@Index(options={"unique", "weight:5"})
 	public final String username;
 	public final String first_name;
 	public final String last_name;
@@ -234,6 +234,10 @@ public class User extends AbstractModel<User> {
 		groups.add(editThisGroup.addFriend(newMember));
 
 		return new User(id, username, first_name, last_name, friends, groups, password);
+	}
+
+	public User noPassword() {
+		return new User(id, username, first_name, last_name, friends, groups, null);
 	}
 }
 
