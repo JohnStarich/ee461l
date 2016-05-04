@@ -9,8 +9,9 @@ import java.util.Date;
 /**
  * Created by Josue on 3/10/2016.
  */
-@Index("title:text")
+@Index("title:text,genre:text")
 public class Movie extends AbstractModel<Movie> {
+	@Index(options={"weight:5"})
 	public final String title;
 	public final String rating;
 	public final String genre;
