@@ -12,6 +12,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 /**
  * Created by Josue on 4/7/2016.
@@ -238,6 +239,29 @@ public class User extends AbstractModel<User> {
 
 	public User noPassword() {
 		return new User(id, username, first_name, last_name, friends, groups, null);
+	}
+
+	public User removeFriendFromGroups(User user) {
+		if(groups == null) return this;
+
+		List<Group> groupsContainUser = groups.parallelStream()
+			.filter(group -> {
+					if (group.members != null) return group.members.contains(user);
+					return false;
+				}
+			)
+			.collect(Collectors.toList());
+
+		List<Group> groupUpdates = new ArrayList<>(this.groups);
+
+		groupsContainUser.parallelStream().forEach(
+			group -> {
+				groupUpdates.remove(group);
+				groupUpdates.add(group.removeFriend(user));
+			}
+		);
+
+		return new User(id,username,first_name,last_name,friends,groupUpdates,password);
 	}
 }
 

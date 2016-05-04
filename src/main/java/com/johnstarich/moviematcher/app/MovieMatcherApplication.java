@@ -10,7 +10,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 /**
@@ -53,7 +52,6 @@ public class MovieMatcherApplication extends JsonApplication {
 			Optional<String> password = bodyParam(request, "password");
 			if(! username.isPresent()) throw new HttpException(HttpStatus.BAD_REQUEST, "No username provided");
 			if(! password.isPresent()) throw new HttpException(HttpStatus.BAD_REQUEST, "No password provided");
-
 			return User.login(username.get(), password.get());
 		});
 
@@ -84,7 +82,7 @@ public class MovieMatcherApplication extends JsonApplication {
 			Optional<Session> session = new Session(new ObjectId(session_id.get()), null).load();
 			if(! session.isPresent()) throw new HttpException(HttpStatus.UNAUTHORIZED, "Invalid session");
 
-			return session.get().user.noPassword();
+			return session.get().user;
 		});
 
 		jpatch("/users", (request, response) -> {
@@ -177,7 +175,6 @@ public class MovieMatcherApplication extends JsonApplication {
 			Optional<Session> session = new Session(new ObjectId(authorization.get().trim()), null).load();
 			if(! session.isPresent()) throw new HttpException(HttpStatus.UNAUTHORIZED, "Invalid session.");
 			if(! Session.isValid(session.get())) throw new HttpException(HttpStatus.UNAUTHORIZED, "Invalid session.");
-
 			request.attribute("user", session.get().user);
 		});
 	}
@@ -245,7 +242,11 @@ public class MovieMatcherApplication extends JsonApplication {
 			System.out.println("Searched for \"" + searchQuery + "\"");
 			int results = asIntOpt(request.queryParams("results")).orElse(20);
 			int page = asIntOpt(request.queryParams("page")).orElse(1);
-			if(searchQuery.equals("") || results == 0)
+			User u = request.attribute("user");
+			Optional<User> user = u.load(User.class);
+			if(! user.isPresent()) throw new HttpException(HttpStatus.UNAUTHORIZED, "Invalid Session");
+			if(searchQuery.equals("") || results == 0 || searchQuery.equals(user.get().username)
+				|| searchQuery.equals(user.get().first_name) || searchQuery.equals(user.get().last_name))
 				return Collections.EMPTY_LIST;
 			return AbstractModel.search(User.class, searchQuery, results, page)
 				.parallelStream()
@@ -269,8 +270,7 @@ public class MovieMatcherApplication extends JsonApplication {
 		jget("/friends/:id/*", friendRoute);
 
 
-
-		jget("/friends", (request, response) -> {
+		Route displayFriends = (request, response) -> {
 			/* return the user's friends */
 			User u = request.attribute("user");
 			if(u==null) return Collections.EMPTY_LIST;
@@ -283,11 +283,15 @@ public class MovieMatcherApplication extends JsonApplication {
 					.collect(Collectors.toList());
 			}
 			return Collections.EMPTY_LIST;
-		});
+		};
+
+		jget("/friends", displayFriends);
+		jget("/friends/", displayFriends);
 
 		Route unimplemented = (request, response) -> {
 			throw new HttpException(HttpStatus.NOT_IMPLEMENTED);
 		};
+
 		Route addFriend = (request, response) -> {
 				Optional<String> potentialFriend = bodyParam(request, "newFriend_id");
 				if(! potentialFriend.isPresent()) throw new HttpException(HttpStatus.BAD_REQUEST, "No potential friend provided.");
@@ -320,7 +324,8 @@ public class MovieMatcherApplication extends JsonApplication {
 			User u = request.attribute("user");
 			Optional<User> user = u.load(User.class);
 			if(! user.isPresent()) throw new HttpException(HttpStatus.UNAUTHORIZED, "Invalid Session");
-			user.get().removeFriend(removeUser.get()).save();
+			if(user.get().id.equals(new ObjectId(userId))) throw new HttpException(HttpStatus.BAD_REQUEST, "Can't delete yourself, sorry bud.");
+			user.get().removeFriend(removeUser.get()).removeFriendFromGroups(removeUser.get()).save();
 			return "Succes, you are no longer friends with " + removeUser.get().username;
 		};
 		/* delete some friends */
