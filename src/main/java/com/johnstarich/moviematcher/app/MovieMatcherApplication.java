@@ -470,8 +470,7 @@ public class MovieMatcherApplication extends JsonApplication {
 			Optional<Group> g = self.get().findGroup(groupName);
 			if(! g.isPresent()) { throw new HttpException(HttpStatus.BAD_REQUEST, "Could not find "+groupName); }
 
-			/* placeholder: actual algo goes here*/
-			return AbstractModel.search(Movie.class, "Deadpool", 20, 1);
+			return g.get().suggestMovies();
 		};
 
 		jget("/groups/:group_name/recommendations", recommendationList);

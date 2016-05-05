@@ -6,10 +6,16 @@ import de.caluga.morphium.annotations.Index;
 import de.caluga.morphium.annotations.Reference;
 import org.bson.types.ObjectId;
 
-import javax.crypto.spec.OAEPParameterSpec;
-import javax.swing.plaf.basic.BasicInternalFrameTitlePane;
-import java.lang.reflect.Array;
-import java.util.*;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.stream.Collectors;
 import java.util.Map.Entry;
 
@@ -64,7 +70,7 @@ public class Group extends AbstractModel<Group> {
 
     public Optional<List<Movie>> suggestMovies() throws HttpException {
        /* bring the ratings in O(Users) */
-        if(members == null) return Optional.empty();
+        if(members == null) throw new HttpException(HttpStatus.BAD_REQUEST, "Please add friends to your group.");
 
         //really don't want to create local variable ....
         List<Rating> groupRatings = new ArrayList<>();
