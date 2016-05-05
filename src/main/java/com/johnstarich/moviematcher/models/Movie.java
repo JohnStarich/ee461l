@@ -62,6 +62,7 @@ public class Movie extends AbstractModel<Movie> {
 		return Optional.ofNullable(MovieMatcherDatabase.morphium
 			.findByField(Movie.class, "genre", genre)
 			.parallelStream()
+			.filter(movie -> movie.imdb_rating != null && movie.imdb_rating.compareTo("") != 0 && Double.parseDouble(movie.imdb_rating) >= 8.0)
 			.limit(20).collect(Collectors.toList()));
 	}
 
