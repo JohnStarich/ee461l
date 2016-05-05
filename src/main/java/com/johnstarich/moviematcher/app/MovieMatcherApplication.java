@@ -5,6 +5,7 @@ import org.bson.types.ObjectId;
 
 import spark.Route;
 import spark.Spark;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -303,7 +304,7 @@ public class MovieMatcherApplication extends JsonApplication {
 				User u = request.attribute("user");
 				Optional<User> user = u.load(User.class);
 				if(! user.isPresent()) throw new HttpException(HttpStatus.UNAUTHORIZED, "Invalid session.");
-				User currentuser = user.get().noPassword();
+				User currentuser = user.get();
 				User nf = newFriend.get();
 				if(currentuser.friends == null) {
 					currentuser = currentuser.addFriend(nf).save();
@@ -329,7 +330,7 @@ public class MovieMatcherApplication extends JsonApplication {
 			if(! user.isPresent()) throw new HttpException(HttpStatus.UNAUTHORIZED, "Invalid Session");
 			if(user.get().id.equals(new ObjectId(userId))) throw new HttpException(HttpStatus.BAD_REQUEST, "Can't delete yourself, sorry bud.");
 			user.get().removeFriend(removeUser.get()).removeFriendFromGroups(removeUser.get()).save();
-			return "Succes, you are no longer friends with " + removeUser.get().username;
+			return "Success, you are no longer friends with " + removeUser.get().username;
 		};
 
 		/* delete some friends */
@@ -387,7 +388,7 @@ public class MovieMatcherApplication extends JsonApplication {
 			System.out.println("Looked up group with ID: "+group_id);
 			return new Group(new ObjectId(group_id)).load(Group.class);
 		};
-		jget("/groups/:id", idRoute);
+		jget("/groups/:id", groupsRoute);
 
 		Route userGroups = (request, response) -> {
 			if(request==null) { return Collections.EMPTY_LIST; }
@@ -396,15 +397,21 @@ public class MovieMatcherApplication extends JsonApplication {
 
 			if(user.isPresent()) {
 				Map<String, List<User>> groupsMap = new HashMap<>();
-				for(Group g : user.get().groups){
-					groupsMap.put(g.name, g.members);
-				}
 				Map<String, Object> ret = new HashMap<>();
-				ret.put("groups", user.get().groups);
+
+				if(user.get().groups == null) {
+					groupsMap.put("", new ArrayList<>(0));
+					ret.put("groups", new ArrayList<>(0));
+				} else {
+					for (Group g : user.get().groups) {
+						groupsMap.put(g.name, g.members);
+					}
+					ret.put("groups", user.get().groups);
+				}
 				ret.put("members", groupsMap);
 				return ret;
 			}
-			return Collections.EMPTY_LIST;
+			throw new HttpException(HttpStatus.UNAUTHORIZED, "Invalid session");
 		};
 		jget("/groups", userGroups);
 		jget("/groups/", userGroups);
@@ -447,5 +454,25 @@ public class MovieMatcherApplication extends JsonApplication {
 
 		jpost("/groups/:group_name/user", addUserToGroup);
 		jpost("/groups/:group_name/user/", addUserToGroup);
+
+
+		Route recommendationList = (request, response) -> {
+			// self
+			User u = request.attribute("user");
+			Optional<User> self = u.load(User.class);
+			if(! self.isPresent()){throw new HttpException(HttpStatus.UNAUTHORIZED, "Invalid session"); }
+
+			// group to generate list for
+			String groupName = request.params("group_name");
+			if(groupName == null) throw new HttpException(HttpStatus.BAD_REQUEST, "No group name provided");
+			Optional<Group> g = self.get().findGroup(groupName);
+			if(! g.isPresent()) { throw new HttpException(HttpStatus.BAD_REQUEST, "Could not find "+groupName); }
+
+			/* placeholder: actual algo goes here*/
+			return AbstractModel.search(Movie.class, "Deadpool", 20, 1);
+		};
+
+		jget("/groups/:group_name/recommendations", recommendationList);
+		jget("/groups/:group_name/recommendations/", recommendationList);
 	}
 }

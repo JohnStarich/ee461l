@@ -217,7 +217,7 @@ public class User extends AbstractModel<User> {
 	}
 
 	public User addFriendToGroup(String groupName, User newMember) throws HttpException{
-		if(groupName == null || newMember == null) {
+		if(groupName == null || newMember == null || friends == null) {
 			throw new HttpException(HttpStatus.BAD_REQUEST);
 		}
 
@@ -287,7 +287,7 @@ public class User extends AbstractModel<User> {
 					friends.parallelStream()
 					.filter(friend -> g.get().members.parallelStream().noneMatch(Predicate.isEqual(friend)))
 					.collect(Collectors.toList())
-				);
+		);
 	}
 
 }
