@@ -5,8 +5,12 @@ import org.bson.types.ObjectId;
 
 import spark.Route;
 import spark.Spark;
-
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.List;
+import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -300,7 +304,7 @@ public class MovieMatcherApplication extends JsonApplication {
 				User u = request.attribute("user");
 				Optional<User> user = u.load(User.class);
 				if(! user.isPresent()) throw new HttpException(HttpStatus.UNAUTHORIZED, "Invalid session.");
-				User currentuser = user.get().noPassword();
+				User currentuser = user.get();
 				User nf = newFriend.get();
 				if(currentuser.friends == null) {
 					currentuser = currentuser.addFriend(nf).save();
@@ -326,7 +330,7 @@ public class MovieMatcherApplication extends JsonApplication {
 			if(! user.isPresent()) throw new HttpException(HttpStatus.UNAUTHORIZED, "Invalid Session");
 			if(user.get().id.equals(new ObjectId(userId))) throw new HttpException(HttpStatus.BAD_REQUEST, "Can't delete yourself, sorry bud.");
 			user.get().removeFriend(removeUser.get()).removeFriendFromGroups(removeUser.get()).save();
-			return "Succes, you are no longer friends with " + removeUser.get().username;
+			return "Success, you are no longer friends with " + removeUser.get().username;
 		};
 
 		/* delete some friends */
