@@ -250,7 +250,8 @@ public class MovieMatcherApplication extends JsonApplication {
 			Optional<User> user = u.load(User.class);
 			if(! user.isPresent()) throw new HttpException(HttpStatus.UNAUTHORIZED, "Invalid Session");
 			if(searchQuery.equals("") || results == 0 || searchQuery.equals(user.get().username)
-				|| searchQuery.equals(user.get().first_name) || searchQuery.equals(user.get().last_name))
+				|| searchQuery.equals(user.get().first_name) || searchQuery.equals(user.get().last_name)
+				|| )
 				return Collections.EMPTY_LIST;
 			return AbstractModel.search(User.class, searchQuery, results, page)
 				.parallelStream()
@@ -306,6 +307,7 @@ public class MovieMatcherApplication extends JsonApplication {
 				if(! user.isPresent()) throw new HttpException(HttpStatus.UNAUTHORIZED, "Invalid session.");
 				User currentuser = user.get();
 				User nf = newFriend.get();
+				if(currentuser.equals(nf)) throw new HttpException(HttpStatus.BAD_REQUEST, "Sorry, can't add yourself as friend.");
 				if(currentuser.friends == null) {
 					currentuser = currentuser.addFriend(nf).save();
 					return "Congrats! You are now friends with " + nf.username;
