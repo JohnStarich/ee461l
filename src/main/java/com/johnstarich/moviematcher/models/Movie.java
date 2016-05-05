@@ -9,6 +9,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.Map;
 
 
 /**
@@ -63,4 +64,17 @@ public class Movie extends AbstractModel<Movie> {
 			.parallelStream()
 			.limit(20).collect(Collectors.toList()));
 	}
+
+/*	public static Optional<List<Movie>> searchByGenre(Map<String, Integer> genreMap) {
+		//genreMap.keySet().stream().filter(genreMap::containsKey).forEach(k->genreMap.put(k, genreMap.get(k)/20));
+		List<Movie> movies = new ArrayList<>();
+		for(Map.Entry<String, Integer> e : genreMap.entrySet()) {
+			MovieMatcherDatabase.morphium
+					.findByField(Movie.class, "genre", e.getKey())
+					.parallelStream()
+					.limit(e.getValue()/20)
+					.collect(Collectors.toList());
+		}
+		return Optional.ofNullable(movies);
+	}*/
 }

@@ -68,13 +68,14 @@ public class Group extends AbstractModel<Group> {
         return ((Group) o).name != null && ((Group) o).name.equals(name) && ((Group) o).members.size() == members.size();
     }
 
-    public Optional<List<Movie>> suggestMovies() throws HttpException {
+    public Map<String, Object> suggestMovies(User me) throws HttpException {
        /* bring the ratings in O(Users) */
         if(members == null) throw new HttpException(HttpStatus.BAD_REQUEST, "Please add friends to your group.");
-
+        List<User> membersAndI = new ArrayList<>(this.members);
+        membersAndI.add(me);
         //really don't want to create local variable ....
         List<Rating> groupRatings = new ArrayList<>();
-        members.parallelStream().forEach(
+        membersAndI.parallelStream().forEach(
             user -> {
                 Optional<List<Rating>> r = Rating.loadRatingsByUser(user.id);
                 if(r.isPresent()) r.get().parallelStream().forEach(groupRatings::add);
@@ -126,6 +127,24 @@ public class Group extends AbstractModel<Group> {
             entry -> sortedMap.put(entry.getKey(), entry.getValue())
         );
 
-        return Movie.searchByGenre(sortedMap.entrySet().iterator().next().getKey());
+        Optional<List<Movie>> foundMovies = Movie.searchByGenre(sortedMap.entrySet().iterator().next().getKey());
+        if(! foundMovies.isPresent()) throw new HttpException(HttpStatus.BAD_REQUEST, "Couldn't find any movies ...");
+
+        Map<ObjectId, Integer> ratingsMap = new HashMap<>();
+        for(Movie m: foundMovies.get()) {
+            Optional<Rating> r = Rating.loadRatingByUser(me.id, m.id);
+            if(r.isPresent()) {
+                ratingsMap.put(m.id, r.get().numeric_rating);
+            }
+            else {
+                ratingsMap.put(m.id, null);
+            }
+        }
+
+        Map<String, Object> ret = new HashMap<>();
+        ret.put("movies", foundMovies.get());
+        ret.put("ratings", ratingsMap);
+        return ret;
+
     }
 }

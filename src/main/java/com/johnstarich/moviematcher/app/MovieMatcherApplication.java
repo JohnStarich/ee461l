@@ -469,8 +469,7 @@ public class MovieMatcherApplication extends JsonApplication {
 			if(groupName == null) throw new HttpException(HttpStatus.BAD_REQUEST, "No group name provided");
 			Optional<Group> g = self.get().findGroup(groupName);
 			if(! g.isPresent()) { throw new HttpException(HttpStatus.BAD_REQUEST, "Could not find "+groupName); }
-
-			return g.get().suggestMovies();
+			return g.get().suggestMovies(self.get());
 		};
 
 		jget("/groups/:group_name/recommendations", recommendationList);
