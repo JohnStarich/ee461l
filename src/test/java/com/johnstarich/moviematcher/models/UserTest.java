@@ -4,6 +4,7 @@ import com.johnstarich.moviematcher.app.AbstractMongoDBTest;
 import org.bson.types.ObjectId;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -11,10 +12,10 @@ import java.util.Optional;
  * Created by Josue on 4/21/2016.
  */
 public class UserTest extends AbstractMongoDBTest {
-	private User Josue = new User( new ObjectId(), "jalfaro@MovieMatcher.com", "Josue" , "Alfaro");
-	private User Jeremy = new User( new ObjectId(), "jcastillo@MovieMatcher.com", "Jeremy", "Castillo");
-	private User John = new User( new ObjectId(), "jstarich@MovieMatcher.com", "John", "Starich");
-	private User Cesar = new User( new ObjectId(), "2cgonzalez@MovieMatcher.com", "Cesar", "Gonzalez");
+	private User Josue = new User(new ObjectId(), "jalfaro@MovieMatcher.com", "Josue", "Alfaro");
+	private User Jeremy = new User(new ObjectId(), "jcastillo@MovieMatcher.com", "Jeremy", "Castillo");
+	private User John = new User(new ObjectId(), "jstarich@MovieMatcher.com", "John", "Starich");
+	private User Cesar = new User(new ObjectId(), "2cgonzalez@MovieMatcher.com", "Cesar", "Gonzalez");
 
 	public void testUserRegister() throws Exception {
 		Josue = Josue.register("goodPassword");
@@ -61,7 +62,7 @@ public class UserTest extends AbstractMongoDBTest {
 
 	}
 
-	public void testLoadByUserName()  throws Exception {
+	public void testLoadByUserName() throws Exception {
 		Jeremy = Jeremy.register("betterPassword1");
 
 		Optional<User> u = User.loadByUsername("jcastillo@MovieMatcher.com");
@@ -93,7 +94,9 @@ public class UserTest extends AbstractMongoDBTest {
 		Cesar = Cesar.register("thebestPassword#3");
 
 		List<User> collectionOfFriends = new ArrayList<>(3);
-		collectionOfFriends.add(Jeremy); collectionOfFriends.add(John); collectionOfFriends.add(Cesar);
+		collectionOfFriends.add(Jeremy);
+		collectionOfFriends.add(John);
+		collectionOfFriends.add(Cesar);
 
 		Josue = Josue.addFriends(collectionOfFriends);
 
@@ -125,7 +128,9 @@ public class UserTest extends AbstractMongoDBTest {
 		Cesar = Cesar.register("thebestPassword#3");
 
 		List<User> collectionOfFriends = new ArrayList<>(3);
-		collectionOfFriends.add(Jeremy); collectionOfFriends.add(John); collectionOfFriends.add(Cesar);
+		collectionOfFriends.add(Jeremy);
+		collectionOfFriends.add(John);
+		collectionOfFriends.add(Cesar);
 		Group creators = new Group(null, "Creators", collectionOfFriends);
 
 		John = John.addGroup(creators);
@@ -142,4 +147,28 @@ public class UserTest extends AbstractMongoDBTest {
 
 		assertFalse(user1.equals(user2));
 	}
+
+	public void testGetFriendsToAdd() throws Exception {
+		Josue = Josue.register("goodPassword");
+		Jeremy = Jeremy.register("betterPassword1");
+		John = John.register("evenbetterPassword2");
+		Cesar = Cesar.register("thebestPassword#3");
+		User Jane = new User(null);
+		Group zero = new Group(null, "zero");
+		Josue = Josue.addGroup(zero);
+		Optional<List<User>> potentialCandidates = Josue.getFriendsToAdd("zero");
+		assertTrue(potentialCandidates.isPresent());
+		List<User> candidates = potentialCandidates.get();
+		assertEquals(0, candidates.size());
+		Josue = Josue.addFriends(Arrays.asList(Jeremy, John, Cesar, Jane)).save();
+		Group creators = new Group(null, "Creators", Arrays.asList(Jeremy, John, Cesar));
+		Josue = Josue.addGroup(creators).save();
+		Optional<List<User>> friendsToAdd = Josue.getFriendsToAdd("Creators");
+		assertTrue(friendsToAdd.isPresent());
+		List<User> friends = friendsToAdd.get();
+		assertEquals(1, friends.size());
+		User friend = friends.get(0);
+		assertSame(Jane, friend);
+	}
 }
+

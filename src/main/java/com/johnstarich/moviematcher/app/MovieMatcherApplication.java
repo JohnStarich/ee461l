@@ -2,9 +2,9 @@ package com.johnstarich.moviematcher.app;
 
 import com.johnstarich.moviematcher.models.*;
 import org.bson.types.ObjectId;
+
 import spark.Route;
 import spark.Spark;
-
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -81,7 +81,7 @@ public class MovieMatcherApplication extends JsonApplication {
 			Optional<String> session_id = Optional.ofNullable(request.headers("Authorization"));
 			if(! session_id.isPresent()) throw new HttpException(HttpStatus.UNAUTHORIZED, "Invalid session");
 
-			Optional<Session> session = new Session(new ObjectId(session_id.get()), null).load();
+			Optional<Session> session = new Session(new ObjectId(session_id.get()), null).load(Session.class);
 			if(! session.isPresent()) throw new HttpException(HttpStatus.UNAUTHORIZED, "Invalid session");
 
 			return session.get().user.noPassword();
@@ -91,7 +91,7 @@ public class MovieMatcherApplication extends JsonApplication {
 			Optional<String> session_id = Optional.ofNullable(request.headers("Authorization"));
 			if(! session_id.isPresent()) throw new HttpException(HttpStatus.UNAUTHORIZED, "Invalid session");
 
-			Optional<Session> session = new Session(new ObjectId(session_id.get()), null).load();
+			Optional<Session> session = new Session(new ObjectId(session_id.get()), null).load(Session.class);
 			if(! session.isPresent()) throw new HttpException(HttpStatus.UNAUTHORIZED, "Invalid session");
 
 			Optional<Map<String, Object>> userFieldsOpt = bodyParam(request, "user");
@@ -110,7 +110,7 @@ public class MovieMatcherApplication extends JsonApplication {
 			User patch = new User(session.get().user.id, null, firstName, lastName);
 			patch.update();
 
-			Optional<User> user = patch.load();
+			Optional<User> user = patch.load(User.class);
 
 			if(password != null && user.isPresent()) {
 				user.get().resetPassword(oldPassword, password);
@@ -122,7 +122,7 @@ public class MovieMatcherApplication extends JsonApplication {
 			Optional<String> session_id = Optional.ofNullable(request.headers("Authorization"));
 			if(! session_id.isPresent()) throw new HttpException(HttpStatus.UNAUTHORIZED, "Invalid session");
 
-			Optional<Session> session = new Session(new ObjectId(session_id.get()), null).load();
+			Optional<Session> session = new Session(new ObjectId(session_id.get()), null).load(Session.class);
 			if(! session.isPresent()) throw new HttpException(HttpStatus.UNAUTHORIZED, "Invalid session");
 
 			Optional<Map<String, Object>> userFieldsOpt = bodyParam(request, "user");
@@ -132,7 +132,7 @@ public class MovieMatcherApplication extends JsonApplication {
 			String movieId = (String) userFields.get("id");
 			double rating = (double) userFields.get("rating");
 
-			Optional<Movie> m =  new Movie(new ObjectId(movieId)).load();
+			Optional<Movie> m =  new Movie(new ObjectId(movieId)).load(Movie.class);
 
 			if(m.isPresent()) {
 				User u = session.get().user;
@@ -174,7 +174,7 @@ public class MovieMatcherApplication extends JsonApplication {
 				throw new HttpException(HttpStatus.UNAUTHORIZED, "No authorization provided.");
 			}
 
-			Optional<Session> session = new Session(new ObjectId(authorization.get().trim()), null).load();
+			Optional<Session> session = new Session(new ObjectId(authorization.get().trim()), null).load(Session.class);
 			if(! session.isPresent()) throw new HttpException(HttpStatus.UNAUTHORIZED, "Invalid session.");
 			if(! Session.isValid(session.get())) throw new HttpException(HttpStatus.UNAUTHORIZED, "Invalid session.");
 
@@ -222,7 +222,7 @@ public class MovieMatcherApplication extends JsonApplication {
 		Route movieRoute = (request, response) -> {
 			String movieId = request.params("id");
 			System.out.println("Looked up movie with ID: "+movieId);
-			return new Movie(new ObjectId(movieId)).load();
+			return new Movie(new ObjectId(movieId)).load(Movie.class);
 		};
 
 		jget("/movies/:id", movieRoute);
@@ -264,7 +264,7 @@ public class MovieMatcherApplication extends JsonApplication {
 		Route friendRoute = (request, response) -> {
 			String userId = request.params("id");
 			System.out.println("Looked up user with ID: "+userId);
-			Optional<User> user = new User(new ObjectId(userId)).load();
+			Optional<User> user = new User(new ObjectId(userId)).load(User.class);
 			if(! user.isPresent()) throw new HttpException(HttpStatus.NOT_FOUND, "User not found");
 			return user.get().noPassword();
 		};
@@ -298,7 +298,7 @@ public class MovieMatcherApplication extends JsonApplication {
 		Route addFriend = (request, response) -> {
 				Optional<String> potentialFriend = bodyParam(request, "newFriend_id");
 				if(! potentialFriend.isPresent()) throw new HttpException(HttpStatus.BAD_REQUEST, "No potential friend provided.");
-				Optional<User> newFriend = new User(new ObjectId(potentialFriend.get())).load();
+				Optional<User> newFriend = new User(new ObjectId(potentialFriend.get())).load(User.class);
 				if(! newFriend.isPresent()) throw new HttpException(HttpStatus.BAD_REQUEST, "No potential friend user name provided.");
 				User u = request.attribute("user");
 				Optional<User> user = u.load(User.class);
@@ -322,7 +322,7 @@ public class MovieMatcherApplication extends JsonApplication {
 
 		Route removeFriend = (request, response) -> {
 			String userId = request.params("id");
-			Optional<User> removeUser = new User(new ObjectId(userId)).load();
+			Optional<User> removeUser = new User(new ObjectId(userId)).load(User.class);
 			if(! removeUser.isPresent()) throw new HttpException(HttpStatus.BAD_REQUEST, "No user with that id found");
 			User u = request.attribute("user");
 			Optional<User> user = u.load(User.class);
@@ -341,6 +341,35 @@ public class MovieMatcherApplication extends JsonApplication {
 	 * Register group services, like group search and group ID lookup
 	 */
 	public void groupsService() {
+
+		Route addGroup = (request, response) ->{
+			Optional<String> group_name = bodyParam(request, "group_name");
+			if(! group_name.isPresent()) throw new HttpException(HttpStatus.BAD_REQUEST, "No group name provided");
+			String groupName = group_name.get();
+			User u = request.attribute("user");
+			Optional<User> user = u.load(User.class);
+			if(user.isPresent()) {
+				if(user.get().groups == null) {
+					Group g = new Group(null, groupName).save();
+					user.get().addGroup(g).save();
+					return g.id;
+				}
+				for(Group existingGroup : user.get().groups){
+					// does group already exist
+					if(existingGroup.name.equals(groupName)){
+						throw new HttpException(HttpStatus.BAD_REQUEST, groupName + " already exists");
+					}
+				}
+				// create new group, save group, add to user, and save changes to user
+				Group g = new Group(null, groupName).save();
+				user.get().addGroup(g).save();
+				return g.id;
+			}
+			throw new HttpException(HttpStatus.UNAUTHORIZED, "Invalid session");
+		};
+		jpost("/groups", addGroup);
+		jpost("/groups/", addGroup);
+
 		jget("/groups/search/:search_query", (request, response) -> {
 			String searchQuery = request.params("search_query").replaceAll("\\+", " ");
 			System.out.println("Searched for \""+searchQuery+"\"");
@@ -352,24 +381,71 @@ public class MovieMatcherApplication extends JsonApplication {
 			System.out.println("Looked up movie with ID: "+movieId);
 			throw new HttpException(HttpStatus.NOT_IMPLEMENTED);
 		};
-		jget("/groups/:id", groupsRoute);
-		jget("/groups/:id/*", groupsRoute);
 
-		Route unimplemented = (request, response) -> {
-			throw new HttpException(HttpStatus.NOT_IMPLEMENTED);
+		Route idRoute = (request, response) -> {
+			String group_id = request.params("id");
+			System.out.println("Looked up group with ID: "+group_id);
+			return new Group(new ObjectId(group_id)).load(Group.class);
 		};
+		jget("/groups/:id", idRoute);
+
 		Route userGroups = (request, response) -> {
 			if(request==null) { return Collections.EMPTY_LIST; }
 			User u = request.attribute("user");
 			Optional<User> user = u.load(User.class);
-			if(user.isPresent()){
-				return user.get().groups;
+
+			if(user.isPresent()) {
+				Map<String, List<User>> groupsMap = new HashMap<>();
+				for(Group g : user.get().groups){
+					groupsMap.put(g.name, g.members);
+				}
+				Map<String, Object> ret = new HashMap<>();
+				ret.put("groups", user.get().groups);
+				ret.put("members", groupsMap);
+				return ret;
 			}
 			return Collections.EMPTY_LIST;
 		};
-
 		jget("/groups", userGroups);
 		jget("/groups/", userGroups);
-		jget("/groups/*", userGroups);
+
+		Route userSubGroup = (request, response) -> {
+			String group_name = request.params("group_name");
+			User u = request.attribute("user");
+			Optional<User> user = u.load(User.class);
+			if(user.isPresent()){
+				return user.get().getFriendsToAdd(group_name);
+			}
+			throw new HttpException(HttpStatus.UNAUTHORIZED, "Invalid session");
+		};
+		jget("/groups/:group_name/user", userSubGroup);
+		jget("/groups/:group_name/user/", userSubGroup);
+
+		Route addUserToGroup = (request, response) -> {
+			// self
+			User u = request.attribute("user");
+			Optional<User> self = u.load(User.class);
+			if(! self.isPresent()){throw new HttpException(HttpStatus.UNAUTHORIZED, "Invalid session"); }
+
+			// friend to add to group
+			Optional<String> username = bodyParam(request, "username");
+			Optional<User> friend = User.loadByUsername(username.get());
+			if(! friend.isPresent()) throw new HttpException(HttpStatus.BAD_REQUEST, username.get() + " does not exist");
+
+			// don't add self to group
+			if(self.get().username.equals(friend.get().username)) throw new HttpException(HttpStatus.BAD_REQUEST, "Cannot add self to group");
+
+			// group to add to
+			String groupName = request.params("group_name");
+			if(groupName == null) throw new HttpException(HttpStatus.BAD_REQUEST, "No group name provided");
+
+			// attempt to add to group
+			u = self.get().addFriendToGroup(groupName, friend.get()).save();
+
+			return u.groups.parallelStream().filter(group -> group.name.equals(groupName)).findFirst().get().id;
+		};
+
+		jpost("/groups/:group_name/user", addUserToGroup);
+		jpost("/groups/:group_name/user/", addUserToGroup);
 	}
 }

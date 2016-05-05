@@ -37,17 +37,17 @@ public class Group extends AbstractModel<Group> {
     public Group addFriend(User friend) {
         ArrayList<User> members = new ArrayList<>(this.members);
         members.add(friend);
-        return new Group(null, name, members);
+        return new Group(id, name, members);
     }
 
     public Group removeFriend(User friend) {
         ArrayList<User> members = new ArrayList<>(this.members);
         members.remove(friend);
-        return new Group(null, name, members);
+        return new Group(id, name, members);
     }
 
     public Group renameGroup(String newName) {
-        return new Group(null, newName, members);
+        return new Group(id, newName, members);
     }
 
     @Override
