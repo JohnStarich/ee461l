@@ -240,7 +240,6 @@ public class User extends AbstractModel<User> {
 		updatedGroups.remove(editThisGroup);
 		updatedGroups.add(editThisGroup.addFriend(newMember).save());
 		return new User(id, username, first_name, last_name, friends, updatedGroups, password);
-
 	}
 
 
@@ -271,6 +270,7 @@ public class User extends AbstractModel<User> {
 
 		return new User(id,username,first_name,last_name,friends,groupUpdates,password);
 	}
+
 	public Optional<Group> findGroup(String groupName) {
 		return groups.parallelStream().filter(group -> group.name.equals(groupName)).findFirst();
 	}
