@@ -2,9 +2,9 @@ package com.johnstarich.moviematcher.app;
 
 import com.johnstarich.moviematcher.models.*;
 import org.bson.types.ObjectId;
+
 import spark.Route;
 import spark.Spark;
-
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -349,6 +349,11 @@ public class MovieMatcherApplication extends JsonApplication {
 			User u = request.attribute("user");
 			Optional<User> user = u.load(User.class);
 			if(user.isPresent()) {
+				if(user.get().groups == null) {
+					Group g = new Group(null, groupName).save();
+					user.get().addGroup(g).save();
+					return g.id;
+				}
 				for(Group existingGroup : user.get().groups){
 					// does group already exist
 					if(existingGroup.name.equals(groupName)){
@@ -388,8 +393,16 @@ public class MovieMatcherApplication extends JsonApplication {
 			if(request==null) { return Collections.EMPTY_LIST; }
 			User u = request.attribute("user");
 			Optional<User> user = u.load(User.class);
-			if(user.isPresent()){
-				return user.get().groups;
+
+			if(user.isPresent()) {
+				Map<String, List<User>> groupsMap = new HashMap<>();
+				for(Group g : user.get().groups){
+					groupsMap.put(g.name, g.members);
+				}
+				Map<String, Object> ret = new HashMap<>();
+				ret.put("groups", user.get().groups);
+				ret.put("members", groupsMap);
+				return ret;
 			}
 			return Collections.EMPTY_LIST;
 		};
@@ -413,6 +426,30 @@ public class MovieMatcherApplication extends JsonApplication {
 			User u = request.attribute("user");
 			Optional<User> self = u.load(User.class);
 			if(! self.isPresent()){throw new HttpException(HttpStatus.UNAUTHORIZED, "Invalid session"); }
+
+			// friend to add to group
+			Optional<String> username = bodyParam(request, "username");
+			Optional<User> friend = User.loadByUsername(username.get());
+			if(! friend.isPresent()) throw new HttpException(HttpStatus.BAD_REQUEST, username.get() + " does not exist");
+
+			// don't add self to group
+			if(self.get().username.equals(friend.get().username)) throw new HttpException(HttpStatus.BAD_REQUEST, "Cannot add self to group");
+
+			// group to add to
+			String groupName = request.params("group_name");
+			if(groupName == null) throw new HttpException(HttpStatus.BAD_REQUEST, "No group name provided");
+
+			// attempt to add to group
+			u = self.get().addFriendToGroup(groupName, friend.get()).save();
+
+			return u.groups.parallelStream().filter(group -> group.name.equals(groupName)).findFirst().get().id;
+		};
+
+		Route addUserToGrosup = (request, response) -> {
+			// self
+			User u = request.attribute("user");
+			Optional<User> self = u.load(User.class);
+			if(! self.isPresent()){throw new HttpException(HttpStatus.UNAUTHORIZED, "Invalid session"); }
 			// friend to add to group
 			Optional<String> username = bodyParam(request, "username");
 			Optional<User> friend = User.loadByUsername(username.get());
@@ -424,10 +461,12 @@ public class MovieMatcherApplication extends JsonApplication {
 			if(groupName == null) throw new HttpException(HttpStatus.BAD_REQUEST, "No group name provided");
 
 			// attempt to add to group
-			u = self.get().addFriendToGroup(groupName, friend.get()).save();
+			u = self.get().addFriendToGroup(groupName, friend.get());
 
 			return u.groups.parallelStream().filter(group -> group.name.equals(groupName)).findFirst().get().id;
 		};
+
+
 		jpost("/groups/:group_name/user", addUserToGroup);
 		jpost("/groups/:group_name/user/", addUserToGroup);
 	}

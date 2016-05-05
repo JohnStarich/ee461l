@@ -236,10 +236,15 @@ public class User extends AbstractModel<User> {
 		Group editThisGroup = editThisGroupOptional.get();
 		if(editThisGroup.members.contains(newMember)) { throw new HttpException(HttpStatus.BAD_REQUEST, newMember.username + " is already in group"); }
 		groups.remove(editThisGroup);
-		groups.add(editThisGroup.addFriend(newMember));
+
+
+		/*I think save needs to be invoked here to save the changes in the group to the group collection*/
+		groups.add(editThisGroup.addFriend(newMember).save());
 
 		return new User(id, username, first_name, last_name, friends, groups, password);
 	}
+
+
 
 	public User noPassword() {
 		return new User(id, username, first_name, last_name, friends, groups, null);
