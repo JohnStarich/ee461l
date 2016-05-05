@@ -4,16 +4,10 @@ import com.johnstarich.moviematcher.store.MovieMatcherDatabase;
 import de.caluga.morphium.annotations.Index;
 import org.bson.types.ObjectId;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-<<<<<<< 551328feb74bf4a80269ecce50ceae8ac8eb2cbc
-import java.util.Map;
-=======
->>>>>>> finished implementing algorithm
-
 
 /**
  * Created by Josue on 3/10/2016.
@@ -65,25 +59,8 @@ public class Movie extends AbstractModel<Movie> {
 		return Optional.ofNullable(MovieMatcherDatabase.morphium
 			.findByField(Movie.class, "genre", genre)
 			.parallelStream()
-<<<<<<< 551328feb74bf4a80269ecce50ceae8ac8eb2cbc
 			.filter(movie -> movie.imdb_rating != null && movie.imdb_rating.compareTo("") != 0 && Double.parseDouble(movie.imdb_rating) >= 8.0)
 			.limit(20).collect(Collectors.toList()));
 	}
 
-/*	public static Optional<List<Movie>> searchByGenre(Map<String, Integer> genreMap) {
-		//genreMap.keySet().stream().filter(genreMap::containsKey).forEach(k->genreMap.put(k, genreMap.get(k)/20));
-		List<Movie> movies = new ArrayList<>();
-		for(Map.Entry<String, Integer> e : genreMap.entrySet()) {
-			MovieMatcherDatabase.morphium
-					.findByField(Movie.class, "genre", e.getKey())
-					.parallelStream()
-					.limit(e.getValue()/20)
-					.collect(Collectors.toList());
-		}
-		return Optional.ofNullable(movies);
-	}*/
-=======
-			.limit(20).collect(Collectors.toList()));
-	}
->>>>>>> finished implementing algorithm
 }
