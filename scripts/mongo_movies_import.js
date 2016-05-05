@@ -12,7 +12,13 @@ db.movie.find().forEach(function(movie){
 	{
 		date.setYear(movie.Year);
 	}
-	var newPoster = "http://img.omdbapi.com/?i=" + movie.imdbID;
+	var newPoster;
+	if(movie.Poster && movie.Poster.trim() !== '') {
+		newPoster = "http://img.omdbapi.com/?i=" + movie.imdbID;
+	}
+	else {
+		newPoster = undefined;
+	}
 	db.movie.update({_id:movie._id},
 		{$set:
 			{
