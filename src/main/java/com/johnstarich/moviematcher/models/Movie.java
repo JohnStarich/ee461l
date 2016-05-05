@@ -1,9 +1,14 @@
 package com.johnstarich.moviematcher.models;
 
+import com.johnstarich.moviematcher.store.MovieMatcherDatabase;
 import de.caluga.morphium.annotations.Index;
 import org.bson.types.ObjectId;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 
 /**
@@ -49,5 +54,13 @@ public class Movie extends AbstractModel<Movie> {
 	@Override
 	public boolean equals(Object o) {
 		return o == this || o instanceof Movie && ((Movie) o).id.equals(id);
+	}
+
+
+	public static Optional<List<Movie>> searchByGenre(String genre) {
+		return Optional.ofNullable(MovieMatcherDatabase.morphium
+			.findByField(Movie.class, "genre", genre)
+			.parallelStream()
+			.limit(20).collect(Collectors.toList()));
 	}
 }

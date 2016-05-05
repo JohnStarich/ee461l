@@ -9,11 +9,9 @@ import org.bson.types.ObjectId;
 import javax.crypto.spec.OAEPParameterSpec;
 import javax.swing.plaf.basic.BasicInternalFrameTitlePane;
 import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
+import java.util.Map.Entry;
 
 /**
  * Created by Josue on 4/16/2016.
@@ -91,13 +89,37 @@ public class Group extends AbstractModel<Group> {
         movies.parallelStream().forEach(
             movie -> {
                 if(movie.isPresent()) {
-                    if(movie.get().genre != null)
+                    if(movie.get().genre != null) {
                         genres.addAll(Arrays.asList(movie.get().genre.split(", ")));
+                    }
                 }
             }
         );
 
+        Map<String, Integer> genreMap = new HashMap();
+        genres.stream().forEach(
+            g -> {
+                if(genreMap.containsKey(g)) {
+                    genreMap.put(g, genreMap.get(g)+1);
+                } else {
+                    genreMap.put(g, 1);
+                }
+            }
+        );
 
-        return Optional.empty();
+        /* we have now mapped the most rated genres */
+        List<Entry<String, Integer>> list = new LinkedList<>(genreMap.entrySet());
+
+        // Sorting the list based on values
+        Collections.sort(list, (o1, o2) -> o2.getValue().compareTo(o1.getValue()));
+
+        // Maintaining insertion order with the help of LinkedList
+        Map<String, Integer> sortedMap = new LinkedHashMap<>();
+
+        list.stream().forEach(
+            entry -> sortedMap.put(entry.getKey(), entry.getValue())
+        );
+
+        return Movie.searchByGenre(sortedMap.entrySet().iterator().next().getKey());
     }
 }
