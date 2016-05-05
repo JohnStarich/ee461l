@@ -9,7 +9,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+<<<<<<< 551328feb74bf4a80269ecce50ceae8ac8eb2cbc
 import java.util.Map;
+=======
+>>>>>>> finished implementing algorithm
 
 
 /**
@@ -62,6 +65,7 @@ public class Movie extends AbstractModel<Movie> {
 		return Optional.ofNullable(MovieMatcherDatabase.morphium
 			.findByField(Movie.class, "genre", genre)
 			.parallelStream()
+<<<<<<< 551328feb74bf4a80269ecce50ceae8ac8eb2cbc
 			.filter(movie -> movie.imdb_rating != null && movie.imdb_rating.compareTo("") != 0 && Double.parseDouble(movie.imdb_rating) >= 8.0)
 			.limit(20).collect(Collectors.toList()));
 	}
@@ -78,4 +82,8 @@ public class Movie extends AbstractModel<Movie> {
 		}
 		return Optional.ofNullable(movies);
 	}*/
+=======
+			.limit(20).collect(Collectors.toList()));
+	}
+>>>>>>> finished implementing algorithm
 }
