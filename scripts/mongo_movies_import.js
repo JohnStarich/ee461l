@@ -12,9 +12,19 @@ db.movie.find().forEach(function(movie){
 	{
 		date.setYear(movie.Year);
 	}
+	var newPoster;
+	if(movie.Poster && movie.Poster.trim() !== '') {
+		newPoster = "http://img.omdbapi.com/?i=" + movie.imdbID;
+	}
+	else {
+		newPoster = undefined;
+	}
 	db.movie.update({_id:movie._id},
 		{$set:
-			{release_date:date}
+			{
+				release_date: date,
+				Poster: newPoster
+			}
 		});
 });
 print("renaming fields");
