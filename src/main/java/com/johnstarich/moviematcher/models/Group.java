@@ -2,7 +2,6 @@ package com.johnstarich.moviematcher.models;
 
 import com.johnstarich.moviematcher.CountedSet;
 import com.johnstarich.moviematcher.app.HttpException;
-import com.johnstarich.moviematcher.app.HttpStatus;
 import com.johnstarich.moviematcher.store.MovieMatcherDatabase;
 import de.caluga.morphium.annotations.Index;
 import de.caluga.morphium.annotations.Reference;
@@ -12,14 +11,7 @@ import org.bson.types.ObjectId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Optional;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.stream.Collectors;
-import java.util.Map.Entry;
 
 /**
  * Created by Josue on 4/16/2016.
