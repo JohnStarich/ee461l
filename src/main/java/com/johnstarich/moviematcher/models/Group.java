@@ -6,7 +6,6 @@ import de.caluga.morphium.annotations.Index;
 import de.caluga.morphium.annotations.Reference;
 import org.bson.types.ObjectId;
 
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Collections;
@@ -145,6 +144,5 @@ public class Group extends AbstractModel<Group> {
         ret.put("movies", foundMovies.get());
         ret.put("ratings", ratingsMap);
         return ret;
-
     }
 }
