@@ -210,10 +210,10 @@ public class User extends AbstractModel<User> {
 
 		Group editThisGroup = editThisGroupOptional.get();
 
-		groups.remove(editThisGroup);
-		groups.add(editThisGroup.removeFriend(member));
-
-		return new User(id, username, first_name, last_name, friends, groups, password);
+		List<Group> updatedGroups = new ArrayList<>(this.groups);
+		updatedGroups.remove(editThisGroup);
+		updatedGroups.add(editThisGroup.removeFriend(member).save());
+		return new User(id, username, first_name, last_name, friends, updatedGroups, password);
 	}
 
 	public User addFriendToGroup(String groupName, User newMember) throws HttpException{
@@ -235,13 +235,11 @@ public class User extends AbstractModel<User> {
 
 		Group editThisGroup = editThisGroupOptional.get();
 		if(editThisGroup.members.contains(newMember)) { throw new HttpException(HttpStatus.BAD_REQUEST, newMember.username + " is already in group"); }
-		groups.remove(editThisGroup);
 
-
-		/*I think save needs to be invoked here to save the changes in the group to the group collection*/
-		groups.add(editThisGroup.addFriend(newMember).save());
-
-		return new User(id, username, first_name, last_name, friends, groups, password);
+		List<Group> updatedGroups = new ArrayList<>(this.groups);
+		updatedGroups.remove(editThisGroup);
+		updatedGroups.add(editThisGroup.addFriend(newMember).save());
+		return new User(id, username, first_name, last_name, friends, updatedGroups, password);
 	}
 
 
@@ -272,6 +270,7 @@ public class User extends AbstractModel<User> {
 
 		return new User(id,username,first_name,last_name,friends,groupUpdates,password);
 	}
+
 	public Optional<Group> findGroup(String groupName) {
 		return groups.parallelStream().filter(group -> group.name.equals(groupName)).findFirst();
 	}
