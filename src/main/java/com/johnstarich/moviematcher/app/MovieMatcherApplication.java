@@ -251,7 +251,7 @@ public class MovieMatcherApplication extends JsonApplication {
 			if(! user.isPresent()) throw new HttpException(HttpStatus.UNAUTHORIZED, "Invalid Session");
 			if(searchQuery.equals("") || results == 0 || searchQuery.equals(user.get().username)
 				|| searchQuery.equals(user.get().first_name) || searchQuery.equals(user.get().last_name)
-				|| )
+				|| searchQuery.equals(user.get().first_name+" "+user.get().last_name))
 				return Collections.EMPTY_LIST;
 			return AbstractModel.search(User.class, searchQuery, results, page)
 				.parallelStream()
