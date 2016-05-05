@@ -26,8 +26,8 @@ public class RatingTest extends AbstractMongoDBTest {
         Movie theNiceGuys = new Movie(new ObjectId(), "The Nice Guys", null, null, null, null, null, null, null);
         new Rating(new ObjectId(), Maximus.id, theNiceGuys.id, "Purely Awesome!", 10).save();
 
-        assertEquals(2, Rating.loadRatingsByUser(Maximus.id).size());
-        assertEquals(0, Rating.loadRatingsByUser(Commodus.id).size());
+        assertEquals(2, Rating.loadRatingsByUser(Maximus.id).get().size());
+        assertEquals(0, Rating.loadRatingsByUser(Commodus.id).get().size());
     }
 
     public void testLoadRatingByUser() throws Exception {

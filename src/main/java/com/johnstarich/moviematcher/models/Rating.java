@@ -40,8 +40,8 @@ public class Rating extends AbstractModel<Rating> {
         return ((Rating) o).id != null && ((Rating) o).id.equals(id);
     }
 
-    public static List<Rating> loadRatingsByUser(ObjectId userID) {
-        return MovieMatcherDatabase.morphium.findByField(Rating.class, "user_id", userID);
+    public static Optional<List<Rating>> loadRatingsByUser(ObjectId userID) {
+        return Optional.ofNullable(MovieMatcherDatabase.morphium.findByField(Rating.class, "user_id", userID));
     }
 
     public static Optional<Rating> loadRatingByUser(ObjectId userId, ObjectId movieId) {

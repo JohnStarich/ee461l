@@ -248,7 +248,7 @@ public class User extends AbstractModel<User> {
 		return new User(id, username, first_name, last_name, friends, groups, null);
 	}
 
-	public User removeFriendFromGroups(User user) {
+	public User removeFriendFromGroups(User user) throws HttpException {
 		if(groups == null) return this;
 
 		List<Group> groupsContainUser = groups.parallelStream()
@@ -261,12 +261,10 @@ public class User extends AbstractModel<User> {
 
 		List<Group> groupUpdates = new ArrayList<>(this.groups);
 
-		groupsContainUser.parallelStream().forEach(
-			group -> {
-				groupUpdates.remove(group);
-				groupUpdates.add(group.removeFriend(user));
-			}
-		);
+		for(Group group : groupUpdates) {
+			groupUpdates.remove(group);
+			groupUpdates.add(group.removeFriend(user).save());
+		}
 
 		return new User(id,username,first_name,last_name,friends,groupUpdates,password);
 	}
