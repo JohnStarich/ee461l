@@ -352,18 +352,15 @@ public class MovieMatcherApplication extends JsonApplication {
 			throw new HttpException(HttpStatus.NOT_IMPLEMENTED);
 		});
 
-		Route groupsRoute = (request, response) -> {
-			String movieId = request.params("id");
-			System.out.println("Looked up movie with ID: "+movieId);
-			throw new HttpException(HttpStatus.NOT_IMPLEMENTED);
-		};
-
 		Route idRoute = (request, response) -> {
 			String group_id = request.params("id");
 			System.out.println("Looked up group with ID: "+group_id);
-			return new Group(new ObjectId(group_id)).load(Group.class);
+			Optional<Group> result = new Group(new ObjectId(group_id)).load();
+			if(! result.isPresent()) throw new HttpException(HttpStatus.NOT_FOUND, "Group not found with ID: "+group_id);
+
+			return result.get().noPasswords();
 		};
-		jget("/groups/:id", groupsRoute);
+		jget("/groups/:id", idRoute);
 
 		Route userGroups = (request, response) -> {
 			if(request==null) { return Collections.EMPTY_LIST; }
@@ -427,6 +424,16 @@ public class MovieMatcherApplication extends JsonApplication {
 			if(! groupToRemoveOpt.isPresent()) throw new HttpException(HttpStatus.NOT_FOUND, "Group not found with ID: "+groupId);
 			user.removeGroup(groupToRemoveOpt.get()).save();
 			return "Success! Group successfully deleted.";
+		});
+
+		jdelete("/groups/:group_id/:member_id", (request, response) -> {
+			User user = request.attribute("user");
+			String groupId = request.params("group_id");
+			String memberId = request.params("member_id");
+			Optional<Group> groupToRemoveMemberOpt = new Group(new ObjectId(groupId)).load();
+			if(! groupToRemoveMemberOpt.isPresent()) throw new HttpException(HttpStatus.NOT_FOUND, "Group not found with ID: "+groupId);
+			groupToRemoveMemberOpt.get().removeFriendWithId(new ObjectId(memberId)).save();
+			return "Success! Group member successfully removed.";
 		});
 
 		Route recommendationList = (request, response) -> {

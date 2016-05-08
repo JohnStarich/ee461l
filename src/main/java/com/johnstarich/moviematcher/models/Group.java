@@ -52,6 +52,16 @@ public class Group extends AbstractModel<Group> {
         return new Group(id, name, members);
     }
 
+    public Group removeFriendWithId(ObjectId friend) {
+        return new Group(
+            id,
+            name,
+            members.parallelStream()
+                .filter(n -> ! n.id.equals(friend))
+                .collect(Collectors.toList())
+        );
+    }
+
     public Group removeFriend(User friend) {
         ArrayList<User> members = new ArrayList<>(this.members);
         members.remove(friend);
@@ -66,6 +76,16 @@ public class Group extends AbstractModel<Group> {
     public boolean equals(Object o) {
         if(o == null || !(o instanceof Group)) return false;
         return ((Group) o).name != null && ((Group) o).name.equals(name) && ((Group) o).members.size() == members.size();
+    }
+
+    public Group noPasswords() {
+        return new Group(
+            id,
+            name,
+            members.parallelStream()
+                .map(User::noPassword)
+                .collect(Collectors.toList())
+        );
     }
 
     public Map<String, Object> suggestMovies(User me) throws HttpException {
