@@ -10,6 +10,7 @@
 ## Site
 
 Login
+
 <http://tomcat.johnstarich.com/login>
 
 Register
@@ -83,4 +84,5 @@ The team decided it would be best if we did not merge buggy code onto our master
 
 In terms of the front end, there was an ember automatic build that helped out when we would create and modify the front end. It was fairly quick because as soon as one saved a javascript or handlebars file we would know if that code broke or not. The team was not able to find an option where the UI tests could be done automatically. So with the help of browser debugging tools, the UI was tested by just playing with the features. 
 
-Once we had most of the front and back end, a friend walked through our web application and reported what their opinion on the functionality of the website. We took their comments into consideration and made changes. 
+Once we had most of the front and back end, a friend walked through our web application and reported what their opinion on the functionality of the website. We took their comments into consideration and made changes.
+
