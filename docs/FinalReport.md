@@ -10,7 +10,7 @@
 ## Site
 
 Login
-<http://tomcat.johnstarich.com/login?redirect=%2F>
+<http://tomcat.johnstarich.com/login>
 
 Register
 <http://tomcat.johnstarich.com/register>
@@ -23,7 +23,7 @@ Register
 
 ## Motivation
 
-There's no easy way to find movies groups of people want to watch. Our audience doesn't have a good way to choose movies they'd like to see, especially not with groups with various preferences.
+There is not an easy way to find movies that groups of people, with their various preferences, would want to watch together. Our goal is to bridge that gap and recommend movies to our audience based on all of their movie preferences.
 
 ## User Benefits
 
@@ -74,12 +74,12 @@ Users can register on the site and browse the movie database. Users would spend 
 
 ## Testing Tools, Test Scenarios, and Test Cases
 
-Our application was divided into two different parts for testing, the first is the API (back end) and the second is the UI (front end). The team’s plan was to make sure that with each pull request on git hub our systems would be tested. 
-For each class within the API a JUnit test was created, this way we could test the functionality of each class separately. The Rating class was tested to make sure that a user could easily rate any movie, the loading, saving, and modifying aspects were also tested. The User class was tested so that each User could add friends, delete friends, create groups, delete groups, and login. The Session class was mainly tested to make sure that a session would be deleted from our database after x amount of time. The Group class was tested to ensure that adding friends into groups was fully functional as well as changing group names. The Movie class was tested to see that the equals method worked well. This completes the unit testing. 
+Our application was divided into two different parts for testing, the first is the API (back end) and the second is the UI (front end). The team’s plan was to make sure that with each pull request on Github our systems would be tested. 
+For each class within the API a JUnit test was created, this way we could test the functionality of each class separately. The Rating class was tested to make sure that a user could easily rate any movie. The loading, saving, and modifying aspects were also tested. The User class was tested so that each User could add friends, delete friends, create groups, delete groups, and login. The Session class was mainly tested to make sure that a session would be deleted from our database after x amount of time. The Group class was tested to ensure that adding friends into groups was fully functional as well as changing group names. The Movie class was tested to see that the equals method worked well. This completes the unit testing. 
 
-All of our data was stored in mongoDB, so we decided it was a great idea to test the functionality of the database with our data. In order to do that we needed an instance of mongoDB in order to run these tests automatically every time a pull request was submitted. So we managed to create integration tests. We saved Sessions, Movies, Ratings, Users, Groups, respectively in their own collections and we performed the following tests. We made sure to test the loading, saving, updating, and dropping of these data sets. The way we implemented this was by creating an AbstractModel that would handle those methods no matter what kind of data was being manipulated. 
+All of our data was stored in MongoDB, so we decided it was a great idea to test the functionality of the database with our data. In order to do that we needed an instance of MongoDB in order to run these tests automatically every time a pull request was submitted. To solve this, we added an embedded MongoDB instance that starts up, runs our tests, and throws out the data for every test. We saved Sessions, Movies, Ratings, Users, Groups, respectively in their own collections and we performed the following tests. We made sure to test the loading, saving, updating, and dropping of these data sets. The way we implemented this was by creating an AbstractModel that would handle those methods no matter what kind of data was being manipulated. 
 
-The team decided it would be best if we did not merge buggy code onto our master branch. So a build pipeline was created for automatic testing and deployment once a team member made a pull request. Here is where we implemented regression and system testing. First the code would be compiled then all of our previous test would be executed. This ensured that our previous code and implementations would not break with new incoming code. Not only were we performing regression testing but also testing the system as a whole. 
+The team decided it would be best if we did not merge buggy code onto our master branch. So a build pipeline was created for automatic testing and deployment once a team member made a pull request. Here is where we implemented regression and system testing. The code would be compiled and then all of our previous tests would be executed. This ensures that our previous code and implementations do not break with the new changes.
 
 In terms of the front end, there was an ember automatic build that helped out when we would create and modify the front end. It was fairly quick because as soon as one saved a javascript or handlebars file we would know if that code broke or not. The team was not able to find an option where the UI tests could be done automatically. So with the help of browser debugging tools, the UI was tested by just playing with the features. 
 
