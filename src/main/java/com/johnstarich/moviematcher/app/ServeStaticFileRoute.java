@@ -8,7 +8,6 @@ import spark.Route;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -23,14 +22,14 @@ public class ServeStaticFileRoute implements Route {
 	private static final Map<String, StaticFile> loadedFiles = new ConcurrentHashMap<>(16);
 	private static final boolean SHOULD_CACHE_FILES = ConfigManager.getPropertyOrDefault("ENVIRONMENT", "development").equals("production");
 
-	private final String file;
+	private final String defaultFile;
 
 	public ServeStaticFileRoute() {
-		this.file = null;
+		this.defaultFile = null;
 	}
 
-	public ServeStaticFileRoute(String file) {
-		this.file = file;
+	public ServeStaticFileRoute(String defaultFile) {
+		this.defaultFile = defaultFile;
 	}
 
 	@Override
@@ -41,7 +40,7 @@ public class ServeStaticFileRoute implements Route {
 		}
 		catch (HttpException e) {
 			if(e.getStatusCode() != HttpStatus.NOT_FOUND.code) throw e;
-			staticFile = getPage(this.file);
+			staticFile = getPage(this.defaultFile);
 		}
 		response.type(staticFile.contentType);
 
