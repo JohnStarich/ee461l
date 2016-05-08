@@ -37,11 +37,7 @@ public class MovieMatcherApplication extends JsonApplication {
 	}
 
 	public void htmlService() {
-		Spark.get("/favicon.ico", new ServeStaticFileRoute());
-		Spark.get("/fonts/*", new ServeStaticFileRoute());
-		Spark.get("/tests/*", new ServeStaticFileRoute());
-		Spark.get("/assets/*", new ServeStaticFileRoute());
-		Spark.get("/*", "text/html", new ServeStaticFileRoute("/index.html"));
+		Spark.get("/*", new ServeStaticFileRoute("/index.html"));
 	}
 
 	/**
@@ -162,9 +158,9 @@ public class MovieMatcherApplication extends JsonApplication {
 					path.startsWith(PREFIX+"/users") ||
 					path.startsWith("/assets") ||
 					path.startsWith("/fonts") ||
-					path.equals("robots.txt")
-				)
-				return;
+					path.equals("/robots.txt") ||
+					path.startsWith("/favicon")
+				) return;
 
 			Optional<String> authorization = Optional.ofNullable(request.headers("Authorization"));
 			if(! authorization.isPresent()) {

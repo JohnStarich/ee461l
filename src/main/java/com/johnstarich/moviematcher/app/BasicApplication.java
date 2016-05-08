@@ -44,7 +44,7 @@ public abstract class BasicApplication implements SparkApplication {
 			int statusCode = ((HttpException)e).getStatusCode();
 			response.status(statusCode);
 			response.body(String.format("%d %s", statusCode, e.getMessage()));
-			System.err.println(String.format("ERROR: %d %s", statusCode, e.getMessage()));
+			System.err.println(String.format("[%s] ERROR: %d %s", request.uri(), statusCode, e.getMessage()));
 			if(e.getCause() != null)
 				e.getCause().printStackTrace();
 		});

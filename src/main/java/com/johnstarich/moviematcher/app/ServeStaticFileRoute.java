@@ -35,9 +35,21 @@ public class ServeStaticFileRoute implements Route {
 
 	@Override
 	public Object handle(Request request, Response response) throws Exception {
-		StaticFile staticFile = getPage(this.file != null ? this.file : request.uri());
+		StaticFile staticFile;
+		try {
+			staticFile = getPage(request.uri());
+		}
+		catch (HttpException e) {
+			if(e.getStatusCode() != HttpStatus.NOT_FOUND.code) throw e;
+			staticFile = getPage(this.file);
+		}
 		response.type(staticFile.contentType);
-		return staticFile.content;
+
+		if(staticFile.contentType.equals("text/html")) return staticFile.content;
+		else {
+			response.body(staticFile.content);
+			return null;
+		}
 	}
 
 	private static StaticFile getPage(String path) throws HttpException {
@@ -54,7 +66,7 @@ public class ServeStaticFileRoute implements Route {
 			URL url = MovieMatcherApplication.class.getClassLoader().getResource(relativeFilePath);
 			if (url != null) {
 				Path filePath = Paths.get(url.toURI());
-				String fileContents = new String(Files.readAllBytes(filePath), Charset.defaultCharset());
+				String fileContents = new String(Files.readAllBytes(filePath));
 				String fileContentType = getContentType(path);
 				StaticFile staticFile = new StaticFile(fileContents, fileContentType);
 				loadedFiles.put(relativeFilePath, staticFile);
@@ -79,6 +91,7 @@ public class ServeStaticFileRoute implements Route {
 			case "js": return "application/javascript";
 			case "png": return "image/png";
 			case "svg": return "image/svg+xml";
+			case "ttf": return "application/x-font-ttf";
 			case "txt": return "text/plain";
 			case "woff": return "application/font-woff";
 			case "woff2": return "application/font-woff2";
