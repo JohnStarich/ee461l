@@ -27,7 +27,7 @@ There is not an easy way to find movies that groups of people, with their variou
 
 ## User Benefits
 
-Users can register on the site and browse the movie database. Users would spend a lot less time trying to brainstorm different movies to watch and they would spend more time watching movies. Our web application is very easy to navigate, add friends, create groups, and it is not distracting. With a click of a button, a user’s group will be provided with the movies that the group would benefit largely from.
+Users can register on the site and browse the movie database. Users would spend a lot less time trying to brainstorm different movies to watch and they would spend more time watching movies. Our web application is very easy to navigate, add friends, create groups, and it is not distracting. With a click of a button, a user’s group will be provided with a list of movies to watch and enjoy together.
 
 ## Feature Description and Requirements
 
