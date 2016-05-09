@@ -133,7 +133,7 @@ The settings page, allows the user to change their username and name
 
 ![Change Name](screenshots/changename.png)
 
-The "change name" page
+The settings page, showing a name change
 
 ## Testing Tools, Test Scenarios, and Test Cases
 
