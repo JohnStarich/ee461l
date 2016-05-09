@@ -89,8 +89,12 @@ public class User extends AbstractModel<User> {
 		if(this.exists()) {
 			throw new HttpException(HttpStatus.BAD_REQUEST, "User with this username already exists.");
 		}
+		List<User> nonNullFriends = friends;
+		if(nonNullFriends == null) nonNullFriends = new ArrayList<>(0);
 
-		User u = new User(id, username, first_name, last_name, friends, groups, BCrypt.hashpw(password, BCrypt.gensalt()));
+		List<Group> nonNullGroups = groups;
+		if(nonNullGroups == null) nonNullGroups = new ArrayList<>(0);
+		User u = new User(id, username, first_name, last_name, nonNullFriends, nonNullGroups, BCrypt.hashpw(password, BCrypt.gensalt()));
 		return u.save();
 	}
 
