@@ -8,7 +8,6 @@ import spark.Route;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -23,21 +22,33 @@ public class ServeStaticFileRoute implements Route {
 	private static final Map<String, StaticFile> loadedFiles = new ConcurrentHashMap<>(16);
 	private static final boolean SHOULD_CACHE_FILES = ConfigManager.getPropertyOrDefault("ENVIRONMENT", "development").equals("production");
 
-	private final String file;
+	private final String defaultFile;
 
 	public ServeStaticFileRoute() {
-		this.file = null;
+		this.defaultFile = null;
 	}
 
-	public ServeStaticFileRoute(String file) {
-		this.file = file;
+	public ServeStaticFileRoute(String defaultFile) {
+		this.defaultFile = defaultFile;
 	}
 
 	@Override
 	public Object handle(Request request, Response response) throws Exception {
-		StaticFile staticFile = getPage(this.file != null ? this.file : request.uri());
+		StaticFile staticFile;
+		try {
+			staticFile = getPage(request.uri());
+		}
+		catch (HttpException e) {
+			if(e.getStatusCode() != HttpStatus.NOT_FOUND.code) throw e;
+			staticFile = getPage(this.defaultFile);
+		}
 		response.type(staticFile.contentType);
-		return staticFile.content;
+
+		if(staticFile.contentType.equals("text/html")) return staticFile.content;
+		else {
+			response.body(staticFile.content);
+			return null;
+		}
 	}
 
 	private static StaticFile getPage(String path) throws HttpException {
@@ -54,7 +65,7 @@ public class ServeStaticFileRoute implements Route {
 			URL url = MovieMatcherApplication.class.getClassLoader().getResource(relativeFilePath);
 			if (url != null) {
 				Path filePath = Paths.get(url.toURI());
-				String fileContents = new String(Files.readAllBytes(filePath), Charset.defaultCharset());
+				String fileContents = new String(Files.readAllBytes(filePath));
 				String fileContentType = getContentType(path);
 				StaticFile staticFile = new StaticFile(fileContents, fileContentType);
 				loadedFiles.put(relativeFilePath, staticFile);
@@ -79,6 +90,7 @@ public class ServeStaticFileRoute implements Route {
 			case "js": return "application/javascript";
 			case "png": return "image/png";
 			case "svg": return "image/svg+xml";
+			case "ttf": return "application/x-font-ttf";
 			case "txt": return "text/plain";
 			case "woff": return "application/font-woff";
 			case "woff2": return "application/font-woff2";

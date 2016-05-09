@@ -200,9 +200,7 @@ public class User extends AbstractModel<User> {
 			throw new HttpException(HttpStatus.BAD_REQUEST, "You are not friends with "+member);
 		}
 
-		Optional<Group> editThisGroupOptional = groups.parallelStream()
-				.filter(group -> group.name.equals(groupName))
-				.findFirst();
+		Optional<Group> editThisGroupOptional = findGroup(groupName);
 
 		if(! editThisGroupOptional.isPresent()) {
 			throw new HttpException(HttpStatus.BAD_REQUEST, "Could not find " + first_name + "'s group named " + groupName +".");
@@ -225,9 +223,7 @@ public class User extends AbstractModel<User> {
 			throw new HttpException(HttpStatus.BAD_REQUEST, "You are not friends with "+ newMember.username);
 		}
 
-		Optional<Group> editThisGroupOptional = groups.parallelStream()
-				.filter(group -> group.name.equals(groupName))
-				.findFirst();
+		Optional<Group> editThisGroupOptional = findGroup(groupName);
 
 		if(! editThisGroupOptional.isPresent()) {
 			throw new HttpException(HttpStatus.BAD_REQUEST, "Could not find " + first_name + "'s group named " + groupName +".");
@@ -242,8 +238,6 @@ public class User extends AbstractModel<User> {
 		return new User(id, username, first_name, last_name, friends, updatedGroups, password);
 	}
 
-
-
 	public User noPassword() {
 		return new User(id, username, first_name, last_name, friends, groups, null);
 	}
@@ -251,40 +245,43 @@ public class User extends AbstractModel<User> {
 	public User removeFriendFromGroups(User user) throws HttpException {
 		if(groups == null) return this;
 
-		List<Group> groupsContainUser = groups.parallelStream()
-			.filter(group -> {
-					if (group.members != null) return group.members.contains(user);
-					return false;
+		List<Group> newGroups = this.groups.parallelStream()
+			.map(group -> {
+				Optional<Group> updatedGroup = Optional.ofNullable(group.removeFriend(user));
+				if(updatedGroup.isPresent()) {
+					try {
+						updatedGroup = Optional.ofNullable(updatedGroup.get().save());
+					}
+					catch (HttpException e) {
+						e.printStackTrace();
+					}
 				}
-			)
+				return updatedGroup;
+			})
+			.filter(Optional::isPresent)
+			.map(Optional::get)
 			.collect(Collectors.toList());
-
-		List<Group> groupUpdates = new ArrayList<>(this.groups);
-
-		for(Group group : groupUpdates) {
-			groupUpdates.remove(group);
-			groupUpdates.add(group.removeFriend(user).save());
-		}
-
-		return new User(id,username,first_name,last_name,friends,groupUpdates,password);
+		return new User(id, username, first_name, last_name, friends, newGroups, password);
 	}
 
 	public Optional<Group> findGroup(String groupName) {
-		return groups.parallelStream().filter(group -> group.name.equals(groupName)).findFirst();
+		return groups.parallelStream()
+			.filter(group -> group.name.equals(groupName))
+			.findFirst();
 	}
 
-	public Optional<List<User>> getFriendsToAdd(String groupName) throws HttpException{
+	public Optional<List<User>> getFriendsToAdd(String groupName) throws HttpException {
 		if(groups == null) throw new HttpException(HttpStatus.BAD_REQUEST, "Could not find "+groupName);
-		Optional<Group> g = groups.parallelStream().filter(group -> group.name.equals(groupName)).findFirst();
-		if(! g.isPresent()) { throw new HttpException(HttpStatus.BAD_REQUEST, "Could not find "+groupName); }
-		/** I want the users who are my friends and not in this group */
-		/** these are members of the group , so return friends who are not in the member */
+		Optional<Group> g = findGroup(groupName);
+		if(! g.isPresent()) throw new HttpException(HttpStatus.BAD_REQUEST, "Could not find "+groupName);
+		/* I want the users who are my friends and not in this group */
+		/* These are members of the group, so return friends who are not members */
 		if(friends == null) return Optional.of(new ArrayList<>(0));
 		if(g.get().members == null) return Optional.of(new ArrayList<>(friends));
 		return Optional.ofNullable(
-					friends.parallelStream()
-					.filter(friend -> g.get().members.parallelStream().noneMatch(Predicate.isEqual(friend)))
-					.collect(Collectors.toList())
+			friends.parallelStream()
+				.filter(friend -> g.get().members.parallelStream().noneMatch(Predicate.isEqual(friend)))
+				.collect(Collectors.toList())
 		);
 	}
 
