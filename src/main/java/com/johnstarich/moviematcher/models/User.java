@@ -86,9 +86,13 @@ public class User extends AbstractModel<User> {
 	}
 
 	public User register(String password) throws HttpException {
+		if(this.username == null || this.username.trim().isEmpty()) {
+			throw new HttpException(HttpStatus.BAD_REQUEST, "Username must not be empty");
+		}
 		if(this.exists()) {
 			throw new HttpException(HttpStatus.BAD_REQUEST, "User with this username already exists.");
 		}
+
 		List<User> nonNullFriends = friends;
 		if(nonNullFriends == null) nonNullFriends = new ArrayList<>(0);
 
