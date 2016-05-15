@@ -100,8 +100,9 @@ public class User extends AbstractModel<User> {
 	public boolean equals(Object o) {
 		if(o == null || !(o instanceof User)) return false;
 		if(o == this) return true;
-		if( ((User) o).id == null || ((User) o).username == null) return false;
-		if( ((User) o).id.equals(id) && ((User) o).username.equals(username) ) return true;
+		User u = (User) o;
+		if( u.id == null || u.username == null) return false;
+		if( u.id.equals(id) && u.username.equals(username) ) return true;
 		else return false;
 	}
 
