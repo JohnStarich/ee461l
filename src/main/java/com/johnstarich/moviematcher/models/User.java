@@ -119,6 +119,14 @@ public class User extends AbstractModel<User> {
 			throw new HttpException(HttpStatus.BAD_REQUEST, "User with this username already exists.");
 		}
 
+		if(this.last_name == null || this.last_name.trim().isEmpty()) {
+			throw new HttpException(HttpStatus.BAD_REQUEST, "Last name must not be empty");
+		}
+
+		if(this.first_name == null || this.first_name.trim().isEmpty()) {
+			throw new HttpException(HttpStatus.BAD_REQUEST, "First name must not be empty");
+		}
+
 		validatePassword(password);
 
 		List<User> nonNullFriends = friends;
