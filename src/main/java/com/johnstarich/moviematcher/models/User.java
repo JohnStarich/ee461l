@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.Arrays;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -24,7 +23,7 @@ import java.util.stream.Collectors;
 public class User extends AbstractModel<User> {
 	private static final int MIN_PASSWORD_LENGTH = 8;
 	private static final Pattern WHITESPACE = Pattern.compile("\\s");
-	private static final Pattern SYMBOL = Pattern.compile("\\W");
+	private static final Pattern SYMBOL_OR_NUMBER = Pattern.compile("[\\W\\d]");
 	private static final Pattern UPPER_CASE = Pattern.compile("[A-Z]");
 	private static final Pattern LOWER_CASE = Pattern.compile("[a-z]");
 
@@ -84,10 +83,10 @@ public class User extends AbstractModel<User> {
 		}
 		List<String> passwordErrors = new ArrayList<>();
 		if(password.length() < MIN_PASSWORD_LENGTH) passwordErrors.add("Password must be at least " + MIN_PASSWORD_LENGTH + " characters long");
-		if(WHITESPACE.matcher(password).matches()) passwordErrors.add("Password must not contain whitespace");
-		if(! SYMBOL.matcher(password).matches()) passwordErrors.add("Password must contain a symbol");
-		if(! LOWER_CASE.matcher(password).matches()) passwordErrors.add("Password must contain a lower case letter");
-		if(! UPPER_CASE.matcher(password).matches()) passwordErrors.add("Password must contain an upper case letter");
+		if(WHITESPACE.matcher(password).find()) passwordErrors.add("Password must not contain whitespace");
+		if(! SYMBOL_OR_NUMBER.matcher(password).find()) passwordErrors.add("Password must contain a symbol or number");
+		if(! LOWER_CASE.matcher(password).find()) passwordErrors.add("Password must contain a lower case letter");
+		if(! UPPER_CASE.matcher(password).find()) passwordErrors.add("Password must contain an upper case letter");
 
 		if(! passwordErrors.isEmpty()) {
 			String message = passwordErrors.parallelStream()

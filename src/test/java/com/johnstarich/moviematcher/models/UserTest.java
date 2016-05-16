@@ -18,7 +18,7 @@ public class UserTest extends AbstractMongoDBTest {
 	private User Cesar = new User(new ObjectId(), "2cgonzalez@MovieMatcher.com", "Cesar", "Gonzalez");
 
 	public void testUserRegister() throws Exception {
-		Josue = Josue.register("goodPassword");
+		Josue = Josue.register("goodPassword!");
 		Jeremy = Jeremy.register("betterPassword1");
 		John = John.register("evenbetterPassword2");
 		Cesar = Cesar.register("thebestPassword#3");
@@ -30,7 +30,7 @@ public class UserTest extends AbstractMongoDBTest {
 	}
 
 	public void testEncryption() throws Exception {
-		Josue = Josue.register("goodPassword");
+		Josue = Josue.register("goodPassword!");
 		Jeremy = Jeremy.register("betterPassword1");
 		John = John.register("evenbetterPassword2");
 		Cesar = Cesar.register("thebestPassword#3");
@@ -38,11 +38,11 @@ public class UserTest extends AbstractMongoDBTest {
 		assertNotSame(Cesar.password, "thebestPassword#3");
 		assertNotSame(John.password, "evenbetterPassword2");
 		assertNotSame(Jeremy.password, "betterPassword1");
-		assertNotSame(Josue.password, "goodPassword");
+		assertNotSame(Josue.password, "goodPassword!");
 
 		User test1 = new User(new ObjectId(), "blah@example.org", "Joe", "Shmoe");
 		User test2 = new User(new ObjectId(), "blah2@example.org", "Joe", "Shmoe");
-		assertNotSame(test1.register("same_password").password, test2.register("same_password").password);
+		assertNotSame(test1.register("same_Password1").password, test2.register("same_Password1").password);
 	}
 
 	public void testResetPassword() throws Exception {
@@ -74,7 +74,7 @@ public class UserTest extends AbstractMongoDBTest {
 	}
 
 	public void testAddFriend() throws Exception {
-		Josue = Josue.register("goodPassword");
+		Josue = Josue.register("goodPassword!");
 		Cesar = Cesar.register("thebestPassword#3");
 
 		Josue = Josue.addFriend(Cesar);
@@ -88,7 +88,7 @@ public class UserTest extends AbstractMongoDBTest {
 	}
 
 	public void testAddFriends() throws Exception {
-		Josue = Josue.register("goodPassword");
+		Josue = Josue.register("goodPassword!");
 		Jeremy = Jeremy.register("betterPassword1");
 		John = John.register("evenbetterPassword2");
 		Cesar = Cesar.register("thebestPassword#3");
@@ -107,7 +107,7 @@ public class UserTest extends AbstractMongoDBTest {
 	}
 
 	public void testRemoveFriend() throws Exception {
-		Josue = Josue.register("goodPassword");
+		Josue = Josue.register("goodPassword!");
 		Jeremy = Jeremy.register("betterPassword1");
 		John = John.register("evenbetterPassword2");
 		Cesar = Cesar.register("thebestPassword#3");
@@ -122,7 +122,7 @@ public class UserTest extends AbstractMongoDBTest {
 	}
 
 	public void testAddFriendToGroup() throws Exception {
-		Josue = Josue.register("goodPassword");
+		Josue = Josue.register("goodPassword!");
 		Jeremy = Jeremy.register("betterPassword1");
 		John = John.register("evenbetterPassword2");
 		Cesar = Cesar.register("thebestPassword#3");
@@ -142,14 +142,14 @@ public class UserTest extends AbstractMongoDBTest {
 	}
 
 	public void testEquals() throws Exception {
-		User user1 = new User(new ObjectId(), "joe@hotmail.com", "Joe", "Shmoe").register("password");
-		User user2 = new User(new ObjectId(), "billybob@hotmail.com", "Billy", "Bob").register("password");
+		User user1 = new User(new ObjectId(), "joe@hotmail.com", "Joe", "Shmoe").register("Password123");
+		User user2 = new User(new ObjectId(), "billybob@hotmail.com", "Billy", "Bob").register("Password123");
 
 		assertFalse(user1.equals(user2));
 	}
 
 	public void testGetFriendsToAdd() throws Exception {
-		Josue = Josue.register("goodPassword");
+		Josue = Josue.register("goodPassword!");
 		Jeremy = Jeremy.register("betterPassword1");
 		John = John.register("evenbetterPassword2");
 		Cesar = Cesar.register("thebestPassword#3");
