@@ -12,8 +12,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.Arrays;
 import java.util.function.Predicate;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -21,6 +21,12 @@ import java.util.stream.Collectors;
  */
 @Index("username:text,first_name:text,last_name:text")
 public class User extends AbstractModel<User> {
+	private static final int MIN_PASSWORD_LENGTH = 8;
+	private static final Pattern WHITESPACE = Pattern.compile("\\s");
+	private static final Pattern SYMBOL_OR_NUMBER = Pattern.compile("[\\W\\d]");
+	private static final Pattern UPPER_CASE = Pattern.compile("[A-Z]");
+	private static final Pattern LOWER_CASE = Pattern.compile("[a-z]");
+
 	@Index(options={"unique", "weight:5"})
 	public final String username;
 	public final String first_name;
@@ -71,12 +77,31 @@ public class User extends AbstractModel<User> {
 		this.password = null;
 	}
 
+	public static void validatePassword(String password) throws HttpException {
+		if(password == null) {
+			throw new HttpException(HttpStatus.BAD_REQUEST, "Password must not be null");
+		}
+		List<String> passwordErrors = new ArrayList<>();
+		if(password.length() < MIN_PASSWORD_LENGTH) passwordErrors.add("Password must be at least " + MIN_PASSWORD_LENGTH + " characters long");
+		if(WHITESPACE.matcher(password).find()) passwordErrors.add("Password must not contain whitespace");
+		if(! SYMBOL_OR_NUMBER.matcher(password).find()) passwordErrors.add("Password must contain a symbol or number");
+		if(! LOWER_CASE.matcher(password).find()) passwordErrors.add("Password must contain a lower case letter");
+		if(! UPPER_CASE.matcher(password).find()) passwordErrors.add("Password must contain an upper case letter");
+
+		if(! passwordErrors.isEmpty()) {
+			String message = passwordErrors.parallelStream()
+				.collect(Collectors.joining("\n"));
+			throw new HttpException(HttpStatus.BAD_REQUEST, "Password is invalid\n" + message);
+		}
+	}
+
 	@Override
 	public boolean equals(Object o) {
 		if(o == null || !(o instanceof User)) return false;
 		if(o == this) return true;
-		if( ((User) o).id == null || ((User) o).username == null) return false;
-		if( ((User) o).id.equals(id) && ((User) o).username.equals(username) ) return true;
+		User u = (User) o;
+		if( u.id == null || u.username == null) return false;
+		if( u.id.equals(id) && u.username.equals(username) ) return true;
 		else return false;
 	}
 
@@ -86,9 +111,23 @@ public class User extends AbstractModel<User> {
 	}
 
 	public User register(String password) throws HttpException {
+		if(this.username == null || this.username.trim().isEmpty()) {
+			throw new HttpException(HttpStatus.BAD_REQUEST, "Username must not be empty");
+		}
 		if(this.exists()) {
 			throw new HttpException(HttpStatus.BAD_REQUEST, "User with this username already exists.");
 		}
+
+		if(this.last_name == null || this.last_name.trim().isEmpty()) {
+			throw new HttpException(HttpStatus.BAD_REQUEST, "Last name must not be empty");
+		}
+
+		if(this.first_name == null || this.first_name.trim().isEmpty()) {
+			throw new HttpException(HttpStatus.BAD_REQUEST, "First name must not be empty");
+		}
+
+		validatePassword(password);
+
 		List<User> nonNullFriends = friends;
 		if(nonNullFriends == null) nonNullFriends = new ArrayList<>(0);
 
@@ -99,9 +138,7 @@ public class User extends AbstractModel<User> {
 	}
 
 	public User resetPassword(String oldPassword, String newPassword) throws HttpException {
-		if(password == null) {
-			throw new HttpException(HttpStatus.BAD_REQUEST, "No previous password set.");
-		}
+		validatePassword(newPassword);
 		if(! BCrypt.checkpw(oldPassword, password)) {
 			throw new HttpException(HttpStatus.BAD_REQUEST, "Invalid old password.");
 		}
