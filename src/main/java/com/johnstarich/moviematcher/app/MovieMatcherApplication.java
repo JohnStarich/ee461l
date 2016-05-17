@@ -183,7 +183,7 @@ public class MovieMatcherApplication extends JsonApplication {
 	 * Register movie services, like movie search and movie ID lookup
 	 */
 	public void moviesService() {
-		Route searchRoute = (request, response) -> {
+		AuthenticatedRoute searchRoute = (request, response, user) -> {
 			Optional<String> queryParam = Optional.ofNullable(request.params("search_query"));
 			String searchQuery = queryParam.orElse("").replaceAll("\\+", " ").trim();
 			System.out.println("Searched for \""+searchQuery+"\"");
@@ -192,12 +192,11 @@ public class MovieMatcherApplication extends JsonApplication {
 			if(searchQuery.equals("") || results == 0)
 				return Collections.EMPTY_LIST;
 
-			User u = request.attribute("user");
 			List<Movie> movies = AbstractModel.search(Movie.class, searchQuery, results, page);
 			Map<ObjectId, Integer> ratingsMap = new HashMap<>();
 
 			for(Movie m: movies) {
-				Optional<Rating> r = Rating.loadRatingByUser(u.id, m.id);
+				Optional<Rating> r = Rating.loadRatingByUser(user.id, m.id);
 				if(r.isPresent()) {
 					ratingsMap.put(m.id, r.get().numeric_rating);
 				}
@@ -236,18 +235,17 @@ public class MovieMatcherApplication extends JsonApplication {
 	 * Register friend services, like friend search and friend ID lookup
 	 */
 	public void friendsService() {
-		Route friendSearchRoute = (request,response) -> {
+		AuthenticatedRoute friendSearchRoute = (request, response, user) -> {
 			Optional<String> queryParam = Optional.ofNullable(request.params("search_query"));
 			String searchQuery = queryParam.orElse("").replaceAll("\\+"," ").trim();
 			System.out.println("Searched for \"" + searchQuery + "\"");
 			int results = asIntOpt(request.queryParams("results")).orElse(20);
 			int page = asIntOpt(request.queryParams("page")).orElse(1);
-			User currentUser = request.attribute("user");
 			return AbstractModel.search(User.class, searchQuery, results, page)
 				.parallelStream()
 				.filter(resultUser ->
-					! currentUser.username.equals(resultUser.username) &&
-					currentUser.friends
+					! user.username.equals(resultUser.username) &&
+					user.friends
 						.parallelStream()
 						.noneMatch(friend -> friend.username.equals(resultUser.username))
 				)
@@ -270,9 +268,8 @@ public class MovieMatcherApplication extends JsonApplication {
 		jget("/friends/:id", friendRoute);
 		jget("/friends/:id/*", friendRoute);
 
-		Route displayFriends = (request, response) -> {
+		AuthenticatedRoute displayFriends = (request, response, user) -> {
 			/* return the user's friends */
-			User user = request.attribute("user");
 			if(user.friends == null ) return Collections.EMPTY_LIST;
 			return user.friends
 				.parallelStream()
@@ -283,18 +280,17 @@ public class MovieMatcherApplication extends JsonApplication {
 		jget("/friends", displayFriends);
 		jget("/friends/", displayFriends);
 
-		Route addFriend = (request, response) -> {
+		AuthenticatedRoute addFriend = (request, response, user) -> {
 			Optional<String> potentialFriend = bodyParam(request, "newFriend_id");
 			if(! potentialFriend.isPresent()) throw new HttpException(HttpStatus.BAD_REQUEST, "No potential friend provided.");
 			Optional<User> newFriendOpt = new User(new ObjectId(potentialFriend.get())).load();
 			if(! newFriendOpt.isPresent()) throw new HttpException(HttpStatus.BAD_REQUEST, "No potential friend user name provided.");
-			User currentUser = request.attribute("user");
 			User newFriend = newFriendOpt.get();
-			if(currentUser.equals(newFriend)) throw new HttpException(HttpStatus.BAD_REQUEST, "Sorry, can't add yourself as friend.");
-			if(currentUser.friends != null && currentUser.friends.parallelStream().anyMatch(Predicate.isEqual(newFriend))) {
+			if(user.equals(newFriend)) throw new HttpException(HttpStatus.BAD_REQUEST, "Sorry, can't add yourself as friend.");
+			if(user.friends != null && user.friends.parallelStream().anyMatch(Predicate.isEqual(newFriend))) {
 				throw new HttpException(HttpStatus.BAD_REQUEST, "Already friends.");
 			}
-			currentUser = currentUser.addFriend(newFriend).save();
+			user.addFriend(newFriend).save();
 			return "Congrats! You are now friends with " + newFriend.username;
 		};
 
@@ -302,11 +298,10 @@ public class MovieMatcherApplication extends JsonApplication {
 		jpost("/friends", addFriend);
 		jpost("/friends/", addFriend);
 
-		Route removeFriend = (request, response) -> {
+		AuthenticatedRoute removeFriend = (request, response, user) -> {
 			String userId = request.params("id");
 			Optional<User> removeUser = new User(new ObjectId(userId)).load();
 			if(! removeUser.isPresent()) throw new HttpException(HttpStatus.BAD_REQUEST, "No user with that id found");
-			User user = request.attribute("user");
 			if(user.id.equals(new ObjectId(userId))) throw new HttpException(HttpStatus.BAD_REQUEST, "Can't delete yourself, sorry bud.");
 			user.removeFriend(removeUser.get()).removeFriendFromGroups(removeUser.get()).save();
 			return "Success, you are no longer friends with " + removeUser.get().username;
@@ -322,11 +317,10 @@ public class MovieMatcherApplication extends JsonApplication {
 	 */
 	public void groupsService() {
 
-		Route addGroup = (request, response) ->{
+		AuthenticatedRoute addGroup = (request, response, user) ->{
 			Optional<String> group_name = bodyParam(request, "group_name");
 			if(! group_name.isPresent()) throw new HttpException(HttpStatus.BAD_REQUEST, "No group name provided");
 			String groupName = group_name.get();
-			User user = request.attribute("user");
 			if(user.groups == null) {
 				Group g = new Group(null, groupName).save();
 				user.addGroup(g).save();
@@ -362,9 +356,8 @@ public class MovieMatcherApplication extends JsonApplication {
 		};
 		jget("/groups/:id", idRoute);
 
-		Route userGroups = (request, response) -> {
+		AuthenticatedRoute userGroups = (request, response, user) -> {
 			if(request==null) { return Collections.EMPTY_LIST; }
-			User user = request.attribute("user");
 
 			Map<String, List<User>> groupsMap = new HashMap<>();
 			Map<String, Object> ret = new HashMap<>();
@@ -384,41 +377,36 @@ public class MovieMatcherApplication extends JsonApplication {
 		jget("/groups", userGroups);
 		jget("/groups/", userGroups);
 
-		Route userSubGroup = (request, response) -> {
+		AuthenticatedRoute userSubGroup = (request, response, user) -> {
 			String group_name = request.params("group_name");
-			User user = request.attribute("user");
 			return user.getFriendsToAdd(group_name);
 		};
 		jget("/groups/:group_name/user", userSubGroup);
 		jget("/groups/:group_name/user/", userSubGroup);
 
-		Route addUserToGroup = (request, response) -> {
-			// self
-			User self = request.attribute("user");
-
+		AuthenticatedRoute addUserToGroup = (request, response, user) -> {
 			// friend to add to group
 			Optional<String> username = bodyParam(request, "username");
 			Optional<User> friend = User.loadByUsername(username.get());
 			if(! friend.isPresent()) throw new HttpException(HttpStatus.BAD_REQUEST, username.get() + " does not exist");
 
 			// don't add self to group
-			if(self.username.equals(friend.get().username)) throw new HttpException(HttpStatus.BAD_REQUEST, "Cannot add self to group");
+			if(user.username.equals(friend.get().username)) throw new HttpException(HttpStatus.BAD_REQUEST, "Cannot add self to group");
 
 			// group to add to
 			String groupName = request.params("group_name");
 			if(groupName == null) throw new HttpException(HttpStatus.BAD_REQUEST, "No group name provided");
 
 			// attempt to add to group
-			self = self.addFriendToGroup(groupName, friend.get()).save();
+			user = user.addFriendToGroup(groupName, friend.get()).save();
 
-			return self.groups.parallelStream().filter(group -> group.name.equals(groupName)).findFirst().get().id;
+			return user.groups.parallelStream().filter(group -> group.name.equals(groupName)).findFirst().get().id;
 		};
 
 		jpost("/groups/:group_name/user", addUserToGroup);
 		jpost("/groups/:group_name/user/", addUserToGroup);
 
-		jdelete("/groups/:group_id", (request, response) -> {
-			User user = request.attribute("user");
+		jdelete("/groups/:group_id", (request, response, user) -> {
 			String groupId = request.params("group_id");
 			Optional<Group> groupToRemoveOpt = new Group(new ObjectId(groupId)).load();
 			if(! groupToRemoveOpt.isPresent()) throw new HttpException(HttpStatus.NOT_FOUND, "Group not found with ID: "+groupId);
@@ -426,8 +414,7 @@ public class MovieMatcherApplication extends JsonApplication {
 			return "Success! Group successfully deleted.";
 		});
 
-		jdelete("/groups/:group_id/:member_id", (request, response) -> {
-			User user = request.attribute("user");
+		jdelete("/groups/:group_id/:member_id", (request, response, user) -> {
 			String groupId = request.params("group_id");
 			String memberId = request.params("member_id");
 			Optional<Group> groupToRemoveMemberOpt = new Group(new ObjectId(groupId)).load();
@@ -436,16 +423,13 @@ public class MovieMatcherApplication extends JsonApplication {
 			return "Success! Group member successfully removed.";
 		});
 
-		Route recommendationList = (request, response) -> {
-			// self
-			User self = request.attribute("user");
-
+		AuthenticatedRoute recommendationList = (request, response, user) -> {
 			// group to generate list for
 			String groupName = request.params("group_name");
 			if(groupName == null) throw new HttpException(HttpStatus.BAD_REQUEST, "No group name provided");
-			Optional<Group> g = self.findGroup(groupName);
+			Optional<Group> g = user.findGroup(groupName);
 			if(! g.isPresent()) { throw new HttpException(HttpStatus.BAD_REQUEST, "Could not find "+groupName); }
-			return g.get().suggestMovies(self);
+			return g.get().suggestMovies(user);
 		};
 
 		jget("/groups/:group_name/recommendations", recommendationList);
