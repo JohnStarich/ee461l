@@ -21,8 +21,7 @@ public class MovieMatcherDatabase {
 			config.addHost(mongoHost);
 		}
 		catch(UnknownHostException e) {
-			e.printStackTrace();
-			System.exit(1);
+			throw new RuntimeException("Could not connect to MongoDB host: " + mongoHost, e);
 		}
 		config.setDatabase("moviematcher");
 		config.setGlobalCacheValidTime(GLOBAL_CACHE_VALID_TIME);
