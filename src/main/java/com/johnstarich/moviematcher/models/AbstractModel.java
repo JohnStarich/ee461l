@@ -47,7 +47,8 @@ public abstract class AbstractModel<T extends AbstractModel> {
 
 	public T update() throws HttpException {
 		handleMongoExceptions(clazz, () -> {
-			MovieMatcherDatabase.morphium.updateUsingFields(this, getNonNullFieldsNames(clazz, this).toArray(new String[0]));
+			String[] fieldNames = getNonNullFieldsNames(clazz, this).toArray(new String[0]);
+			MovieMatcherDatabase.morphium.updateUsingFields(this, fieldNames);
 		});
 		return (T) this;
 	}
@@ -126,13 +127,15 @@ public abstract class AbstractModel<T extends AbstractModel> {
 	}
 
 	private static List<String> getFieldNames(Class clazz) {
-		return Arrays.stream(clazz.getFields())
-			.map(Field::getName)
-			.collect(Collectors.toList());
+		//noinspection unchecked
+		return MovieMatcherDatabase.morphium.getARHelper().getFields(clazz);
 	}
 
 	private static List<String> getNonNullFieldsNames(Class clazz, Object instance) {
-		return Arrays.stream(clazz.getFields()).filter(field -> {
+		List<String> fieldNames = getFieldNames(clazz);
+		return MovieMatcherDatabase.morphium.getARHelper().getAllFields(clazz).parallelStream()
+			.filter(field -> fieldNames.contains(field.getName()))
+			.filter(field -> {
 				try {
 					return field.get(instance) != null;
 				}
