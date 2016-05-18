@@ -7,15 +7,13 @@ import java.util.concurrent.atomic.AtomicLong;
 /**
  * Created by johnstarich on 5/8/16.
  */
-public class CountedSet<T> extends HashMap<T, AtomicLong> {
+public class CountedSet<T> extends HashMap<T, Long> {
 	public CountedSet() {
 		super();
 	}
 
 	public long count(T key) {
-		AtomicLong value = super.get(key);
-		if(value == null) return 0L;
-		return value.get();
+		return super.getOrDefault(key, 0L);
 	}
 
 	public CountedSet(int initialCapacity) {
@@ -28,12 +26,9 @@ public class CountedSet<T> extends HashMap<T, AtomicLong> {
 	}
 
 	public void add(T item) {
-		AtomicLong currentCount = get(item);
-		if(currentCount == null) {
-			currentCount = new AtomicLong(0L);
-			putIfAbsent(item, currentCount);
+		synchronized (this) {
+			put(item, getOrDefault(item, 0L) + 1L);
 		}
-		currentCount.incrementAndGet();
 	}
 
 	public void addAll(Collection<? extends T> c) {
