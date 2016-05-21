@@ -17,14 +17,6 @@ public class UserTest extends AbstractMongoDBTest {
 	private User John = new User(new ObjectId(), "jstarich@MovieMatcher.com", "John", "Starich");
 	private User Cesar = new User(new ObjectId(), "2cgonzalez@MovieMatcher.com", "Cesar", "Gonzalez");
 
-	@Override
-	public void tearDown() {
-		Josue.delete();
-		Jeremy.delete();
-		John.delete();
-		Cesar.delete();
-	}
-
 	public void testUserRegister() throws Exception {
 		Josue = Josue.register("goodPassword!");
 		Jeremy = Jeremy.register("betterPassword1");

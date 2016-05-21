@@ -20,14 +20,18 @@ public class SessionTest extends AbstractMongoDBTest {
         Session s = new Session(new ObjectId(), Josue);
         s = s.save();
         /* need to drop expiration of two hours */
-        MovieMatcherDatabase.morphium.getDatabase().getCollection("session").dropIndex(
-                new BasicDBObject("created_at", 1)
-        );
+        MovieMatcherDatabase.morphium
+            .getDatabase()
+            .getCollection("session")
+            .dropIndex(new BasicDBObject("created_at", 1));
 
         DBObject value = new BasicDBObject("created_at", 1);
         DBObject property = new BasicDBObject("expireAfterSeconds", 60);
         /* creates expiration for 60 seconds */
-        MovieMatcherDatabase.morphium.getDatabase().getCollection("session").createIndex(value, property);
+        MovieMatcherDatabase.morphium
+            .getDatabase()
+            .getCollection("session")
+            .createIndex(value, property);
 
         Josue = Josue.save();
 

@@ -1,9 +1,9 @@
 package com.johnstarich.moviematcher.app;
 
 import com.johnstarich.moviematcher.store.ConfigManager;
-import com.mongodb.DB;
 import com.mongodb.Mongo;
 import com.mongodb.MongoClient;
+import com.mongodb.client.MongoCollection;
 import de.flapdoodle.embed.mongo.Command;
 import de.flapdoodle.embed.mongo.MongodExecutable;
 import de.flapdoodle.embed.mongo.MongodProcess;
@@ -16,6 +16,8 @@ import de.flapdoodle.embed.process.extract.UserTempNaming;
 import de.flapdoodle.embed.process.io.Processors;
 import de.flapdoodle.embed.process.runtime.Network;
 import junit.framework.TestCase;
+
+import java.util.stream.StreamSupport;
 
 /**
  * Created by johnstarich on 4/14/16.
@@ -81,9 +83,13 @@ public abstract class AbstractMongoDBTest extends TestCase {
 	@Override
 	protected void tearDown() throws Exception {
 		super.tearDown();
-		mongo.getUsedDatabases()
-			.parallelStream()
-			.forEach(DB::dropDatabase);
+		StreamSupport.stream(mongo.listDatabaseNames().spliterator(), true)
+			.map(mongo::getDatabase)
+			.forEach(db ->
+				StreamSupport.stream(db.listCollectionNames().spliterator(), true)
+					.map(db::getCollection)
+					.forEach(MongoCollection::drop)
+			);
 	}
 
 	protected void tearDownAll() throws Exception {
