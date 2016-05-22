@@ -20,14 +20,14 @@ public class CountedSetTest extends TestCase {
 		List<String> elements = Arrays.asList("hello", "hello", "nope", "hello", "maybe");
 		CountedSet<String> set = new CountedSet<>();
 		set.addAll(elements);
-		assertEquals(set.count("hello"), 3);
-		assertEquals(set.count("nope"), 1);
-		assertEquals(set.count("maybe"), 1);
+		assertEquals(3, set.count("hello"), 3);
+		assertEquals(1, set.count("nope"), 1);
+		assertEquals(1, set.count("maybe"), 1);
 
 		CountedSet<String> set2 = new CountedSet<>(elements);
-		assertEquals(set2.count("hello"), 3);
-		assertEquals(set2.count("nope"), 1);
-		assertEquals(set2.count("maybe"), 1);
+		assertEquals(3, set2.count("hello"));
+		assertEquals(1, set2.count("nope"));
+		assertEquals(1, set2.count("maybe"));
 	}
 
 	public void testNotNull() throws Exception {

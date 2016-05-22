@@ -15,11 +15,12 @@ import java.util.Optional;
  */
 public class AbstractModelTest extends AbstractMongoDBTest {
 	public void testSave() throws Exception {
+		MovieMatcherDatabase.morphium.getDatabase().dropDatabase(); // cleanup from other test cases
 		DBTester obj = new DBTester(new ObjectId(), "test");
 		DBCollection collection = MovieMatcherDatabase.morphium.getDatabase().getCollection("d_b_tester");
-		assertEquals(collection.count(), 0);
+		assertEquals(0, collection.count());
 		obj.save();
-		assertEquals(collection.count(), 1);
+		assertEquals(1, collection.count());
 	}
 
 	public void testLoad() throws Exception {
@@ -50,9 +51,10 @@ public class AbstractModelTest extends AbstractMongoDBTest {
 	}
 
 	public void testSearch() throws Exception {
+		MovieMatcherDatabase.morphium.getDatabase().dropDatabase(); // cleanup from other test cases
 		DBTester obj = new DBTester(new ObjectId(), "test").save();
 		List<DBTester> results = AbstractModel.search(DBTester.class, "test");
-		assertEquals(results.size(), 1);
+		assertEquals(1, results.size());
 		assertEquals(obj, results.get(0));
 	}
 }

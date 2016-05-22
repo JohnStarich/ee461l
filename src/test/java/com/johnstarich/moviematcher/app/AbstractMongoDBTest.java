@@ -1,7 +1,9 @@
 package com.johnstarich.moviematcher.app;
 
+import com.johnstarich.moviematcher.store.ConfigManager;
 import com.mongodb.Mongo;
 import com.mongodb.MongoClient;
+import com.mongodb.client.MongoCollection;
 import de.flapdoodle.embed.mongo.Command;
 import de.flapdoodle.embed.mongo.MongodExecutable;
 import de.flapdoodle.embed.mongo.MongodProcess;
@@ -15,6 +17,8 @@ import de.flapdoodle.embed.process.io.Processors;
 import de.flapdoodle.embed.process.runtime.Network;
 import junit.framework.TestCase;
 
+import java.util.stream.StreamSupport;
+
 /**
  * Created by johnstarich on 4/14/16.
  */
@@ -26,47 +30,69 @@ public abstract class AbstractMongoDBTest extends TestCase {
 	 */
 	private static final MongodStarter starter;
 	private static final int MONGO_PORT = 27017;
-	private MongodExecutable mongodExe;
-	private MongodProcess mongod;
-	private MongoClient mongo;
+	private static MongodExecutable mongodExe;
+	private static MongodProcess mongod;
+	private static MongoClient mongo;
 
 	static {
-		Command command = Command.MongoD;
+		// if MONGO_TEST environment variable is set, then prevent multiple firewall popup warnings
+		if(ConfigManager.getPropertyOrDefault("MONGO_TEST", null) != null) {
+			Command command = Command.MongoD;
 
+			ProcessOutput processOutput = new ProcessOutput(Processors.namedConsole("[mongod]"),
+				Processors.namedConsole("[MONGOD]"), Processors.namedConsole("[command]"));
 
-		ProcessOutput processOutput = new ProcessOutput(Processors.namedConsole("[mongod]"),
-			Processors.namedConsole("[MONGOD]"), Processors.namedConsole("[command]"));
-
-		IRuntimeConfig runtimeConfig = new RuntimeConfigBuilder()
-			.defaults(command)
-			.artifactStore(new ExtractedArtifactStoreBuilder()
+			IRuntimeConfig runtimeConfig = new RuntimeConfigBuilder()
 				.defaults(command)
-				.download(new DownloadConfigBuilder()
-					.defaultsForCommand(command).build())
-				.executableNaming(new UserTempNaming()))
-			.processOutput(processOutput)
-			.build();
+				.artifactStore(new ExtractedArtifactStoreBuilder()
+					.defaults(command)
+					.download(new DownloadConfigBuilder()
+						.defaultsForCommand(command).build())
+					.executableNaming(new UserTempNaming()))
+				.processOutput(processOutput)
+				.build();
 
-		starter = MongodStarter.getInstance(runtimeConfig);
+			starter = MongodStarter.getInstance(runtimeConfig);
+		}
+		else starter = MongodStarter.getDefaultInstance();
+
+		try {
+			setUpAll();
+		}
+		catch(Exception e) {
+			throw new RuntimeException("Error initializing embedded MongoDB instance. " +
+				"Is another instance running already? Did the last instance not shut down properly?", e);
+		}
 	}
 
-	@Override
-	protected void setUp() throws Exception {
+	protected static void setUpAll() throws Exception {
 		mongodExe = starter.prepare(new MongodConfigBuilder()
-				.version(Version.Main.PRODUCTION)
-				.net(new Net(MONGO_PORT, Network.localhostIsIPv6()))
-				.build());
+			.version(Version.Main.PRODUCTION)
+			.net(new Net(MONGO_PORT, Network.localhostIsIPv6()))
+			.build());
 		mongod = mongodExe.start();
-
-		super.setUp();
 
 		mongo = new MongoClient("localhost", MONGO_PORT);
 	}
 
 	@Override
+	protected void setUp() throws Exception {
+		super.setUp();
+	}
+
+	@Override
 	protected void tearDown() throws Exception {
 		super.tearDown();
+		StreamSupport.stream(mongo.listDatabaseNames().spliterator(), true)
+			.map(mongo::getDatabase)
+			.forEach(db ->
+				StreamSupport.stream(db.listCollectionNames().spliterator(), true)
+					.map(db::getCollection)
+					.forEach(MongoCollection::drop)
+			);
+	}
 
+	protected void tearDownAll() throws Exception {
 		mongod.stop();
 		mongodExe.stop();
 	}
