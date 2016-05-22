@@ -13,7 +13,7 @@ import static spark.Spark.*;
  * A base template for services that always return JSON results.
  * Created by johnstarich on 2/23/16.
  */
-public abstract class JsonApplication extends BasicApplication {
+public abstract class JsonController extends BasicController {
 	private final JsonTransformer json = new JsonTransformer();
 
 	/** JSON transformed DELETE handler. */

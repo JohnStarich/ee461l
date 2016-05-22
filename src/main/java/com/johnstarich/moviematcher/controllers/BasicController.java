@@ -12,7 +12,7 @@ import static spark.Spark.*;
  * A base template for a simple service.
  * Created by johnstarich on 2/25/16.
  */
-public abstract class BasicApplication implements SparkApplication {
+public abstract class BasicController implements SparkApplication {
 	/**
 	 * The route prefix for all routes defined in this application.
 	 * This prefix should not change between calls.
@@ -25,7 +25,7 @@ public abstract class BasicApplication implements SparkApplication {
 	public final String PREFIX = prefix();
 
 	/** Initialize any routes for your JSON app here. */
-	public abstract void app();
+	public abstract void initService();
 
 	@Override
 	public void init() {
@@ -57,7 +57,7 @@ public abstract class BasicApplication implements SparkApplication {
 			e.printStackTrace();
 		});
 
-		this.app();
+		this.initService();
 	}
 
 	@Override

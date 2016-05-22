@@ -6,13 +6,13 @@ import org.junit.Test;
 /**
  * Created by johnstarich on 3/22/16.
  */
-public class BasicApplicationTest {
+public class BasicControllerTest {
 	@Test
 	public void basicApplicationShouldSetPrefix() {
 		String prefix = "wee";
-		BasicApplication app = new BasicApplication() {
+		BasicController app = new BasicController() {
 			public String prefix() { return prefix; }
-			public void app() {}
+			public void initService() {}
 		};
 
 		assertEquals(app.PREFIX, prefix);

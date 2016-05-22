@@ -1,7 +1,8 @@
 package com.johnstarich.moviematcher.app;
 
 import com.johnstarich.moviematcher.controllers.AuthenticatedRoute;
-import com.johnstarich.moviematcher.controllers.JsonApplication;
+import com.johnstarich.moviematcher.controllers.HtmlService;
+import com.johnstarich.moviematcher.controllers.JsonController;
 import com.johnstarich.moviematcher.controllers.ServeStaticFileRoute;
 import com.johnstarich.moviematcher.models.*;
 import org.bson.types.ObjectId;
@@ -21,12 +22,12 @@ import java.util.stream.Collectors;
  * Movie Matcher API is defined here. These routes make up the Movie Matcher services.
  * Created by johnstarich on 2/25/16.
  */
-public class MovieMatcherApplication extends JsonApplication {
+public class MovieMatcherApplication extends JsonController {
 	@Override
 	public String prefix() { return "/v1"; }
 
 	@Override
-	public void app() {
+	public void initService() {
 		Route statusRoute = (request, response) -> new Status("1.0.0");
 		jget("", statusRoute);
 		jget("/", statusRoute);
@@ -36,11 +37,7 @@ public class MovieMatcherApplication extends JsonApplication {
 		friendsService();
 		groupsService();
 
-		htmlService();
-	}
-
-	public void htmlService() {
-		Spark.get("/*", new ServeStaticFileRoute("/index.html"));
+		new HtmlService().initService();
 	}
 
 	/**
