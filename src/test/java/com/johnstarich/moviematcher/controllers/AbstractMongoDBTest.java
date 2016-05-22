@@ -1,4 +1,4 @@
-package com.johnstarich.moviematcher.app;
+package com.johnstarich.moviematcher.controllers;
 
 import com.johnstarich.moviematcher.store.ConfigManager;
 import com.mongodb.Mongo;

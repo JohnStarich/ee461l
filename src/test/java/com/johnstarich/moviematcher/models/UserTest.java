@@ -1,6 +1,6 @@
 package com.johnstarich.moviematcher.models;
 
-import com.johnstarich.moviematcher.app.AbstractMongoDBTest;
+import com.johnstarich.moviematcher.controllers.AbstractMongoDBTest;
 import org.bson.types.ObjectId;
 
 import java.util.ArrayList;

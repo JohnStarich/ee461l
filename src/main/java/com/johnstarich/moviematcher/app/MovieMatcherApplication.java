@@ -1,5 +1,8 @@
 package com.johnstarich.moviematcher.app;
 
+import com.johnstarich.moviematcher.controllers.AuthenticatedRoute;
+import com.johnstarich.moviematcher.controllers.JsonApplication;
+import com.johnstarich.moviematcher.controllers.ServeStaticFileRoute;
 import com.johnstarich.moviematcher.models.*;
 import org.bson.types.ObjectId;
 

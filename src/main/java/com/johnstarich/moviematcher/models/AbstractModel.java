@@ -1,6 +1,6 @@
 package com.johnstarich.moviematcher.models;
 
-import com.johnstarich.moviematcher.app.CheckedRunnable;
+import com.johnstarich.moviematcher.controllers.CheckedRunnable;
 import com.johnstarich.moviematcher.app.HttpException;
 import com.johnstarich.moviematcher.app.HttpStatus;
 import com.johnstarich.moviematcher.store.MovieMatcherDatabase;
@@ -13,7 +13,6 @@ import org.bson.types.ObjectId;
 
 import java.lang.reflect.Field;
 import java.util.*;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**

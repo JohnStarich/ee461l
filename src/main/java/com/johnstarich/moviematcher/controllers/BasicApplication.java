@@ -1,5 +1,7 @@
-package com.johnstarich.moviematcher.app;
+package com.johnstarich.moviematcher.controllers;
 
+import com.johnstarich.moviematcher.app.HttpException;
+import com.johnstarich.moviematcher.app.HttpStatus;
 import spark.servlet.SparkApplication;
 
 import java.util.Optional;

@@ -1,4 +1,4 @@
-package com.johnstarich.moviematcher.app;
+package com.johnstarich.moviematcher.controllers;
 
 /**
  * Created by johnstarich on 4/7/16.

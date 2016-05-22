@@ -1,6 +1,6 @@
 package com.johnstarich.moviematcher.models;
 
-import com.johnstarich.moviematcher.app.AbstractMongoDBTest;
+import com.johnstarich.moviematcher.controllers.AbstractMongoDBTest;
 import com.johnstarich.moviematcher.store.MovieMatcherDatabase;
 import com.mongodb.DBCollection;
 import de.caluga.morphium.annotations.Index;

@@ -1,4 +1,4 @@
-package com.johnstarich.moviematcher.app;
+package com.johnstarich.moviematcher.controllers;
 
 import static org.junit.Assert.*;
 import org.junit.Test;

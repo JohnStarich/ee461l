@@ -1,4 +1,4 @@
-package com.johnstarich.moviematcher.app;
+package com.johnstarich.moviematcher.controllers;
 
 /**
  * A simple runnable that is allowed to throw runtime exceptions

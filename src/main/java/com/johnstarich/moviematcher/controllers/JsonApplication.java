@@ -1,4 +1,4 @@
-package com.johnstarich.moviematcher.app;
+package com.johnstarich.moviematcher.controllers;
 
 import com.johnstarich.moviematcher.models.User;
 import spark.Request;
