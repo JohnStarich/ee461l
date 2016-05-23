@@ -4,6 +4,8 @@
 ### Ember UI ###
 
 src/main/static/
+# Ignore symlink too
+src/main/static
 
 
 ### Sass CSS ###
