@@ -6,6 +6,7 @@ import de.caluga.morphium.MorphiumConfig;
 import java.net.UnknownHostException;
 
 /**
+ * Globally accessible database driver and set of connections for MovieMatcher
  * Created by johnstarich on 3/22/16.
  */
 public class MovieMatcherDatabase {

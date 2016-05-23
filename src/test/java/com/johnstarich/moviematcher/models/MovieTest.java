@@ -8,6 +8,7 @@ import java.util.Date;
 import java.util.List;
 
 /**
+ * Test for Movie
  * Created by johnstarich on 4/17/16.
  */
 public class MovieTest extends AbstractMongoDBTest {

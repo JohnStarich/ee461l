@@ -8,6 +8,9 @@ import java.util.Date;
 import java.util.Optional;
 
 /**
+ * A user's login session
+ * Allow's for authenticated access without having to
+ * store the password in an insecure fashion on the browser or server
  * Created by Josue on 4/25/2016.
  */
 public class Session extends AbstractModel<Session> {

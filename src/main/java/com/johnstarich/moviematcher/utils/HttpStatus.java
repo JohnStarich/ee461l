@@ -1,6 +1,7 @@
 package com.johnstarich.moviematcher.utils;
 
 /**
+ * Provides industry standard error codes and their associated meanings for use in throwing HTTP errors
  * Created by johnstarich on 3/28/16.
  */
 public enum HttpStatus {

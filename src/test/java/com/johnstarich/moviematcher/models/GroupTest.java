@@ -6,6 +6,7 @@ import org.bson.types.ObjectId;
 import java.util.Arrays;
 
 /**
+ * Test for Group
  * Created by Josue on 4/25/2016.
  */
 public class GroupTest extends TestCase {

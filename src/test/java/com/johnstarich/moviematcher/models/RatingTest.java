@@ -6,6 +6,7 @@ import org.bson.types.ObjectId;
 import java.util.Optional;
 
 /**
+ * Test for Rating
  * Created by Josue on 4/21/2016.
  */
 public class RatingTest extends AbstractMongoDBTest {

@@ -10,6 +10,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
+ * A searchable movie
  * Created by Josue on 3/10/2016.
  */
 @Index("title:text,genre:text")

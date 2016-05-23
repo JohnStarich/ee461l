@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * Enables reading properties from the runtime environment
  * Created by johnstarich on 4/17/16.
  */
 public class ConfigManager {

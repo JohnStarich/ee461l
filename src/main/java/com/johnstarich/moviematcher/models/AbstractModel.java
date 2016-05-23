@@ -41,6 +41,7 @@ public abstract class AbstractModel<T extends AbstractModel> {
 
 	public T save() throws HttpException {
 		handleMongoExceptions(clazz, () -> MovieMatcherDatabase.morphium.store(this));
+		//noinspection unchecked
 		return (T) this;
 	}
 
@@ -49,6 +50,7 @@ public abstract class AbstractModel<T extends AbstractModel> {
 			String[] fieldNames = getNonNullFieldsNames(clazz, this).toArray(new String[0]);
 			MovieMatcherDatabase.morphium.updateUsingFields(this, fieldNames);
 		});
+		//noinspection unchecked
 		return (T) this;
 	}
 
@@ -61,6 +63,7 @@ public abstract class AbstractModel<T extends AbstractModel> {
 		if(results.isEmpty()) return Optional.empty();
 		else {
 			T result = results.get(0);
+			//noinspection unchecked
 			((AbstractModel<T>) result).clazz = clazz;
 			return Optional.ofNullable(results.get(0));
 		}
@@ -68,6 +71,7 @@ public abstract class AbstractModel<T extends AbstractModel> {
 
 	public T delete() {
 		MovieMatcherDatabase.morphium.delete(this);
+		//noinspection unchecked
 		return (T) this;
 	}
 
@@ -79,11 +83,11 @@ public abstract class AbstractModel<T extends AbstractModel> {
 		return search(clazz, query, results, page);
 	}
 
-	public static final <T extends AbstractModel> List<T> search(Class<T> clazz, String query) throws HttpException {
+	public static <T extends AbstractModel> List<T> search(Class<T> clazz, String query) throws HttpException {
 		return search(clazz, query, MODEL_DEFAULT_RESULTS, MODEL_MIN_PAGE);
 	}
 
-	public static final <T extends AbstractModel> List<T> search(Class<T> clazz, String query, int results, int page) throws HttpException {
+	public static <T extends AbstractModel> List<T> search(Class<T> clazz, String query, int results, int page) throws HttpException {
 		if(results < 1 || results > MODEL_MAX_RESULTS) {
 			throw new HttpException(HttpStatus.BAD_REQUEST, "Results must be a positive integer no greater than " + MODEL_MAX_RESULTS);
 		}

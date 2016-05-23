@@ -20,6 +20,7 @@ import junit.framework.TestCase;
 import java.util.stream.StreamSupport;
 
 /**
+ * MongoDB enabled TestCase
  * Created by johnstarich on 4/14/16.
  */
 public abstract class AbstractMongoDBTest extends TestCase {
@@ -92,7 +93,7 @@ public abstract class AbstractMongoDBTest extends TestCase {
 			);
 	}
 
-	protected void tearDownAll() throws Exception {
+	protected void tearDownAll() {
 		mongod.stop();
 		mongodExe.stop();
 	}

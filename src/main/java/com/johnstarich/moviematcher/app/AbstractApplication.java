@@ -12,7 +12,7 @@ import java.util.List;
  * Created by johnstarich on 5/22/16.
  */
 public abstract class AbstractApplication implements SparkApplication {
-	private List<HttpService> controllers = new ArrayList<>();
+	private final List<HttpService> controllers = new ArrayList<>();
 
 	/**
 	 * Adds a controller to be mounted when the application starts.

@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Optional;
 
 /**
+ * Test for User
  * Created by Josue on 4/21/2016.
  */
 public class UserTest extends AbstractMongoDBTest {

@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
+ * Collection of friends to match movies against
  * Created by Josue on 4/16/2016.
  */
 @Index("name:text")
@@ -82,7 +83,7 @@ public class Group extends AbstractModel<Group> {
         );
     }
 
-    public List<Movie> suggestMovies(User me) throws HttpException {
+    public List<Movie> suggestMovies(User me) {
         // get ratings for this group and me
         // find common genres
         // return highest rated (but unrated by group) movies

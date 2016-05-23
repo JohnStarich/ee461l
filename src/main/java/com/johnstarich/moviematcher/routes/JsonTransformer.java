@@ -2,6 +2,7 @@ package com.johnstarich.moviematcher.routes;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonSyntaxException;
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
@@ -19,7 +20,7 @@ import java.util.stream.Collectors;
  * Created by johnstarich on 2/23/16.
  */
 public class JsonTransformer implements ResponseTransformer {
-	private Gson gson = new GsonBuilder()
+	private final Gson gson = new GsonBuilder()
 		.registerTypeAdapter(ObjectId.class, new TypeAdapter<ObjectId>() {
 			@Override
 			public void write(JsonWriter jsonWriter, ObjectId objectId) throws IOException {
@@ -45,7 +46,7 @@ public class JsonTransformer implements ResponseTransformer {
 		else return gson.toJson(model);
 	}
 
-	public <T> T parse(String model, Class<T> clazz) throws Exception {
+	public <T> T parse(String model, Class<T> clazz) throws JsonSyntaxException {
 		return gson.fromJson(model, clazz);
 	}
 }
