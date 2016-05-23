@@ -1,5 +1,8 @@
-package com.johnstarich.moviematcher.app;
+package com.johnstarich.moviematcher.routes;
 
+import com.johnstarich.moviematcher.utils.HttpException;
+import com.johnstarich.moviematcher.utils.HttpStatus;
+import com.johnstarich.moviematcher.app.MovieMatcherApplication;
 import com.johnstarich.moviematcher.store.ConfigManager;
 import spark.Request;
 import spark.Response;
@@ -97,5 +100,15 @@ public class ServeStaticFileRoute implements Route {
 			case "xml": return "application/xml";
 			default: return "application/octet-stream";
 		}
+	}
+}
+
+class StaticFile {
+	public final String content;
+	public final String contentType;
+
+	public StaticFile(String content, String contentType) {
+		this.content = content;
+		this.contentType = contentType;
 	}
 }

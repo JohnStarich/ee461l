@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Optional;
 
 /**
+ * A user's rating (1-10, inclusive) for a particular movie
  * Created by Josue on 4/17/2016.
  */
 public class Rating extends AbstractModel<Rating> {

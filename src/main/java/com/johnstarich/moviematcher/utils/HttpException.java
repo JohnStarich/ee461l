@@ -1,4 +1,4 @@
-package com.johnstarich.moviematcher.app;
+package com.johnstarich.moviematcher.utils;
 
 /**
  * An exception with an HTTP status code to help produce good error messages on HTTP responses.

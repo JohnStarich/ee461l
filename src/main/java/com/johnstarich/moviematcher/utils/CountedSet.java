@@ -1,10 +1,10 @@
-package com.johnstarich.moviematcher;
+package com.johnstarich.moviematcher.utils;
 
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
+ * Counts the number of times elements have been added to the set
  * Created by johnstarich on 5/8/16.
  */
 public class CountedSet<T> extends HashMap<T, Long> {

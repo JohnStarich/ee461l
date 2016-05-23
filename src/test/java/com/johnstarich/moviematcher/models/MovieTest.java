@@ -1,6 +1,6 @@
 package com.johnstarich.moviematcher.models;
 
-import com.johnstarich.moviematcher.app.AbstractMongoDBTest;
+import com.johnstarich.moviematcher.controllers.AbstractMongoDBTest;
 import com.johnstarich.moviematcher.store.MovieMatcherDatabase;
 import org.bson.types.ObjectId;
 
@@ -8,6 +8,7 @@ import java.util.Date;
 import java.util.List;
 
 /**
+ * Test for Movie
  * Created by johnstarich on 4/17/16.
  */
 public class MovieTest extends AbstractMongoDBTest {

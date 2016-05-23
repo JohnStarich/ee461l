@@ -1,7 +1,7 @@
 package com.johnstarich.moviematcher.models;
 
-import com.johnstarich.moviematcher.app.HttpException;
-import com.johnstarich.moviematcher.app.HttpStatus;
+import com.johnstarich.moviematcher.utils.HttpException;
+import com.johnstarich.moviematcher.utils.HttpStatus;
 import com.johnstarich.moviematcher.store.MovieMatcherDatabase;
 import de.caluga.morphium.annotations.Index;
 import de.caluga.morphium.annotations.Reference;
@@ -17,6 +17,8 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
+ * An authorized user for browsing movies, adding friends,
+ * creating groups, and matching movies.
  * Created by Josue on 4/7/2016.
  */
 @Index("username:text,first_name:text,last_name:text")
@@ -96,13 +98,12 @@ public class User extends AbstractModel<User> {
 	}
 
 	@Override
-	public boolean equals(Object o) {
-		if(o == null || !(o instanceof User)) return false;
-		if(o == this) return true;
-		User u = (User) o;
-		if( u.id == null || u.username == null) return false;
-		if( u.id.equals(id) && u.username.equals(username) ) return true;
-		else return false;
+	public boolean equals(Object obj) {
+		if(obj == null || !(obj instanceof User)) return false;
+		if(obj == this) return true;
+		User user = (User) obj;
+		if(user.id == null || user.username == null) return false;
+		return user.id.equals(id) && user.username.equals(username);
 	}
 
 	@Override

@@ -1,6 +1,7 @@
 package com.johnstarich.moviematcher.models;
 
-import com.johnstarich.moviematcher.app.AbstractMongoDBTest;
+import com.johnstarich.moviematcher.controllers.AbstractMongoDBTest;
+import com.johnstarich.moviematcher.utils.HttpException;
 import org.bson.types.ObjectId;
 
 import java.util.ArrayList;
@@ -9,6 +10,7 @@ import java.util.List;
 import java.util.Optional;
 
 /**
+ * Test for User
  * Created by Josue on 4/21/2016.
  */
 public class UserTest extends AbstractMongoDBTest {
@@ -50,7 +52,7 @@ public class UserTest extends AbstractMongoDBTest {
 
 		try {
 			John = John.resetPassword("wrongPassword", "INeedBetterPassword@2013");
-		} catch (com.johnstarich.moviematcher.app.HttpException e) {
+		} catch (HttpException e) {
 			assertEquals("Invalid old password.", e.getMessage());
 		}
 

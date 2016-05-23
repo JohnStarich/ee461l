@@ -1,6 +1,6 @@
 package com.johnstarich.moviematcher.models;
 
-import com.johnstarich.moviematcher.app.AbstractMongoDBTest;
+import com.johnstarich.moviematcher.controllers.AbstractMongoDBTest;
 
 import com.johnstarich.moviematcher.store.MovieMatcherDatabase;
 import com.mongodb.BasicDBObject;
@@ -9,6 +9,7 @@ import org.bson.types.ObjectId;
 
 
 /**
+ * Test for Session
  * Created by Josue on 4/26/2016.
  */
 public class SessionTest extends AbstractMongoDBTest {

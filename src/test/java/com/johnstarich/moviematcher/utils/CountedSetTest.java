@@ -1,4 +1,4 @@
-package com.johnstarich.moviematcher;
+package com.johnstarich.moviematcher.utils;
 
 import junit.framework.TestCase;
 
@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
+ * Test for CountedSet
  * Created by johnstarich on 5/8/16.
  */
 public class CountedSetTest extends TestCase {
