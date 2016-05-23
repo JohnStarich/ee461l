@@ -1,8 +1,8 @@
 package com.johnstarich.moviematcher.models;
 
-import com.johnstarich.moviematcher.controllers.CheckedRunnable;
-import com.johnstarich.moviematcher.app.HttpException;
-import com.johnstarich.moviematcher.app.HttpStatus;
+import com.johnstarich.moviematcher.utils.CheckedRunnable;
+import com.johnstarich.moviematcher.utils.HttpException;
+import com.johnstarich.moviematcher.utils.HttpStatus;
 import com.johnstarich.moviematcher.store.MovieMatcherDatabase;
 import com.mongodb.DuplicateKeyException;
 import de.caluga.morphium.annotations.Entity;

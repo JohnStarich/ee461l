@@ -1,4 +1,4 @@
-package com.johnstarich.moviematcher;
+package com.johnstarich.moviematcher.utils;
 
 import junit.framework.TestCase;
 

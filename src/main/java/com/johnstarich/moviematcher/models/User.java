@@ -1,7 +1,7 @@
 package com.johnstarich.moviematcher.models;
 
-import com.johnstarich.moviematcher.app.HttpException;
-import com.johnstarich.moviematcher.app.HttpStatus;
+import com.johnstarich.moviematcher.utils.HttpException;
+import com.johnstarich.moviematcher.utils.HttpStatus;
 import com.johnstarich.moviematcher.store.MovieMatcherDatabase;
 import de.caluga.morphium.annotations.Index;
 import de.caluga.morphium.annotations.Reference;

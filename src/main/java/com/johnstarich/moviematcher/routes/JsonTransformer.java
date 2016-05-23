@@ -1,4 +1,4 @@
-package com.johnstarich.moviematcher.controllers;
+package com.johnstarich.moviematcher.routes;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;

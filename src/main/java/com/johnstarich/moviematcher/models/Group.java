@@ -1,7 +1,7 @@
 package com.johnstarich.moviematcher.models;
 
-import com.johnstarich.moviematcher.CountedSet;
-import com.johnstarich.moviematcher.app.HttpException;
+import com.johnstarich.moviematcher.utils.CountedSet;
+import com.johnstarich.moviematcher.utils.HttpException;
 import com.johnstarich.moviematcher.store.MovieMatcherDatabase;
 import de.caluga.morphium.annotations.Index;
 import de.caluga.morphium.annotations.Reference;
@@ -113,7 +113,6 @@ public class Group extends AbstractModel<Group> {
             .filter(genre -> ! genre.isEmpty())
             .collect(Collectors.toList());
         CountedSet<String> frequencyOfGenres = new CountedSet<>(genres);
-        System.out.println(frequencyOfGenres);
 
         List<Query<Movie>> genreQueries = frequencyOfGenres.keySet().parallelStream()
             .map(genre ->

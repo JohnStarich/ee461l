@@ -1,4 +1,4 @@
-package com.johnstarich.moviematcher.app;
+package com.johnstarich.moviematcher.utils;
 
 /**
  * Created by johnstarich on 3/28/16.
