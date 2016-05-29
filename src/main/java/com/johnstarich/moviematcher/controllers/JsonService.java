@@ -1,5 +1,6 @@
 package com.johnstarich.moviematcher.controllers;
 
+import com.google.gson.JsonSyntaxException;
 import com.johnstarich.moviematcher.models.User;
 import com.johnstarich.moviematcher.routes.AuthenticatedRoute;
 import com.johnstarich.moviematcher.routes.JsonTransformer;
@@ -30,7 +31,12 @@ public abstract class JsonService extends AbstractService {
 			resp.type("application/json");
 			Map jsonMap = null;
 			if(req.contentType() != null && req.contentType().contains("application/json")) {
-				jsonMap = json.parse(req.body(), Map.class);
+				try {
+					jsonMap = json.parse(req.body(), Map.class);
+				}
+				catch (JsonSyntaxException e) {
+					// ignore syntax errors: any unknown fields, if used, will be empty Optionals
+				}
 			}
 			req.attribute("json", Optional.ofNullable(jsonMap));
 		});
