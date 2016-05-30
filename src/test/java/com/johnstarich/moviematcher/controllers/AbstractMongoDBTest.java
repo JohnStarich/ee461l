@@ -1,5 +1,6 @@
 package com.johnstarich.moviematcher.controllers;
 
+import com.johnstarich.moviematcher.routes.AbstractHttpClientTest;
 import com.johnstarich.moviematcher.store.ConfigManager;
 import com.mongodb.Mongo;
 import com.mongodb.MongoClient;
@@ -23,7 +24,7 @@ import java.util.stream.StreamSupport;
  * MongoDB enabled TestCase
  * Created by johnstarich on 4/14/16.
  */
-public abstract class AbstractMongoDBTest extends TestCase {
+public abstract class AbstractMongoDBTest extends AbstractHttpClientTest {
 	/**
 	 * EmbeddedMongo author's note:
 	 * please store Starter or RuntimeConfig in a static final field
@@ -77,12 +78,12 @@ public abstract class AbstractMongoDBTest extends TestCase {
 	}
 
 	@Override
-	protected void setUp() throws Exception {
+	public void setUp() throws Exception {
 		super.setUp();
 	}
 
 	@Override
-	protected void tearDown() throws Exception {
+	public void tearDown() throws Exception {
 		super.tearDown();
 		StreamSupport.stream(mongo.listDatabaseNames().spliterator(), true)
 			.map(mongo::getDatabase)
