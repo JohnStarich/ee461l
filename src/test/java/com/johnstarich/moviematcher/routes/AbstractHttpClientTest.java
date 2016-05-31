@@ -7,6 +7,7 @@ import org.eclipse.jetty.client.HttpContentResponse;
 import org.eclipse.jetty.client.api.ContentProvider;
 import org.eclipse.jetty.client.api.Request;
 import org.eclipse.jetty.http.HttpMethod;
+import spark.Spark;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
@@ -22,6 +23,17 @@ public class AbstractHttpClientTest extends TestCase {
 	private static final Charset charset = Charset.forName("UTF-8");
 
 	private HttpClient client;
+
+	public void testClientWorks() throws Exception {
+		Spark.get("/", (request, response) -> "It works!");
+		Spark.awaitInitialization();
+		get("/", response -> {
+			assertEquals("It works!", response.body);
+			assertEquals("text/html", response.type);
+			assertEquals("UTF-8", response.encoding);
+			assertEquals(200, response.status);
+		});
+	}
 
 	@Override
 	public void setUp() throws Exception {
