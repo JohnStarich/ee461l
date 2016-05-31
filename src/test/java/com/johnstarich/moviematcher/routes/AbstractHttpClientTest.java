@@ -25,6 +25,7 @@ public class AbstractHttpClientTest extends TestCase {
 	private HttpClient client;
 
 	public void testClientWorks() throws Exception {
+		Spark.stop();
 		Spark.get("/", (request, response) -> "It works!");
 		Spark.awaitInitialization();
 		get("/", response -> {
