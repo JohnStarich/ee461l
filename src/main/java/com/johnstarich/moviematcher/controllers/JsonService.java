@@ -47,7 +47,7 @@ public abstract class JsonService extends AbstractService {
 		this.initService();
 	}
 
-	public abstract void initService();
+	protected abstract void initService();
 
 	public <T> Optional<T> bodyParam(Request request, String key) {
 		Optional<Map<String, T>> mapOptional = request.attribute("json");
