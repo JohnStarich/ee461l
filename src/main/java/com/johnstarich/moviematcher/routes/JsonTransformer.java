@@ -9,10 +9,12 @@ import com.google.gson.stream.JsonWriter;
 import com.johnstarich.moviematcher.models.AbstractModel;
 import com.johnstarich.moviematcher.store.MovieMatcherDatabase;
 import org.bson.types.ObjectId;
+import org.json.simple.parser.ParseException;
 import spark.ResponseTransformer;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -46,7 +48,13 @@ public class JsonTransformer implements ResponseTransformer {
 		else return gson.toJson(model);
 	}
 
-	public <T> T parse(String model, Class<T> clazz) throws JsonSyntaxException {
+	private static final Pattern OBJECT_ID = Pattern.compile("\\{\\s*\"\\$oid\"\\s*:\\s*(?<id>\"[0-9a-f]+\")\\s*\\}");
+
+	public <T> T parse(String model, Class<T> clazz) throws JsonSyntaxException, ParseException {
+		if (AbstractModel.class.isAssignableFrom(clazz)) {
+			model = OBJECT_ID.matcher(model).replaceAll("$1");
+			return MovieMatcherDatabase.morphium.getMapper().unmarshall(clazz, model);
+		}
 		return gson.fromJson(model, clazz);
 	}
 }

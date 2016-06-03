@@ -1,8 +1,11 @@
 package com.johnstarich.moviematcher.controllers;
 
+import com.google.gson.JsonSyntaxException;
 import com.johnstarich.moviematcher.models.User;
 import com.johnstarich.moviematcher.routes.AuthenticatedRoute;
 import com.johnstarich.moviematcher.routes.JsonTransformer;
+import org.json.simple.parser.ParseException;
+import spark.Filter;
 import spark.Request;
 import spark.Route;
 
@@ -26,21 +29,28 @@ public abstract class JsonService extends AbstractService {
 	@Override
 	public final void init() {
 		super.init();
-		before(PREFIX+"/*", (req, resp) -> {
+		Filter jsonAttribute = (req, resp) -> {
 			resp.type("application/json");
 			Map jsonMap = null;
 			if(req.contentType() != null && req.contentType().contains("application/json")) {
-				jsonMap = json.parse(req.body(), Map.class);
+				try {
+					jsonMap = json.parse(req.body(), Map.class);
+				}
+				catch (JsonSyntaxException | ParseException e) {
+					// ignore syntax errors: any unknown fields, if used, will be empty Optionals
+				}
 			}
 			req.attribute("json", Optional.ofNullable(jsonMap));
-		});
+		};
+		before(PREFIX+"/*", jsonAttribute);
+		before(PREFIX, jsonAttribute);
 		this.initService();
 	}
 
-	public abstract void initService();
+	protected abstract void initService();
 
 	public <T> Optional<T> bodyParam(Request request, String key) {
-		Optional<Map<String, T>> mapOptional =  request.attribute("json");
+		Optional<Map<String, T>> mapOptional = request.attribute("json");
 		if(! mapOptional.isPresent()) return Optional.empty();
 		return Optional.ofNullable(mapOptional.get().get(key));
 	}
