@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * Test for UserService
  * Created by johnstarich on 5/27/16.
  */
 public class UserServiceTest extends AbstractMongoDBTest {
