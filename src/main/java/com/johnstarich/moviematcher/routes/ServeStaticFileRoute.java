@@ -48,7 +48,7 @@ public class ServeStaticFileRoute implements Route {
 		}
 		response.type(staticFile.contentType);
 
-		if(staticFile.contentType.equals("text/html")) return staticFile.content;
+		if(staticFile.contentType.startsWith("text/")) return staticFile.content;
 		else {
 			response.body(staticFile.content);
 			return null;
