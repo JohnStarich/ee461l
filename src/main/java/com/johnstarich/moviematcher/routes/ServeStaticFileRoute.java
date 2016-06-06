@@ -23,7 +23,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ServeStaticFileRoute implements Route {
 	private static final String STATIC_PREFIX = "static";
 	private static final Map<String, StaticFile> loadedFiles = new ConcurrentHashMap<>(16);
-	private static final boolean SHOULD_CACHE_FILES = ConfigManager.getPropertyOrDefault("ENVIRONMENT", "development").equals("production");
+	private static final boolean SHOULD_CACHE_FILES = ConfigManager.getPropertyOrDefault("CACHE_STATIC_FILES", "false").equals("true") ||
+		ConfigManager.getPropertyOrDefault("ENVIRONMENT", "development").equals("production");
 
 	private final String defaultFile;
 
@@ -54,11 +55,20 @@ public class ServeStaticFileRoute implements Route {
 		}
 	}
 
-	private static StaticFile getPage(String path) throws HttpException {
+	private static String pathForRelativePath(String path) {
 		StringBuilder relativeFilePathBuilder = new StringBuilder(STATIC_PREFIX);
 		if(! path.startsWith("/")) relativeFilePathBuilder.append('/');
 		relativeFilePathBuilder.append(path);
-		String relativeFilePath = relativeFilePathBuilder.toString();
+		return relativeFilePathBuilder.toString();
+	}
+
+	/** For testing purposes only. Sets the content of a page for a given path. */
+	static void setPage(String path, String content, String contentType) throws HttpException {
+		loadedFiles.put(pathForRelativePath(path), new StaticFile(content, contentType));
+	}
+
+	private static StaticFile getPage(String path) throws HttpException {
+		String relativeFilePath = pathForRelativePath(path);
 
 		if(SHOULD_CACHE_FILES && loadedFiles.containsKey(relativeFilePath)) {
 			return loadedFiles.get(relativeFilePath);
