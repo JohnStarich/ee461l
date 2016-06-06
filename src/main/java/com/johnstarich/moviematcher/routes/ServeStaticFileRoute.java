@@ -92,7 +92,9 @@ public class ServeStaticFileRoute implements Route {
 	}
 
 	private static String getContentType(String fileName) {
-		String extension = fileName.substring(fileName.lastIndexOf('.') + 1);
+		String extension;
+		if(fileName == null || fileName.indexOf('.') < 0) extension = "";
+		else extension = fileName.substring(fileName.lastIndexOf('.') + 1);
 		switch(extension) {
 			case "css": return "text/css";
 			case "eot": return "application/vnd.ms-fontobject";
