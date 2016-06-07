@@ -6,11 +6,11 @@ import org.eclipse.jetty.http.HttpField;
 import org.json.simple.parser.ParseException;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 /**
+ * Wrapper for HTTP responses using the Jetty HTTP client.
  * Created by johnstarich on 5/28/16.
  */
 public class HttpResponseWrapper {

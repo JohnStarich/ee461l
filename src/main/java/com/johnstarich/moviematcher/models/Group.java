@@ -1,7 +1,6 @@
 package com.johnstarich.moviematcher.models;
 
 import com.johnstarich.moviematcher.utils.CountedSet;
-import com.johnstarich.moviematcher.utils.HttpException;
 import com.johnstarich.moviematcher.store.MovieMatcherDatabase;
 import de.caluga.morphium.annotations.Index;
 import de.caluga.morphium.annotations.Reference;
@@ -69,8 +68,8 @@ public class Group extends AbstractModel<Group> {
 
     @Override
     public boolean equals(Object o) {
-        if(o == null || !(o instanceof Group)) return false;
-        return ((Group) o).name != null && ((Group) o).name.equals(name) && ((Group) o).members.size() == members.size();
+        return o != null && o instanceof Group &&
+            ((Group) o).name != null && ((Group) o).name.equals(name) && ((Group) o).members.size() == members.size();
     }
 
     public Group noPasswords() {

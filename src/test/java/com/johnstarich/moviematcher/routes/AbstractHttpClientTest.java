@@ -117,7 +117,7 @@ public class AbstractHttpClientTest extends TestCase {
 
 	private static ContentProvider providerForData(String data) {
 		return new ContentProvider.Typed() {
-			ByteBuffer buffer = ByteBuffer.wrap(data.getBytes(charset));
+			final ByteBuffer buffer = ByteBuffer.wrap(data.getBytes(charset));
 
 			@Override
 			public Iterator<ByteBuffer> iterator() {

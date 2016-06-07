@@ -16,7 +16,6 @@ import de.flapdoodle.embed.process.config.io.ProcessOutput;
 import de.flapdoodle.embed.process.extract.UserTempNaming;
 import de.flapdoodle.embed.process.io.Processors;
 import de.flapdoodle.embed.process.runtime.Network;
-import junit.framework.TestCase;
 
 import java.util.stream.StreamSupport;
 
@@ -75,11 +74,6 @@ public abstract class AbstractMongoDBTest extends AbstractHttpClientTest {
 		mongod = mongodExe.start();
 
 		mongo = new MongoClient("localhost", MONGO_PORT);
-	}
-
-	@Override
-	public void setUp() throws Exception {
-		super.setUp();
 	}
 
 	@Override
