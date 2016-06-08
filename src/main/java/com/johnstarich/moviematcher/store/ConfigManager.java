@@ -27,4 +27,13 @@ public class ConfigManager {
 	public static String getPropertyOrDefault(String property, String defaultValue) {
 		return config.getOrDefault(property, defaultValue);
 	}
+
+	public static void setProperty(String property, String value) {
+		config.put(property, value);
+	}
+
+	/** Set property if not already set */
+	public static void setPropertyDefault(String property, String value) {
+		config.putIfAbsent(property, value);
+	}
 }
