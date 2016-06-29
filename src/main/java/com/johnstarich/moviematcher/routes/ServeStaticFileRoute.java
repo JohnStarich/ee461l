@@ -63,7 +63,7 @@ public class ServeStaticFileRoute implements Route {
 	}
 
 	/** For testing purposes only. Sets the content of a page for a given path. */
-	static void setPage(String path, String content, String contentType) throws HttpException {
+	static void setPage(String path, String content, String contentType) {
 		loadedFiles.put(pathForRelativePath(path), new StaticFile(content, contentType));
 	}
 

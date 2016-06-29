@@ -10,10 +10,10 @@ import java.util.Arrays;
  * Created by Josue on 4/25/2016.
  */
 public class GroupTest extends TestCase {
-    private User Josue = new User( new ObjectId(), "jalfaro@MovieMatcher.com", "Josue" , "Alfaro");
-    private User Jeremy = new User( new ObjectId(), "jcastillo@MovieMatcher.com", "Jeremy", "Castillo");
-    private User John = new User( new ObjectId(), "jstarich@MovieMatcher.com", "John", "Starich");
-    private User Cesar = new User( new ObjectId(), "2cgonzalez@MovieMatcher.com", "Cesar", "Gonzalez");
+    private final User Josue = new User( new ObjectId(), "jalfaro@MovieMatcher.com", "Josue" , "Alfaro");
+    private final User Jeremy = new User( new ObjectId(), "jcastillo@MovieMatcher.com", "Jeremy", "Castillo");
+    private final User John = new User( new ObjectId(), "jstarich@MovieMatcher.com", "John", "Starich");
+    private final User Cesar = new User( new ObjectId(), "2cgonzalez@MovieMatcher.com", "Cesar", "Gonzalez");
 
     public void testAddFriend() throws Exception {
         User Romeo = new User(new ObjectId());

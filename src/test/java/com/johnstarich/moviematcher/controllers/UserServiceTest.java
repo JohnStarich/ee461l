@@ -2,6 +2,7 @@ package com.johnstarich.moviematcher.controllers;
 
 import com.johnstarich.moviematcher.models.Session;
 import com.johnstarich.moviematcher.models.User;
+import com.johnstarich.moviematcher.utils.HttpStatus;
 import org.bson.types.ObjectId;
 import spark.Spark;
 
@@ -14,7 +15,7 @@ import java.util.Map;
  * Created by johnstarich on 5/27/16.
  */
 public class UserServiceTest extends AbstractMongoDBTest {
-	private UserService service = new UserService();
+	private final UserService service = new UserService();
 
 	@Override
 	public void setUp() throws Exception {
@@ -31,7 +32,9 @@ public class UserServiceTest extends AbstractMongoDBTest {
 		return User.login("johnstarich", password);
 	}
 
-	public Map<String, String> authHeaders(Session session) throws Exception {
+	public Map<String, String> authHeaders(Session session) {
+		if(session == null) throw new AssertionError("Session is null");
+		if(session.id == null) throw new AssertionError("Session ID is null");
 		return Collections.singletonMap("Authorization", session.id.toHexString());
 	}
 
@@ -90,6 +93,7 @@ public class UserServiceTest extends AbstractMongoDBTest {
 		innerRatingData.put("rating", 6.5D);
 		post(service.PREFIX + "/ratings", data, authHeaders(s), response -> {
 			assertEquals("\"rating saved!\"", response.body);
+			assertEquals(HttpStatus.OK.code, response.status);
 		});
 	}
 }

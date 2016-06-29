@@ -14,7 +14,6 @@ public class AbstractServiceTest {
 		AbstractService app = new AbstractService() {
 			public String mountPoint() { return ""; }
 			public String resource() { return prefix; }
-			public void init() {}
 		};
 
 		assertEquals(app.PREFIX, prefix);
