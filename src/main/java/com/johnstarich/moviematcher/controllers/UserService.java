@@ -29,9 +29,9 @@ public class UserService extends JsonService {
 	));
 
 	private final Set<String> WHITELIST_AUTH_PREFIXES = new HashSet<>(Arrays.asList(
-		PREFIX+"/", // i.e. /v1/users/*
-		"/login/",
-		"/register/",
+		PREFIX, // i.e. /v1/users/*
+		"/login",
+		"/register",
 		"/assets/",
 		"/fonts/",
 		"/favicon"

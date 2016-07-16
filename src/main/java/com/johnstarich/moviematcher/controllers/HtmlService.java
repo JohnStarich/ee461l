@@ -21,7 +21,7 @@ public class HtmlService implements HttpService {
 	@Override
 	public void init() {
 		// accept any type except JSON
-		Spark.get("/*", "application/json;q=0.0, */*", new ServeStaticFileRoute("/index.html"));
+		Spark.get("/*", "*/*;q=1.0, application/json;q=0.0", new ServeStaticFileRoute("/index.html"));
 	}
 
 	@Override
