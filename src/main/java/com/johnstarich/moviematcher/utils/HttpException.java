@@ -5,78 +5,59 @@ package com.johnstarich.moviematcher.utils;
  * Created by johnstarich on 2/25/16.
  */
 public class HttpException extends Exception {
-	private int statusCode = 500;
+	private static final long serialVersionUID = 1832901938935139436L;
 
-	public HttpException(int statusCode) {
-		super();
-		this.statusCode = statusCode;
-	}
+	private final HttpStatus statusCode;
 
 	public HttpException(HttpStatus statusCode) {
-		this.statusCode = statusCode.code;
+		this.statusCode = statusCode;
 	}
 
 	public HttpException() {
-		super();
-	}
-
-	public HttpException(int statusCode, String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-		super(message, cause, enableSuppression, writableStackTrace);
-		this.statusCode = statusCode;
+		statusCode = HttpStatus.INTERNAL_SERVER_ERROR;
 	}
 
 	public HttpException(HttpStatus statusCode, String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
 		super(message, cause, enableSuppression, writableStackTrace);
-		this.statusCode = statusCode.code;
+		this.statusCode = statusCode;
 	}
 
 	public HttpException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
 		super(message, cause, enableSuppression, writableStackTrace);
-	}
-
-	public HttpException(int statusCode, String message, Throwable cause) {
-		super(message, cause);
-		this.statusCode = statusCode;
+		statusCode = HttpStatus.INTERNAL_SERVER_ERROR;
 	}
 
 	public HttpException(HttpStatus statusCode, String message, Throwable cause) {
 		super(message, cause);
-		this.statusCode = statusCode.code;
+		this.statusCode = statusCode;
 	}
 
 	public HttpException(String message, Throwable cause) {
 		super(message, cause);
-	}
-
-	public HttpException(int statusCode, String message) {
-		super(message);
-		this.statusCode = statusCode;
+		statusCode = HttpStatus.INTERNAL_SERVER_ERROR;
 	}
 
 	public HttpException(HttpStatus statusCode, String message) {
 		super(message);
-		this.statusCode = statusCode.code;
+		this.statusCode = statusCode;
 	}
 
 	public HttpException(String message) {
 		super(message);
-	}
-
-	public HttpException(int statusCode, Throwable cause) {
-		super(cause);
-		this.statusCode = statusCode;
+		statusCode = HttpStatus.INTERNAL_SERVER_ERROR;
 	}
 
 	public HttpException(HttpStatus statusCode, Throwable cause) {
 		super(cause);
-		this.statusCode = statusCode.code;
+		this.statusCode = statusCode;
 	}
 
 	public HttpException(Throwable cause) {
 		super(cause);
+		statusCode = HttpStatus.INTERNAL_SERVER_ERROR;
 	}
 
-	public int getStatusCode() { return statusCode; }
+	public HttpStatus getStatusCode() { return statusCode; }
 
 	@Override
 	public String getMessage() {
@@ -85,6 +66,4 @@ public class HttpException extends Exception {
 		else
 			return HttpStatus.getErrorMessageForCode(statusCode);
 	}
-
-
 }

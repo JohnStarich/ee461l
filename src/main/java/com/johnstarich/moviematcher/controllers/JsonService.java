@@ -4,6 +4,10 @@ import com.google.gson.JsonSyntaxException;
 import com.johnstarich.moviematcher.models.User;
 import com.johnstarich.moviematcher.routes.AuthenticatedRoute;
 import com.johnstarich.moviematcher.routes.JsonTransformer;
+import com.johnstarich.moviematcher.utils.ClientFacingHttpException;
+import com.johnstarich.moviematcher.utils.HttpException;
+import com.johnstarich.moviematcher.utils.HttpStatus;
+
 import org.json.simple.parser.ParseException;
 import spark.Filter;
 import spark.Request;
@@ -49,9 +53,14 @@ public abstract class JsonService extends AbstractService {
 
 	protected abstract void initService();
 
-	public <T> Optional<T> bodyParam(Request request, String key) {
+	public <T> Optional<T> bodyParam(Request request, String key) throws HttpException {
 		Optional<Map<String, T>> mapOptional = request.attribute("json");
-		if(! mapOptional.isPresent()) return Optional.empty();
+		if(! mapOptional.isPresent()) {
+			throw new ClientFacingHttpException(
+				HttpStatus.UNSUPPORTED_MEDIA_TYPE,
+				"Wrong content type, expected application/json"
+			);
+		}
 		return Optional.ofNullable(mapOptional.get().get(key));
 	}
 
@@ -63,7 +72,7 @@ public abstract class JsonService extends AbstractService {
 	}
 
 	private String checkPath(String path) {
-		if(! path.startsWith("/")) return '/' + path;
+		if(path.isEmpty() || path.charAt(0) != '/') return '/' + path;
 		return path;
 	}
 

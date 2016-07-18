@@ -26,6 +26,7 @@ public enum HttpStatus {
 	UNAUTHORIZED (401),
 	FORBIDDEN (403),
 	NOT_FOUND (404),
+	UNSUPPORTED_MEDIA_TYPE (415),
 
 	INTERNAL_SERVER_ERROR (500),
 	NOT_IMPLEMENTED (501),
@@ -42,32 +43,14 @@ public enum HttpStatus {
 	 * @param statusCode the code to retrieve a message for
 	 * @return the message
 	 */
-	public static String getErrorMessageForCode(int statusCode) {
-		switch (statusCode) {
-			case 200: return "OK";
-			case 201: return "Created";
-			case 202: return "Accepted";
-			case 204: return "No Content";
-			case 205: return "Reset Content";
-			case 301: return "Moved Permanently";
-			case 302: return "Found";
-			case 307: return "Temporary Redirect";
-			case 308: return "Permanent Redirect";
-			case 400: return "Bad Request";
-			case 401: return "Unauthorized";
-			case 403: return "Forbidden";
-			case 404: return "Not Found";
-			case 500: return "Internal Server Error";
-			case 501: return "Not Implemented";
-		}
-
+	public static HttpStatus getGenericErrorMessageForCode(int statusCode) {
 		switch (statusCode / 100) {
-			case 1: return "Info";
-			case 2: return "Success";
-			case 3: return "Redirect";
-			case 4: return "Client Error";
-			case 5: return "Server Error";
-			default:return "Server Error";
+			case 1: return INFO;
+			case 2: return SUCCESS;
+			case 3: return REDIRECT;
+			case 4: return CLIENT_ERROR;
+			case 5:
+			default:return SERVER_ERROR;
 		}
 	}
 
@@ -91,13 +74,16 @@ public enum HttpStatus {
 			case UNAUTHORIZED: return "Unauthorized";
 			case FORBIDDEN: return "Forbidden";
 			case NOT_FOUND: return "Not Found";
+			case UNSUPPORTED_MEDIA_TYPE: return "Unsupported Media Type";
 			case INTERNAL_SERVER_ERROR: return "Internal Server Error";
 			case NOT_IMPLEMENTED: return "Not Implemented";
 			case INFO: return "Info";
 			case SUCCESS: return "Success";
 			case REDIRECT: return "Redirect";
 			case CLIENT_ERROR: return "Client Error";
-			default: case SERVER_ERROR: return "Server Error";
+			case SERVER_ERROR:
+			default:
+				return "Server Error";
 		}
 	}
 }

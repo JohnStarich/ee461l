@@ -43,7 +43,7 @@ public class ServeStaticFileRoute implements Route {
 			staticFile = getPage(request.uri());
 		}
 		catch (HttpException e) {
-			if(e.getStatusCode() != HttpStatus.NOT_FOUND.code) throw e;
+			if(e.getStatusCode() != HttpStatus.NOT_FOUND) throw e;
 			staticFile = getPage(this.defaultFile);
 		}
 		response.type(staticFile.contentType);

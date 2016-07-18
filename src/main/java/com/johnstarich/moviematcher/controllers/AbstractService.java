@@ -1,5 +1,6 @@
 package com.johnstarich.moviematcher.controllers;
 
+import com.johnstarich.moviematcher.utils.ClientFacingHttpException;
 import com.johnstarich.moviematcher.utils.HttpException;
 import com.johnstarich.moviematcher.utils.HttpStatus;
 
@@ -53,11 +54,20 @@ public abstract class AbstractService implements HttpService {
 			throw new HttpException(HttpStatus.NOT_FOUND);
 		});
 
+		exception(ClientFacingHttpException.class, (e, request, response) -> {
+			HttpStatus statusCode = ((HttpException)e).getStatusCode();
+			response.status(statusCode.code);
+			response.body(String.format("%d %s", statusCode.code, e.getMessage()));
+			System.err.printf("[%s] ERROR: %d %s", request.uri(), statusCode.code, ((ClientFacingHttpException)e).getHiddenMessage());
+			if(e.getCause() != null)
+				e.getCause().printStackTrace();
+		});
+
 		exception(HttpException.class, (e, request, response) -> {
-			int statusCode = ((HttpException)e).getStatusCode();
-			response.status(statusCode);
-			response.body(String.format("%d %s", statusCode, e.getMessage()));
-			System.err.println(String.format("[%s] ERROR: %d %s", request.uri(), statusCode, e.getMessage()));
+			HttpStatus statusCode = ((HttpException)e).getStatusCode();
+			response.status(statusCode.code);
+			response.body(String.format("%d %s", statusCode.code, e.getMessage()));
+			System.err.println(String.format("[%s] ERROR: %d %s", request.uri(), statusCode.code, e.getMessage()));
 			if(e.getCause() != null)
 				e.getCause().printStackTrace();
 		});
