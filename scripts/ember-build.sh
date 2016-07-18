@@ -1,4 +1,6 @@
-#!/usr/bin/env bash -e
+#!/usr/bin/env bash
+
+set -e
 
 function error {
     if [ -z "$@" ]; then
@@ -25,6 +27,7 @@ function print_usage {
     error <<EOT
 Usage: ember-build.sh {development,production}
 EOT
+	return 2
 }
 
 function build {
@@ -40,6 +43,6 @@ function install {
     npm install && bower install
 }
 
-validate_args $@ || (print_usage && exit 2)
+validate_args $@ || print_usage
 
 install && build
