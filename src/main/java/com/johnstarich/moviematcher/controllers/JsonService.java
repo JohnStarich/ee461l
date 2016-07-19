@@ -58,7 +58,7 @@ public abstract class JsonService extends AbstractService {
 		if(! mapOptional.isPresent()) {
 			throw new ClientFacingHttpException(
 				HttpStatus.UNSUPPORTED_MEDIA_TYPE,
-				"Wrong content type, expected application/json"
+				String.format("Wrong content type: expected application/json, received \"%s\"", request.contentType())
 			);
 		}
 		return Optional.ofNullable(mapOptional.get().get(key));
