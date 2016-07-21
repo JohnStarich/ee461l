@@ -19,9 +19,9 @@ public class ClientFacingHttpException extends HttpException {
 		this.hiddenMessage = hiddenMessage;
 	}
 
-	public ClientFacingHttpException(HttpStatus httpStatus, String message) {
-		super(HttpStatus.CLIENT_ERROR, message);
-		hiddenMessage = "Something went wrong with your request, sorry for any inconvenience";
+	public ClientFacingHttpException(HttpStatus httpStatus, String hiddenMessage) {
+		super(HttpStatus.CLIENT_ERROR, "Something went wrong with your request, sorry for any inconvenience");
+		this.hiddenMessage = hiddenMessage;
 	}
 
 	public ClientFacingHttpException(String hiddenMessage, String message) {
