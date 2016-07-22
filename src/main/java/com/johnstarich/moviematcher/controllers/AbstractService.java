@@ -80,10 +80,9 @@ public abstract class AbstractService implements HttpService {
 	}
 
 	private static void logError(Request request, Response response, String clientMessage, String consoleMessage, HttpStatus statusCode) {
-		String logMessage = String.format("[%s] ERROR: %d %s\n", request.uri(), statusCode.code, consoleMessage);
+		String logMessage = String.format("[%s] ERROR: %d %s", request.uri(), statusCode.code, consoleMessage);
 		String clientFacingMessage = String.format("%d %s", statusCode.code, clientMessage);
 		System.err.println(logMessage);
-		System.out.println(logMessage);
 		response.status(statusCode.code);
 		response.body(clientFacingMessage);
 	}
