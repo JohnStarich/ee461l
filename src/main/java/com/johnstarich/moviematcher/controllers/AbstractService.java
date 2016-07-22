@@ -58,32 +58,35 @@ public abstract class AbstractService implements HttpService {
 		});
 
 		exception(ClientFacingHttpException.class, (e, request, response) -> {
-			HttpStatus statusCode = ((HttpException) e).getStatusCode();
 			if(e.getCause() != null) e.getCause().printStackTrace();
-			logError(request, response, e.getMessage(), ((ClientFacingHttpException) e).getHiddenMessage(), statusCode);
+			String message = e.getMessage();
+			String hiddenMessage = ((ClientFacingHttpException) e).getHiddenMessage();
+			HttpStatus statusCode = ((HttpException) e).getStatusCode();
+			HttpStatus hiddenStatusCode = ((ClientFacingHttpException) e).getHiddenHttpStatus();
+			logError(request, response, message, hiddenMessage, statusCode, hiddenStatusCode);
 		});
 
 		exception(HttpException.class, (e, request, response) -> {
-			HttpStatus statusCode = ((HttpException) e).getStatusCode();
 			if(e.getCause() != null) e.getCause().printStackTrace();
-			logError(request, response, e.getMessage(), e.getMessage(), statusCode);
+			HttpStatus statusCode = ((HttpException) e).getStatusCode();
+			logError(request, response, e.getMessage(), statusCode);
 		});
 
 		exception(Exception.class, (e, request, response) -> {
 			e.printStackTrace();
-			logError(request, response, "Internal Server Error", e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+			logError(request, response, "Internal Server Error", e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
 		});
 	}
 
 	private static void logError(Request request, Response response, String message, HttpStatus statusCode) {
-		logError(request, response, message, message, statusCode);
+		logError(request, response, message, message, statusCode, statusCode);
 	}
 
-	private static void logError(Request request, Response response, String clientMessage, String consoleMessage, HttpStatus statusCode) {
-		String logMessage = String.format("[%s] ERROR: %d %s", request.uri(), statusCode.code, consoleMessage);
-		String clientFacingMessage = String.format("%d %s", statusCode.code, clientMessage);
+	private static void logError(Request request, Response response, String clientMessage, String consoleMessage, HttpStatus clientStatusCode, HttpStatus consoleStatusCode) {
+		String logMessage = String.format("[%s] ERROR: %d %s", request.uri(), consoleStatusCode.code, consoleMessage);
+		String clientFacingMessage = String.format("%d %s", clientStatusCode.code, clientMessage);
 		System.err.println(logMessage);
-		response.status(statusCode.code);
+		response.status(clientStatusCode.code);
 		response.body(clientFacingMessage);
 	}
 
