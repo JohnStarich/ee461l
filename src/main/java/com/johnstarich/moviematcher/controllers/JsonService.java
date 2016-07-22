@@ -56,10 +56,18 @@ public abstract class JsonService extends AbstractService {
 	public <T> Optional<T> bodyParam(Request request, String key) throws HttpException {
 		Optional<Map<String, T>> mapOptional = request.attribute("json");
 		if(! mapOptional.isPresent()) {
-			throw new ClientFacingHttpException(
-				HttpStatus.UNSUPPORTED_MEDIA_TYPE,
-				String.format("Wrong content type: expected application/json, received \"%s\"", request.contentType())
-			);
+			if(request.contentType() == null || ! request.contentType().contains("application/json")) {
+				throw new ClientFacingHttpException(
+					HttpStatus.UNSUPPORTED_MEDIA_TYPE,
+					String.format("Wrong content type: expected application/json, received \"%s\"", request.contentType())
+				);
+			}
+			else if (request.body() == null || request.body().isEmpty()) {
+				throw new ClientFacingHttpException(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "Body of request is empty");
+			}
+			else {
+				throw new ClientFacingHttpException(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "Body of request is malformed JSON");
+			}
 		}
 		return Optional.ofNullable(mapOptional.get().get(key));
 	}
