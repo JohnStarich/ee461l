@@ -36,12 +36,17 @@ public abstract class JsonService extends AbstractService {
 		Filter jsonAttribute = (req, resp) -> {
 			resp.type("application/json");
 			Map jsonMap = null;
-			if(req.contentType() != null && req.contentType().contains("application/json")) {
+			if(req.contentType() != null && req.contentType().contains("application/json") && ! req.body().isEmpty()) {
 				try {
 					jsonMap = json.parse(req.body(), Map.class);
-				}
-				catch (JsonSyntaxException | ParseException e) {
+				} catch (JsonSyntaxException | ParseException e) {
 					// ignore syntax errors: any unknown fields, if used, will be empty Optionals
+					throw new ClientFacingHttpException(
+						HttpStatus.BAD_REQUEST,
+						HttpStatus.BAD_REQUEST,
+						String.format("Body of request is malformed JSON: %s\nContent: %s", e, req.body()),
+						"Body of request is malformed JSON"
+					);
 				}
 			}
 			req.attribute("json", Optional.ofNullable(jsonMap));
@@ -57,16 +62,13 @@ public abstract class JsonService extends AbstractService {
 		Optional<Map<String, T>> mapOptional = request.attribute("json");
 		if(! mapOptional.isPresent()) {
 			if(request.contentType() == null || ! request.contentType().contains("application/json")) {
-				throw new ClientFacingHttpException(
+				throw new HttpException(
 					HttpStatus.UNSUPPORTED_MEDIA_TYPE,
 					String.format("Wrong content type: expected application/json, received \"%s\"", request.contentType())
 				);
 			}
 			else if (request.body() == null || request.body().isEmpty()) {
-				throw new ClientFacingHttpException(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "Body of request is empty");
-			}
-			else {
-				throw new ClientFacingHttpException(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "Body of request is malformed JSON");
+				throw new HttpException(HttpStatus.BAD_REQUEST, "Body of request is empty");
 			}
 		}
 		return Optional.ofNullable(mapOptional.get().get(key));

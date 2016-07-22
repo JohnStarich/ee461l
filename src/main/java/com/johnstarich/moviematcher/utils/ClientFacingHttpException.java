@@ -16,9 +16,15 @@ public class ClientFacingHttpException extends HttpException {
 		this.hiddenMessage = hiddenMessage;
 	}
 
-	public ClientFacingHttpException(HttpStatus httpStatus, String hiddenMessage, String message) {
+	public ClientFacingHttpException(HttpStatus hiddenStatus, String hiddenMessage, String message) {
 		super(HttpStatus.INTERNAL_SERVER_ERROR, message);
-		hiddenHttpStatus = httpStatus;
+		hiddenHttpStatus = hiddenStatus;
+		this.hiddenMessage = hiddenMessage;
+	}
+
+	public ClientFacingHttpException(HttpStatus status, HttpStatus hiddenStatus, String hiddenMessage, String message) {
+		super(status, message);
+		hiddenHttpStatus = hiddenStatus;
 		this.hiddenMessage = hiddenMessage;
 	}
 
