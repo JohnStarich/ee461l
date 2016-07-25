@@ -36,6 +36,9 @@ public abstract class JsonService extends AbstractService {
 		Filter jsonAttribute = (req, resp) -> {
 			resp.type("application/json");
 			Map jsonMap = null;
+			System.out.println("Body:");
+			System.out.println(req.body());
+			System.out.println(req.body());
 			if(req.contentType() != null && req.contentType().contains("application/json") && ! req.body().isEmpty()) {
 				try {
 					jsonMap = json.parse(req.body(), Map.class);
