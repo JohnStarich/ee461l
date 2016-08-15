@@ -48,7 +48,7 @@ public class MovieServiceTest extends AbstractMongoDBTest {
 	}
 	public Movie addMovie(ObjectId id, String title) throws Exception {
 		return new Movie(id, title, null, null, null, null, null, null, null)
-		.save();
+			.save();
 	}
 
 	public void testGetMovieSearchResultsForDark() throws Exception {
@@ -62,7 +62,6 @@ public class MovieServiceTest extends AbstractMongoDBTest {
 			List<LinkedTreeMap> movieResults = (List) returnedMap.get("movies");
 			HashSet<String> movieTitles = new HashSet<>();
 			movieResults.forEach(m -> movieTitles.add(m.get("title").toString()));
-
 			assertTrue(movieTitles.contains(theDarkKnight.title));
 			assertTrue(movieTitles.contains(theDarkKnightRises.title));
 			assertFalse(movieTitles.contains(theRing.title));
@@ -77,7 +76,6 @@ public class MovieServiceTest extends AbstractMongoDBTest {
 		get(movieService.PREFIX + "/search/dllsakdjflaiwef;alsdkhlueiahe", authHeaders(s), response -> {
 			Map<String, Object> returnedMap = response.json(HashMap.class);
 			List<LinkedTreeMap<String, String>> movieResults = (List) returnedMap.get("movies");
-
 			assertTrue(movieResults.isEmpty());
 		});
 	}
