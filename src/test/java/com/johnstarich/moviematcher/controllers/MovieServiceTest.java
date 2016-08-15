@@ -46,11 +46,10 @@ public class MovieServiceTest extends AbstractMongoDBTest {
 		return new Movie(new ObjectId(), title, null, null, null, null, null, null, null)
 			.save();
 	}
-    public Movie addMovie(ObjectId id, String title) throws Exception {
-        return new Movie(id, title, null, null, null, null, null, null, null)
-                .save();
-    }
-
+	public Movie addMovie(ObjectId id, String title) throws Exception {
+		return new Movie(id, title, null, null, null, null, null, null, null)
+		.save();
+	}
 
 	public void testGetMovieSearchResultsForDark() throws Exception {
 		Movie theDarkKnight = addMovie("The Dark Knight");
@@ -77,25 +76,21 @@ public class MovieServiceTest extends AbstractMongoDBTest {
 		Session s = login("Welcome1");
 		get(movieService.PREFIX + "/search/dllsakdjflaiwef;alsdkhlueiahe", authHeaders(s), response -> {
 			Map<String, Object> returnedMap = response.json(HashMap.class);
-			List<LinkedTreeMap> movieResults = (List) returnedMap.get("movies");
-			HashSet<String> movieTitles = new HashSet<>();
-			movieResults.forEach(m -> movieTitles.add(m.get("title").toString()));
+			List<LinkedTreeMap<String, String>> movieResults = (List) returnedMap.get("movies");
 
-			assertTrue(movieTitles.isEmpty());
+			assertTrue(movieResults.isEmpty());
 		});
 	}
-	public void testGetMovieByMovieId() throws Exception {
-        ObjectId movieId = new ObjectId();
-		Movie theDarkKnight = addMovie(movieId, "The Dark Knight");
-        register("Welcome1");
-        Session s = login("Welcome1");
-        get(movieService.PREFIX + "/"+movieId, authHeaders(s), response -> {
-			Movie movieResult = response.json(Movie.class);
-            assertEquals(theDarkKnight.title, movieResult.title);
-			assertEquals(theDarkKnight.id, movieResult.id);
-        });
+	public void testGetMovieByMovieId() throws Exception { 
+		ObjectId movieId = new ObjectId(); 
+		Movie theDarkKnight = addMovie(movieId, "The Dark Knight"); 
+		register("Welcome1"); 
+		Session s = login("Welcome1"); 
+		get(movieService.PREFIX + "/"+movieId, authHeaders(s), response -> { 
+			Movie movieResult = response.json(Movie.class); 
+			assertEquals(theDarkKnight.title, movieResult.title); 
+			assertEquals(theDarkKnight.id, movieResult.id); 
+		}); 
 	}
-
-
 
 }
