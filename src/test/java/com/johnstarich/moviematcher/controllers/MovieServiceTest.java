@@ -4,6 +4,7 @@ import com.google.gson.internal.LinkedTreeMap;
 import com.johnstarich.moviematcher.models.Movie;
 import com.johnstarich.moviematcher.models.Session;
 import com.johnstarich.moviematcher.models.User;
+import com.johnstarich.moviematcher.utils.HttpException;
 import org.bson.types.ObjectId;
 import spark.Spark;
 import java.util.Collections;
@@ -79,16 +80,42 @@ public class MovieServiceTest extends AbstractMongoDBTest {
 			assertTrue(movieResults.isEmpty());
 		});
 	}
-	public void testGetMovieByMovieId() throws Exception { 
+	public void testGetMovieWithMovieId() throws Exception {
 		ObjectId movieId = new ObjectId(); 
 		Movie theDarkKnight = addMovie(movieId, "The Dark Knight"); 
 		register("Welcome1"); 
 		Session s = login("Welcome1"); 
-		get(movieService.PREFIX + "/"+movieId, authHeaders(s), response -> { 
+		get(movieService.PREFIX + "/" + movieId, authHeaders(s), response -> {
 			Movie movieResult = response.json(Movie.class); 
 			assertEquals(theDarkKnight.title, movieResult.title); 
 			assertEquals(theDarkKnight.id, movieResult.id); 
 		}); 
 	}
-
+    public void testGetMovieWithInvalidMovieId() throws Exception {
+        ObjectId movieId = new ObjectId();
+        ObjectId randId = new ObjectId();
+        Movie theDarkKnight = addMovie(movieId, "The Dark Knight");
+        register("Welcome1");
+        Session s = login("Welcome1");
+        try {
+            get(movieService.PREFIX + "/" + randId, authHeaders(s), response -> {
+                Movie movieResult = response.json(Movie.class);
+                assertEquals(theDarkKnight.title, movieResult.title);
+                assertEquals(theDarkKnight.id, movieResult.id);
+            });
+        } catch(HttpException e){
+            assertEquals(e.getStatusCode(), 500);
+            assertEquals(e.getMessage(), "<html><body><h2>500 Internal Error</h2></body></html>");
+        }
+        try {
+            get(movieService.PREFIX + "/" + "2983ewoualjsc", authHeaders(s), response -> {
+                Movie movieResult = response.json(Movie.class);
+                assertEquals(theDarkKnight.title, movieResult.title);
+                assertEquals(theDarkKnight.id, movieResult.id);
+            });
+        } catch(HttpException e){
+            assertEquals(e.getStatusCode(), 500);
+            assertEquals(e.getMessage(), "<html><body><h2>500 Internal Error</h2></body></html>");
+        }
+    }
 }
