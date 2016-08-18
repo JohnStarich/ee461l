@@ -91,23 +91,23 @@ public class MovieServiceTest extends AbstractMongoDBTest {
 			assertEquals(theDarkKnight.id, movieResult.id); 
 		}); 
 	}
-    public void testGetMovieWithInvalidMovieId() throws Exception {
-        ObjectId movieId = new ObjectId();
-        ObjectId randId = new ObjectId();
-        Movie theDarkKnight = addMovie(movieId, "The Dark Knight");
-        register("Welcome1");
-        Session s = login("Welcome1");
-        try {
-            get(movieService.PREFIX + "/" + randId, authHeaders(s), response -> {});
-        } catch(HttpException e){
-            assertEquals(e.getStatusCode(), 500);
-            assertEquals(e.getMessage(), "<html><body><h2>500 Internal Error</h2></body></html>");
-        }
-        try {
-            get(movieService.PREFIX + "/" + "2983ewoualjsc", authHeaders(s), response -> {});
-        } catch(HttpException e){
-            assertEquals(e.getStatusCode(), 500);
-            assertEquals(e.getMessage(), "<html><body><h2>500 Internal Error</h2></body></html>");
-        }
-    }
+	public void testGetMovieWithInvalidMovieId() throws Exception {
+		ObjectId movieId = new ObjectId();
+		ObjectId randId = new ObjectId();
+		Movie theDarkKnight = addMovie(movieId, "The Dark Knight");
+		register("Welcome1");
+		Session s = login("Welcome1");
+		try {
+			get(movieService.PREFIX + "/" + randId, authHeaders(s), response -> {});
+		} catch(HttpException e){
+			assertEquals(500, e.getStatusCode());
+			assertEquals("<html><body><h2>500 Internal Error</h2></body></html>", e.getMessage());
+		}
+		try {
+			get(movieService.PREFIX + "/" + "2983ewoualjsc", authHeaders(s), response -> {});
+		} catch(HttpException e){
+			assertEquals(500, e.getStatusCode());
+			assertEquals("<html><body><h2>500 Internal Error</h2></body></html>", e.getMessage());
+		}
+	}
 }
