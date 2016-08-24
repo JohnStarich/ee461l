@@ -57,7 +57,9 @@ public class MovieService extends JsonService {
 		Route movieRoute = (request, response) -> {
 			String movieId = request.params("id");
 			System.out.println("Looked up movie with ID: " + movieId);
-			return new Movie(new ObjectId(movieId)).load(Movie.class);
+			Optional<Movie> result = new Movie(new ObjectId(movieId)).load(Movie.class);
+			if(! result.isPresent()) throw new HttpException(HttpStatus.NOT_FOUND, "Movie not found with ID: "+movieId);
+			return result.get();
 		};
 
 		jget(":id", movieRoute);

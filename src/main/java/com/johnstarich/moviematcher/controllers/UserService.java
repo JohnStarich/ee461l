@@ -6,10 +6,14 @@ import com.johnstarich.moviematcher.models.Movie;
 import com.johnstarich.moviematcher.models.Rating;
 import com.johnstarich.moviematcher.models.Session;
 import com.johnstarich.moviematcher.models.User;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import org.bson.types.ObjectId;
 import spark.Spark;
 
-import java.util.*;
 
 /**
  * Register login services, like registration and user login API,
