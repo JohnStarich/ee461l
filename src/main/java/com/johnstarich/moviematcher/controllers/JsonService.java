@@ -4,6 +4,10 @@ import com.google.gson.JsonSyntaxException;
 import com.johnstarich.moviematcher.models.User;
 import com.johnstarich.moviematcher.routes.AuthenticatedRoute;
 import com.johnstarich.moviematcher.routes.JsonTransformer;
+import com.johnstarich.moviematcher.utils.ClientFacingHttpException;
+import com.johnstarich.moviematcher.utils.HttpException;
+import com.johnstarich.moviematcher.utils.HttpStatus;
+
 import org.json.simple.parser.ParseException;
 import spark.Filter;
 import spark.Request;
@@ -32,12 +36,20 @@ public abstract class JsonService extends AbstractService {
 		Filter jsonAttribute = (req, resp) -> {
 			resp.type("application/json");
 			Map jsonMap = null;
-			if(req.contentType() != null && req.contentType().contains("application/json")) {
+			System.out.println("Body:");
+			System.out.println(req.body());
+			System.out.println(req.body());
+			if(req.contentType() != null && req.contentType().contains("application/json") && ! req.body().isEmpty()) {
 				try {
 					jsonMap = json.parse(req.body(), Map.class);
-				}
-				catch (JsonSyntaxException | ParseException e) {
+				} catch (JsonSyntaxException | ParseException e) {
 					// ignore syntax errors: any unknown fields, if used, will be empty Optionals
+					throw new ClientFacingHttpException(
+						HttpStatus.BAD_REQUEST,
+						HttpStatus.BAD_REQUEST,
+						String.format("Body of request is malformed JSON: %s\nContent: %s", e, req.body()),
+						"Body of request is malformed JSON"
+					);
 				}
 			}
 			req.attribute("json", Optional.ofNullable(jsonMap));
@@ -49,9 +61,19 @@ public abstract class JsonService extends AbstractService {
 
 	protected abstract void initService();
 
-	public <T> Optional<T> bodyParam(Request request, String key) {
+	public <T> Optional<T> bodyParam(Request request, String key) throws HttpException {
 		Optional<Map<String, T>> mapOptional = request.attribute("json");
-		if(! mapOptional.isPresent()) return Optional.empty();
+		if(! mapOptional.isPresent()) {
+			if(request.contentType() == null || ! request.contentType().contains("application/json")) {
+				throw new HttpException(
+					HttpStatus.UNSUPPORTED_MEDIA_TYPE,
+					String.format("Wrong content type: expected application/json, received \"%s\"", request.contentType())
+				);
+			}
+			else if (request.body() == null || request.body().isEmpty()) {
+				throw new HttpException(HttpStatus.BAD_REQUEST, "Body of request is empty");
+			}
+		}
 		return Optional.ofNullable(mapOptional.get().get(key));
 	}
 
@@ -63,7 +85,7 @@ public abstract class JsonService extends AbstractService {
 	}
 
 	private String checkPath(String path) {
-		if(! path.startsWith("/")) return '/' + path;
+		if(path.isEmpty() || path.charAt(0) != '/') return '/' + path;
 		return path;
 	}
 

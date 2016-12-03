@@ -1,9 +1,13 @@
 package com.johnstarich.moviematcher.controllers;
 
+import com.johnstarich.moviematcher.utils.ClientFacingHttpException;
 import com.johnstarich.moviematcher.utils.HttpException;
 import com.johnstarich.moviematcher.utils.HttpStatus;
 
 import java.util.Optional;
+
+import spark.Request;
+import spark.Response;
 
 import static spark.Spark.*;
 
@@ -53,20 +57,37 @@ public abstract class AbstractService implements HttpService {
 			throw new HttpException(HttpStatus.NOT_FOUND);
 		});
 
+		exception(ClientFacingHttpException.class, (e, request, response) -> {
+			if(e.getCause() != null) e.getCause().printStackTrace();
+			String message = e.getMessage();
+			String hiddenMessage = ((ClientFacingHttpException) e).getHiddenMessage();
+			HttpStatus statusCode = ((HttpException) e).getStatusCode();
+			HttpStatus hiddenStatusCode = ((ClientFacingHttpException) e).getHiddenHttpStatus();
+			logError(request, response, message, hiddenMessage, statusCode, hiddenStatusCode);
+		});
+
 		exception(HttpException.class, (e, request, response) -> {
-			int statusCode = ((HttpException)e).getStatusCode();
-			response.status(statusCode);
-			response.body(String.format("%d %s", statusCode, e.getMessage()));
-			System.err.println(String.format("[%s] ERROR: %d %s", request.uri(), statusCode, e.getMessage()));
-			if(e.getCause() != null)
-				e.getCause().printStackTrace();
+			if(e.getCause() != null) e.getCause().printStackTrace();
+			HttpStatus statusCode = ((HttpException) e).getStatusCode();
+			logError(request, response, e.getMessage(), statusCode);
 		});
 
 		exception(Exception.class, (e, request, response) -> {
-			response.status(HttpStatus.SERVER_ERROR.code);
-			response.body("500 Internal Server Error");
 			e.printStackTrace();
+			logError(request, response, "Internal Server Error", e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
 		});
+	}
+
+	private static void logError(Request request, Response response, String message, HttpStatus statusCode) {
+		logError(request, response, message, message, statusCode, statusCode);
+	}
+
+	private static void logError(Request request, Response response, String clientMessage, String consoleMessage, HttpStatus clientStatusCode, HttpStatus consoleStatusCode) {
+		String logMessage = String.format("[%s] ERROR: %d %s", request.uri(), consoleStatusCode.code, consoleMessage);
+		String clientFacingMessage = String.format("%d %s", clientStatusCode.code, clientMessage);
+		System.err.println(logMessage);
+		response.status(clientStatusCode.code);
+		response.body(clientFacingMessage);
 	}
 
 	@Override

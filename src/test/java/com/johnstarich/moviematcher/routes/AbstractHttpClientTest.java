@@ -1,6 +1,8 @@
 package com.johnstarich.moviematcher.routes;
 
 import com.johnstarich.moviematcher.utils.HttpException;
+import com.johnstarich.moviematcher.utils.HttpStatus;
+
 import junit.framework.TestCase;
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.HttpContentResponse;
@@ -109,7 +111,10 @@ public class AbstractHttpClientTest extends TestCase {
 
 		HttpResponseWrapper wrappedResponse = new HttpResponseWrapper(response);
 		if(wrappedResponse.status / 100 != 2) {
-			throw new HttpException(wrappedResponse.status, wrappedResponse.body);
+			throw new HttpException(
+				HttpStatus.getGenericErrorMessageForCode(wrappedResponse.status),
+				String.format("Bad return code: %d\nBody of response:\n%s", wrappedResponse.status, wrappedResponse.body)
+			);
 		}
 
 		handler.handle(wrappedResponse);
